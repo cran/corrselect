@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Gilles Colling" />
+
+<meta name="date" content="2025-11-28" />
+
+<title>Complete Workflows: Real-World Examples</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Complete Workflows: Real-World
+Examples</h1>
+<h4 class="author">Gilles Colling</h4>
+<h4 class="date">2025-11-28</h4>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>This vignette demonstrates integration of corrselect into complete
+modeling workflows, from raw predictors to final models under
+correlation constraints. Four applied settings illustrate interface
+selection and workflow composition. See
+<code>vignette(&quot;quickstart&quot;)</code> for interface descriptions and
+<code>vignette(&quot;theory&quot;)</code> for mathematical foundations.</p>
+<p><strong>Functions used</strong>: <code>corrPrune()</code>,
+<code>modelPrune()</code> — see <code>vignette(&quot;quickstart&quot;)</code> for
+full signatures and parameter details.</p>
+<p>Each workflow showcases different aspects of the package:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Ecological Modeling</strong>: Two-stage pruning (correlation
++ VIF) for environmental predictors</li>
+<li><strong>Survey Data</strong>: Protecting key variables while
+reducing redundancy in questionnaires</li>
+<li><strong>High-Dimensional Data</strong>: Greedy algorithms for gene
+expression (p &gt;&gt; n scenarios)</li>
+<li><strong>Mixed Models</strong>: VIF-based pruning of fixed effects in
+hierarchical data</li>
+</ol>
+<hr />
+</div>
+<div id="workflow-1-ecological-modeling" class="section level1">
+<h1>Workflow 1: Ecological Modeling</h1>
+<p><strong>Goal</strong>: Build an interpretable species distribution
+model from highly correlated bioclimatic variables.</p>
+<p><strong>Challenge</strong>: WorldClim’s 19 bioclimatic variables
+contain many temperature and precipitation metrics that are
+mathematically related (e.g., mean temperature, minimum temperature,
+maximum temperature). Using all variables leads to multicollinearity,
+unstable coefficients, and poor model interpretation.</p>
+<p><strong>Strategy</strong>: Two-stage pruning:</p>
+<ol style="list-style-type: decimal">
+<li><code>corrPrune()</code> removes pairwise correlations &gt; 0.7</li>
+<li><code>modelPrune()</code> refines further using variance inflation
+factors (VIF)</li>
+</ol>
+<p>This approach balances model fit with interpretability and numerical
+stability.</p>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(bioclim_example)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Data structure</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">dim</span>(bioclim_example)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; [1] 100  20</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">names</span>(bioclim_example))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;species_richness&quot; &quot;BIO1&quot;             &quot;BIO2&quot;             &quot;BIO3&quot;            </span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; [5] &quot;BIO4&quot;             &quot;BIO5&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co"># Response variable</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">summary</span>(bioclim_example<span class="sc">$</span>species_richness)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;     5.0    96.0   118.5   120.2   144.2   206.0</span></span></code></pre></div>
+<p>The dataset contains 100 sampling locations with 19 bioclimatic
+predictors and a species richness response. The bioclimatic variables
+are standard WorldClim metrics (BIO1-BIO19) measuring temperature and
+precipitation patterns.</p>
+</div>
+<div id="correlation-based-pruning" class="section level3">
+<h3>Correlation-based pruning</h3>
+<p>We start by removing variables with pairwise correlations exceeding
+0.7. The <code>mode = &quot;auto&quot;</code> setting uses the exact algorithm
+(Bron-Kerbosch) to enumerate all maximal subsets, then selects the
+largest one.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Remove highly correlated predictors</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>bio_clean <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">data =</span> bioclim_example[, <span class="sc">-</span><span class="dv">1</span>],  <span class="co"># Exclude response</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">threshold =</span> <span class="fl">0.7</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">mode =</span> <span class="st">&quot;auto&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co"># How much did we reduce?</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Reduced from %d → %d variables</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>            <span class="fu">ncol</span>(bioclim_example) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>            <span class="fu">ncol</span>(bio_clean)))</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; Reduced from 19 → 12 variables</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># Which variables were kept?</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">attr</span>(bio_clean, <span class="st">&quot;selected_vars&quot;</span>), <span class="dv">10</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;BIO1&quot;  &quot;BIO3&quot;  &quot;BIO6&quot;  &quot;BIO9&quot;  &quot;BIO11&quot; &quot;BIO12&quot; &quot;BIO13&quot; &quot;BIO14&quot; &quot;BIO16&quot;</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; [10] &quot;BIO17&quot;</span></span></code></pre></div>
+<p>The pruning successfully reduced dimensionality while ensuring no
+remaining pair exceeds the 0.7 threshold. The selected variables span
+both temperature and precipitation domains, maintaining ecological
+interpretability.</p>
+</div>
+<div id="correlation-distribution" class="section level3">
+<h3>Correlation distribution</h3>
+<p>The histogram below shows how <code>corrPrune()</code> reshapes the
+correlation structure. Before pruning (red), many variable pairs exceed
+the 0.7 threshold. After pruning (blue), all pairwise correlations fall
+below the threshold.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cor_before <span class="ot">&lt;-</span> <span class="fu">cor</span>(bioclim_example[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>cor_after  <span class="ot">&lt;-</span> <span class="fu">cor</span>(bio_clean)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>vals_before <span class="ot">&lt;-</span> <span class="fu">abs</span>(cor_before[<span class="fu">upper.tri</span>(cor_before)])</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>vals_after  <span class="ot">&lt;-</span> <span class="fu">abs</span>(cor_after[<span class="fu">upper.tri</span>(cor_after)])</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># Common x limits</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>xlim <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Shared breaks for fair comparison</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>breaks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">30</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co"># Before histogram</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">hist</span>(vals_before,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>     <span class="at">breaks =</span> breaks,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>     <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;Distribution of Absolute Correlations&quot;</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Absolute Correlation&quot;</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>),</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>     <span class="at">border =</span> <span class="st">&quot;white&quot;</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>     <span class="at">xlim =</span> xlim)</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co"># After histogram</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="fu">hist</span>(vals_after,</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>     <span class="at">breaks =</span> breaks,</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>     <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>),</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>     <span class="at">border =</span> <span class="st">&quot;white&quot;</span>,</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co"># Threshold line</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fl">0.7</span>, <span class="at">col =</span> <span class="st">&quot;black&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;topright&quot;</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;Before&quot;</span>, <span class="st">&quot;After&quot;</span>, <span class="st">&quot;Threshold&quot;</span>),</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>       <span class="at">fill   =</span> <span class="fu">c</span>(<span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>),</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>                  <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>),</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>                  <span class="cn">NA</span>),</span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>       <span class="at">border =</span> <span class="fu">c</span>(<span class="st">&quot;white&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="cn">NA</span>),</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>       <span class="at">lty    =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">2</span>),</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>       <span class="at">lwd    =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">2</span>),</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>       <span class="at">col    =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">&quot;black&quot;</span>),</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a>       <span class="at">bty    =</span> <span class="st">&quot;o&quot;</span>,</span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>       <span class="at">bg =</span> <span class="st">&quot;white&quot;</span>)</span></code></pre></div>
+<p><img role="img" aria-label="Histogram showing distribution of absolute correlations before and after pruning. Red bars show many correlations exceed 0.7 threshold before pruning. Blue bars show all correlations below 0.7 after pruning." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzUwNC4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTA0LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU1EUXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTA0LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTURRdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+Cjx0ZXh0IHg9JzI2Ni40MCcgeT0nMzQuNjcnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI1Mi4xN3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkRpc3RyaWJ1dGlvbiBvZiBBYnNvbHV0ZSBDb3JyZWxhdGlvbnM8L3RleHQ+Cjx0ZXh0IHg9JzI2Ni40MCcgeT0nMzQxLjI4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEwOC43MnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkFic29sdXRlIENvcnJlbGF0aW9uPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMi45NiwxNzIuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzQwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+RGVuc2l0eTwvdGV4dD4KPGxpbmUgeDE9Jzc0LjQwJyB5MT0nMjg2LjU2JyB4Mj0nNDU4LjQwJyB5Mj0nMjg2LjU2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9Jzc0LjQwJyB5MT0nMjg2LjU2JyB4Mj0nNzQuNDAnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMTUxLjIwJyB5MT0nMjg2LjU2JyB4Mj0nMTUxLjIwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzIyOC4wMCcgeTE9JzI4Ni41NicgeDI9JzIyOC4wMCcgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczMDQuODAnIHkxPScyODYuNTYnIHgyPSczMDQuODAnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMzgxLjYwJyB5MT0nMjg2LjU2JyB4Mj0nMzgxLjYwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzQ1OC40MCcgeTE9JzI4Ni41NicgeDI9JzQ1OC40MCcgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9Jzc0LjQwJyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjA8L3RleHQ+Cjx0ZXh0IHg9JzE1MS4yMCcgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4yPC90ZXh0Pgo8dGV4dCB4PScyMjguMDAnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuNDwvdGV4dD4KPHRleHQgeD0nMzA0LjgwJyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjY8L3RleHQ+Cjx0ZXh0IHg9JzM4MS42MCcgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC44PC90ZXh0Pgo8dGV4dCB4PSc0NTguNDAnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjEuMDwvdGV4dD4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjc4LjEzJyB4Mj0nNTkuMDQnIHkyPSc4OS45Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI3OC4xMycgeDI9JzUxLjg0JyB5Mj0nMjc4LjEzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjQwLjQ5JyB4Mj0nNTEuODQnIHkyPScyNDAuNDknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyMDIuODUnIHgyPSc1MS44NCcgeTI9JzIwMi44NScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzE2NS4yMScgeDI9JzUxLjg0JyB5Mj0nMTY1LjIxJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMTI3LjU2JyB4Mj0nNTEuODQnIHkyPScxMjcuNTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPSc4OS45MicgeDI9JzUxLjg0JyB5Mj0nODkuOTInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyNzguMTMpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyNDAuNDkpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyMDIuODUpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4yPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwxNjUuMjEpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4zPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwxMjcuNTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz40PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43Niw4OS45Mikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjU8L3RleHQ+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE5Ua3VNRFI4TkRjekxqYzJmRFU1TGpBMGZESTROaTQxTmc9PSc+CiAgICA8cmVjdCB4PSc1OS4wNCcgeT0nNTkuMDQnIHdpZHRoPSc0MTQuNzInIGhlaWdodD0nMjI3LjUyJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRrdU1EUjhORGN6TGpjMmZEVTVMakEwZkRJNE5pNDFOZz09KSc+CjxyZWN0IHg9Jzc0LjQwJyB5PSc2Ny40Nycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzIxMC42Nycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSc4Ny42NCcgeT0nODAuMjMnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxOTcuOTAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMTAwLjg4JyB5PScxODIuMzgnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSc5NS43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScxMTQuMTInIHk9JzE5NS4xNCcgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzgyLjk5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzEyNy4zNycgeT0nMjUyLjYwJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMjUuNTQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMTQwLjYxJyB5PScyNjUuMzcnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxMi43Nycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScxNTMuODUnIHk9JzI1OC45OCcgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzE5LjE1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzE2Ny4wOScgeT0nMjU4Ljk4JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMTkuMTUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMTgwLjMzJyB5PScyNDYuMjEnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSczMS45Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScxOTMuNTcnIHk9JzI1Mi42MCcgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzI1LjU0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzIwNi44MScgeT0nMjUyLjYwJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMjUuNTQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMjIwLjA2JyB5PScyMzMuNDUnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSc0NC42OScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScyMzMuMzAnIHk9JzI1OC45OCcgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzE5LjE1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzI0Ni41NCcgeT0nMjM5LjgzJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMzguMzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMjU5Ljc4JyB5PScyMzMuNDUnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSc0NC42OScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScyNzMuMDInIHk9JzI2NS4zNycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzEyLjc3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzI4Ni4yNicgeT0nMjY1LjM3JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMTIuNzcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMjk5LjUwJyB5PScyNTguOTgnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxOS4xNScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczMTIuNzQnIHk9JzI1Mi42MCcgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzI1LjU0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzMyNS45OScgeT0nMjMzLjQ1JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nNDQuNjknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMzM5LjIzJyB5PScyNTguOTgnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxOS4xNScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczNTIuNDcnIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMzY1LjcxJyB5PScyNTguOTgnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxOS4xNScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczNzguOTUnIHk9JzIzMy40NScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzQ0LjY5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzM5Mi4xOScgeT0nMjc4LjEzJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSc0MDUuNDMnIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nNDE4LjY4JyB5PScyNzguMTMnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScwLjAwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzQzMS45MicgeT0nMjc4LjEzJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSc0NDUuMTYnIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nNzQuNDAnIHk9JzQ2LjU3JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMjMxLjU2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9Jzg3LjY0JyB5PScxMy40OScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzI2NC42NCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScxMDAuODgnIHk9JzE5NS40Mycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzgyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzExNC4xMicgeT0nMjExLjk3JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nNjYuMTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMTI3LjM3JyB5PScyMjguNTEnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSc0OS42Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScxNDAuNjEnIHk9JzI2MS41OScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzE2LjU0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzE1My44NScgeT0nMjQ1LjA1JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMzMuMDgnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMTY3LjA5JyB5PScyNjEuNTknIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxNi41NCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScxODAuMzMnIHk9JzI0NS4wNScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzMzLjA4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzE5My41NycgeT0nMjI4LjUxJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nNDkuNjInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMjA2LjgxJyB5PScyNDUuMDUnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSczMy4wOCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScyMjAuMDYnIHk9JzI0NS4wNScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzMzLjA4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzIzMy4zMCcgeT0nMjYxLjU5JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMTYuNTQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMjQ2LjU0JyB5PScyNjEuNTknIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxNi41NCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScyNTkuNzgnIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMjczLjAyJyB5PScyNDUuMDUnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PSczMy4wOCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PScyODYuMjYnIHk9JzI0NS4wNScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzMzLjA4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzI5OS41MCcgeT0nMjYxLjU5JyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMTYuNTQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMzEyLjc0JyB5PScyNjEuNTknIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScxNi41NCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczMjUuOTknIHk9JzIyOC41MScgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzQ5LjYyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzMzOS4yMycgeT0nMjc4LjEzJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczNTIuNDcnIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMzY1LjcxJyB5PScyNzguMTMnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScwLjAwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzM3OC45NScgeT0nMjc4LjEzJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczOTIuMTknIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nNDA1LjQzJyB5PScyNzguMTMnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScwLjAwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxyZWN0IHg9JzQxOC42OCcgeT0nMjc4LjEzJyB3aWR0aD0nMTMuMjQnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSc0MzEuOTInIHk9JzI3OC4xMycgd2lkdGg9JzEzLjI0JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nNDQ1LjE2JyB5PScyNzguMTMnIHdpZHRoPScxMy4yNCcgaGVpZ2h0PScwLjAwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC40MDsnIC8+CjxsaW5lIHgxPSczNDMuMjAnIHkxPScyODYuNTYnIHgyPSczNDMuMjAnIHkyPSc1OS4wNCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlLWRhc2hhcnJheTogOC4wMCw4LjAwOycgLz4KPHJlY3QgeD0nMzYzLjE2JyB5PSc1OS4wNCcgd2lkdGg9JzExMC42MCcgaGVpZ2h0PSc1Ny42MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0ZGRkZGRjsnIC8+CjxyZWN0IHg9JzM3My45NicgeT0nNjkuODQnIHdpZHRoPSc4LjY0JyBoZWlnaHQ9JzcuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjQwOycgLz4KPHJlY3QgeD0nMzczLjk2JyB5PSc4NC4yNCcgd2lkdGg9JzguNjQnIGhlaWdodD0nNy4yMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNDA7JyAvPgo8cmVjdCB4PSczNzMuOTYnIHk9Jzk4LjY0JyB3aWR0aD0nOC42NCcgaGVpZ2h0PSc3LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7JyAvPgo8bGluZSB4MT0nMzgyLjYwJyB5MT0nMTAyLjI0JyB4Mj0nNDA0LjIwJyB5Mj0nMTAyLjI0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2UtZGFzaGFycmF5OiA4LjAwLDguMDA7JyAvPgo8dGV4dCB4PSc0MTUuMDAnIHk9Jzc3Ljc0JyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzM1LjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QmVmb3JlPC90ZXh0Pgo8dGV4dCB4PSc0MTUuMDAnIHk9JzkyLjE0JyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI1LjMzcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QWZ0ZXI8L3RleHQ+Cjx0ZXh0IHg9JzQxNS4wMCcgeT0nMTA2LjU0JyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzUzLjM2cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+VGhyZXNob2xkPC90ZXh0Pgo8L2c+CjwvZz4KPC9zdmc+Cg==" alt="Histogram showing distribution of absolute correlations before and after pruning. Red bars show many correlations exceed 0.7 threshold before pruning. Blue bars show all correlations below 0.7 after pruning." /></p>
+</div>
+<div id="fit-models" class="section level3">
+<h3>Fit models</h3>
+<p>We fit three models to compare the effect of pruning:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Full model</strong>: All 19 bioclimatic variables
+(baseline)</li>
+<li><strong>After corrPrune</strong>: Variables with correlations &lt;
+0.7</li>
+<li><strong>After modelPrune</strong>: Further refined using VIF &lt;
+5</li>
+</ol>
+<p>The VIF criterion complements correlation-based pruning by detecting
+multicollinearity involving more than two variables simultaneously.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Model 1: Full model (19 variables)</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>model_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(species_richness <span class="sc">~</span> ., <span class="at">data =</span> bioclim_example)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># Model 2: After corrPrune (correlation-based pruning)</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>bio_clean_full <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">species_richness =</span> bioclim_example<span class="sc">$</span>species_richness,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  bio_clean</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>model_corrprune <span class="ot">&lt;-</span> <span class="fu">lm</span>(species_richness <span class="sc">~</span> ., <span class="at">data =</span> bio_clean_full)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co"># Model 3: Sequential VIF-based refinement</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>bio_final <span class="ot">&lt;-</span> <span class="fu">modelPrune</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="at">formula =</span> species_richness <span class="sc">~</span> .,</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="at">data =</span> bio_clean_full,</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="at">limit =</span> <span class="dv">5</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>model_final <span class="ot">&lt;-</span> <span class="fu">attr</span>(bio_final, <span class="st">&quot;final_model&quot;</span>)</span></code></pre></div>
+</div>
+<div id="model-comparison" class="section level3">
+<h3>Model comparison</h3>
+<p>The table below shows that pruning dramatically improves numerical
+stability (condition number κ) while maintaining model fit (adjusted
+R²). A lower κ indicates better-conditioned matrices and more stable
+coefficient estimates.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Variable counts</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>n_full      <span class="ot">&lt;-</span> <span class="dv">19</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>n_corrprune <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">attr</span>(bio_clean, <span class="st">&quot;selected_vars&quot;</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>n_final     <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">attr</span>(bio_final, <span class="st">&quot;selected_vars&quot;</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># Compute condition numbers (measure of collinearity)</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>X_full      <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(model_full)[, <span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>X_corrprune <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(model_corrprune)[, <span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>X_final     <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(model_final)[, <span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>kappa_full      <span class="ot">&lt;-</span> <span class="fu">kappa</span>(X_full, <span class="at">exact =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>kappa_corrprune <span class="ot">&lt;-</span> <span class="fu">kappa</span>(X_corrprune, <span class="at">exact =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>kappa_final     <span class="ot">&lt;-</span> <span class="fu">kappa</span>(X_final, <span class="at">exact =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># Summary table</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="at">Step =</span> <span class="fu">c</span>(<span class="st">&quot;Full&quot;</span>, <span class="st">&quot;corrPrune&quot;</span>, <span class="st">&quot;+ modelPrune&quot;</span>),</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="at">Predictors =</span> <span class="fu">c</span>(n_full, n_corrprune, n_final),</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="at">Adj_R2 =</span> <span class="fu">c</span>(</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>    <span class="fu">summary</span>(model_full)<span class="sc">$</span>adj.r.squared,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>    <span class="fu">summary</span>(model_corrprune)<span class="sc">$</span>adj.r.squared,</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>    <span class="fu">summary</span>(model_final)<span class="sc">$</span>adj.r.squared</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  ),</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>  <span class="at">Kappa =</span> <span class="fu">c</span>(kappa_full, kappa_corrprune, kappa_final)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>)</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="fu">print</span>(comparison)</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt;           Step Predictors    Adj_R2    Kappa</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; 1         Full         19 0.9821862 914.8146</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; 2    corrPrune         12 0.8962848 538.1157</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; 3 + modelPrune         12 0.8962848 538.1157</span></span></code></pre></div>
+<p><strong>Key insights</strong>:</p>
+<ul>
+<li>The full model has substantial multicollinearity (high κ)</li>
+<li>Correlation-based pruning reduces κ while losing minimal fit</li>
+<li>VIF-based refinement can further improve stability with only
+marginal R² decrease</li>
+</ul>
+</div>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
+<p>The plot below illustrates the pruning tradeoff: as we remove
+variables, condition number (κ) drops dramatically while adjusted R²
+remains high. This demonstrates that many of the original 19 variables
+were redundant for prediction.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Extract data</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>n_vars <span class="ot">&lt;-</span> comparison<span class="sc">$</span>Predictors</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>adj_r2 <span class="ot">&lt;-</span> comparison<span class="sc">$</span>Adj_R2</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>kappa  <span class="ot">&lt;-</span> comparison<span class="sc">$</span>Kappa</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># Left y-axis: Adjusted R²</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>))  <span class="co"># extra space on the right for second axis</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  n_vars, adj_r2,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;b&quot;</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">19</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="at">cex  =</span> <span class="fl">1.5</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="at">col  =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="dv">1</span>),</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="at">lwd  =</span> <span class="dv">2</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Number of Predictors&quot;</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Adjusted R²&quot;</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Pruning Reduces Collinearity While Preserving Fit&quot;</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>)</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co"># Right y-axis: log10(κ)</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>log_kappa <span class="ot">&lt;-</span> <span class="fu">log10</span>(kappa)</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co"># Nice ylim for log10(κ)</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>ylim_right <span class="ot">&lt;-</span> <span class="fu">range</span>(log_kappa, <span class="at">finite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>ylim_right <span class="ot">&lt;-</span> ylim_right <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="fu">par</span>(<span class="at">new =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>  n_vars, log_kappa,</span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;b&quot;</span>,</span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">17</span>,</span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="at">cex  =</span> <span class="fl">1.5</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>  <span class="at">col  =</span> <span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="dv">1</span>),</span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>  <span class="at">lwd  =</span> <span class="dv">2</span>,</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>  <span class="at">xaxt =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>  <span class="at">yaxt =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>  <span class="at">ylim =</span> ylim_right</span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>)</span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co"># Right-hand axis ticks using pretty() on log scale</span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a>log_ticks <span class="ot">&lt;-</span> <span class="fu">pretty</span>(log_kappa)</span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a>kappa_labels <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">10</span><span class="sc">^</span>log_ticks)</span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">4</span>, <span class="at">at =</span> log_ticks, <span class="at">labels =</span> kappa_labels)</span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">&quot;Condition Number (κ)&quot;</span>, <span class="at">side =</span> <span class="dv">4</span>, <span class="at">line =</span> <span class="dv">3</span>)</span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co"># Legend centered at top</span></span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>  <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>  <span class="at">inset =</span> <span class="fl">0.02</span>,</span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;Adjusted R² (higher better)&quot;</span>, <span class="st">&quot;κ (lower better)&quot;</span>),</span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(</span>
+<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a>    <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="dv">1</span>),</span>
+<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a>    <span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="dv">1</span>)</span>
+<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>  ),</span>
+<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a>  <span class="at">pch    =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>),</span>
+<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a>  <span class="at">lwd    =</span> <span class="dv">2</span>,</span>
+<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a>  <span class="at">horiz  =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;o&quot;</span>,</span>
+<span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a>  <span class="at">bg =</span> <span class="st">&quot;white&quot;</span>,</span>
+<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a>  <span class="at">x.intersp =</span> <span class="fl">0.8</span></span>
+<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a>)</span></code></pre></div>
+<p><img role="img" aria-label="Dual-axis line plot showing number of predictors (x-axis) versus adjusted R² (blue, left y-axis) and condition number κ (red, right y-axis, log scale). As predictors decrease from 19 to 8, adjusted R² remains high (above 0.7) while κ drops from over 10000 to below 100, demonstrating that pruning dramatically improves numerical stability with minimal loss of explanatory power." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE5UY3VOakI4TlRFNExqUXdmRFUzTGpZd2ZESTRPQzR3TUE9PSc+CiAgICA8cmVjdCB4PSc1Ny42MCcgeT0nNTcuNjAnIHdpZHRoPSc0NjAuODAnIGhlaWdodD0nMjMwLjQwJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRjdU5qQjhOVEU0TGpRd2ZEVTNMall3ZkRJNE9DNHdNQT09KSc+CjxsaW5lIHgxPSc0OTQuMTQnIHkxPSc3MC4yNCcgeDI9JzgxLjg2JyB5Mj0nODcuOTUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzUwMS4zMycgY3k9JzY5LjkzJyByPSc0LjA1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc3NC42NycgY3k9Jzg4LjI2JyByPSc0LjA1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc3NC42NycgY3k9Jzg4LjI2JyByPSc0LjA1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjxsaW5lIHgxPSc3NC42NycgeTE9JzI4OC4wMCcgeDI9JzUwMS4zMycgeTI9JzI4OC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc3NC42NycgeTE9JzI4OC4wMCcgeDI9Jzc0LjY3JyB5Mj0nMjk1LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzEzNS42MicgeTE9JzI4OC4wMCcgeDI9JzEzNS42MicgeTI9JzI5NS4yMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScxOTYuNTcnIHkxPScyODguMDAnIHgyPScxOTYuNTcnIHkyPScyOTUuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMjU3LjUyJyB5MT0nMjg4LjAwJyB4Mj0nMjU3LjUyJyB5Mj0nMjk1LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzMxOC40OCcgeTE9JzI4OC4wMCcgeDI9JzMxOC40OCcgeTI9JzI5NS4yMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczNzkuNDMnIHkxPScyODguMDAnIHgyPSczNzkuNDMnIHkyPScyOTUuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNDQwLjM4JyB5MT0nMjg4LjAwJyB4Mj0nNDQwLjM4JyB5Mj0nMjk1LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzUwMS4zMycgeTE9JzI4OC4wMCcgeDI9JzUwMS4zMycgeTI9JzI5NS4yMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9Jzc0LjY3JyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xMjwvdGV4dD4KPHRleHQgeD0nMTM1LjYyJyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xMzwvdGV4dD4KPHRleHQgeD0nMTk2LjU3JyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xNDwvdGV4dD4KPHRleHQgeD0nMjU3LjUyJyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xNTwvdGV4dD4KPHRleHQgeD0nMzE4LjQ4JyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xNjwvdGV4dD4KPHRleHQgeD0nMzc5LjQzJyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xNzwvdGV4dD4KPHRleHQgeD0nNDQwLjM4JyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xODwvdGV4dD4KPHRleHQgeD0nNTAxLjMzJyB5PSczMTMuOTInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xOTwvdGV4dD4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMjc5LjQ3JyB4Mj0nNTcuNjAnIHkyPSc2Ni4xMycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1Ny42MCcgeTE9JzI3OS40NycgeDI9JzUwLjQwJyB5Mj0nMjc5LjQ3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMjM2LjgwJyB4Mj0nNTAuNDAnIHkyPScyMzYuODAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTcuNjAnIHkxPScxOTQuMTMnIHgyPSc1MC40MCcgeTI9JzE5NC4xMycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1Ny42MCcgeTE9JzE1MS40NycgeDI9JzUwLjQwJyB5Mj0nMTUxLjQ3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMTA4LjgwJyB4Mj0nNTAuNDAnIHkyPScxMDguODAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTcuNjAnIHkxPSc2Ni4xMycgeDI9JzUwLjQwJyB5Mj0nNjYuMTMnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MC4zMiwyNzkuNDcpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4wPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MC4zMiwyMzYuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4yPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MC4zMiwxOTQuMTMpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC40PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MC4zMiwxNTEuNDcpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC42PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MC4zMiwxMDguODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC44PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MC4zMiw2Ni4xMykgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xLjA8L3RleHQ+Cjxwb2x5Z29uIHBvaW50cz0nNTcuNjAsMjg4LjAwIDUxOC40MCwyODguMDAgNTE4LjQwLDU3LjYwIDU3LjYwLDU3LjYwICcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzI4OC4wMCcgeT0nMzMuOTUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzM0My4wOHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPlBydW5pbmcgUmVkdWNlcyBDb2xsaW5lYXJpdHkgV2hpbGUgUHJlc2VydmluZyBGaXQ8L3RleHQ+Cjx0ZXh0IHg9JzI4OC4wMCcgeT0nMzQyLjcyJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzExMy4zNnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPk51bWJlciBvZiBQcmVkaWN0b3JzPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMS41MiwxNzIuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYyLjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QWRqdXN0ZWQgUsKyPC90ZXh0Pgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE5UY3VOakI4TlRFNExqUXdmRFUzTGpZd2ZESTRPQzR3TUE9PSknPgo8bGluZSB4MT0nNDk0LjIxJyB5MT0nMTQ2LjE2JyB4Mj0nODEuNzknIHkyPScyMDUuNTknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+Cjxwb2x5Z29uIHBvaW50cz0nNTAxLjMzLDEzOC44NCA1MDYuNzksMTQ4LjI4IDQ5NS44OCwxNDguMjggJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7JyAvPgo8cG9seWdvbiBwb2ludHM9Jzc0LjY3LDIwMC4zMiA4MC4xMiwyMDkuNzYgNjkuMjEsMjA5Ljc2ICcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOycgLz4KPHBvbHlnb24gcG9pbnRzPSc3NC42NywyMDAuMzIgODAuMTIsMjA5Ljc2IDY5LjIxLDIwOS43NiAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsnIC8+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01IdzFOell1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPHBvbHlnb24gcG9pbnRzPSc1Ny42MCwyODguMDAgNTE4LjQwLDI4OC4wMCA1MTguNDAsNTcuNjAgNTcuNjAsNTcuNjAgJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzUxOC40MCcgeTE9JzIxNC44NScgeDI9JzUxOC40MCcgeTI9JzEzNC44Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1MTguNDAnIHkxPScyMTQuODUnIHgyPSc1MjUuNjAnIHkyPScyMTQuODUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTE4LjQwJyB5MT0nMjAxLjUxJyB4Mj0nNTI1LjYwJyB5Mj0nMjAxLjUxJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzUxOC40MCcgeTE9JzE4OC4xNycgeDI9JzUyNS42MCcgeTI9JzE4OC4xNycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1MTguNDAnIHkxPScxNzQuODMnIHgyPSc1MjUuNjAnIHkyPScxNzQuODMnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTE4LjQwJyB5MT0nMTYxLjUwJyB4Mj0nNTI1LjYwJyB5Mj0nMTYxLjUwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzUxOC40MCcgeTE9JzE0OC4xNicgeDI9JzUyNS42MCcgeTI9JzE0OC4xNicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1MTguNDAnIHkxPScxMzQuODInIHgyPSc1MjUuNjAnIHkyPScxMzQuODInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg1NDQuMzIsMjE0Ljg1KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjUwMTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNTQ0LjMyLDE3NC44Mykgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz43MDg8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDU0NC4zMiwxMzQuODIpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI2LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTAwMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNTczLjEyLDE3Mi44MCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTE0LjA1cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+Q29uZGl0aW9uIE51bWJlciAozropPC90ZXh0Pgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE5UY3VOakI4TlRFNExqUXdmRFUzTGpZd2ZESTRPQzR3TUE9PSknPgo8cmVjdCB4PScxMTAuNDQnIHk9JzYyLjIxJyB3aWR0aD0nMzU1LjExJyBoZWlnaHQ9JzI4LjgwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkZGRkZGOycgLz4KPGxpbmUgeDE9JzExMy42OCcgeTE9Jzc2LjYxJyB4Mj0nMTM1LjI4JyB5Mj0nNzYuNjEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScyODguNTQnIHkxPSc3Ni42MScgeDI9JzMxMC4xNCcgeTI9Jzc2LjYxJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PScxMjQuNDgnIGN5PSc3Ni42MScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPHBvbHlnb24gcG9pbnRzPScyOTkuMzQsNzIuNDEgMzAyLjk4LDc4LjcxIDI5NS43MCw3OC43MSAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsnIC8+Cjx0ZXh0IHg9JzE0My45MicgeT0nODAuOTEnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTQxLjM4cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QWRqdXN0ZWQgUsKyIChoaWdoZXIgYmV0dGVyKTwvdGV4dD4KPHRleHQgeD0nMzE4Ljc4JyB5PSc4MC45MScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc4MC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPs66IChsb3dlciBiZXR0ZXIpPC90ZXh0Pgo8L2c+CjwvZz4KPC9zdmc+Cg==" alt="Dual-axis line plot showing number of predictors (x-axis) versus adjusted R² (blue, left y-axis) and condition number κ (red, right y-axis, log scale). As predictors decrease from 19 to 8, adjusted R² remains high (above 0.7) while κ drops from over 10000 to below 100, demonstrating that pruning dramatically improves numerical stability with minimal loss of explanatory power." /></p>
+</div>
+<div id="coefficient-stability" class="section level3">
+<h3>Coefficient stability</h3>
+<p>Multicollinearity inflates coefficient variance, making estimates
+unstable. The plot below compares coefficients between the full model
+(19 variables) and the final pruned model. Notice how:</p>
+<ul>
+<li>Variables dropped in the pruned model (shown as red-only bars) had
+unstable estimates</li>
+<li>Variables retained in both models (overlapping bars) show more
+consistent magnitudes</li>
+<li>The pruned model yields clearer, more interpretable effect
+sizes</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Extract coefficients (excluding intercept)</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>coef_full  <span class="ot">&lt;-</span> <span class="fu">coef</span>(model_full)[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>coef_final <span class="ot">&lt;-</span> <span class="fu">coef</span>(model_final)[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># Use *all* variables (not just common ones)</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>all_vars <span class="ot">&lt;-</span> <span class="fu">union</span>(<span class="fu">names</span>(coef_full), <span class="fu">names</span>(coef_final))</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co"># Align coefficients to the same full variable list</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>vals_full   <span class="ot">&lt;-</span> coef_full[all_vars]</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>vals_pruned <span class="ot">&lt;-</span> coef_final[all_vars]</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co"># Replace missing values (variables dropped in a model) with 0</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>vals_full[<span class="fu">is.na</span>(vals_full)]     <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>vals_pruned[<span class="fu">is.na</span>(vals_pruned)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co"># Colours</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>col_full   <span class="ot">&lt;-</span> <span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>col_pruned <span class="ot">&lt;-</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.5</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq_along</span>(all_vars)</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co"># Symmetric Y range</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>ylim <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(vals_full, vals_pruned)) <span class="sc">*</span> <span class="fl">1.15</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co"># Empty plot first</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>  x, vals_full,</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>  <span class="at">xaxt =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Coefficient&quot;</span>,</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Coefficient Comparison (Full vs modelPrune)&quot;</span>,</span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>  <span class="at">ylim =</span> ylim</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>)</span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> x, <span class="at">labels =</span> all_vars, <span class="at">las =</span> <span class="dv">2</span>, <span class="at">cex.axis =</span> <span class="fl">0.7</span>)</span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co"># Full model bars</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="fu">rect</span>(</span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>  x <span class="sc">-</span> <span class="fl">0.4</span>, <span class="dv">0</span>,</span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>  x <span class="sc">+</span> <span class="fl">0.4</span>, vals_full,</span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>  <span class="at">col =</span> col_full, <span class="at">border =</span> <span class="cn">NA</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a>)</span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co"># Pruned model bars</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="fu">rect</span>(</span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a>  x <span class="sc">-</span> <span class="fl">0.4</span>, <span class="dv">0</span>,</span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a>  x <span class="sc">+</span> <span class="fl">0.4</span>, vals_pruned,</span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a>  <span class="at">col =</span> col_pruned, <span class="at">border =</span> <span class="cn">NA</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a>)</span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a>  <span class="st">&quot;topright&quot;</span>,</span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(</span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a>    <span class="fu">sprintf</span>(<span class="st">&quot;Full (%d vars)&quot;</span>, n_full),</span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a>    <span class="fu">sprintf</span>(<span class="st">&quot;Final (%d vars)&quot;</span>, n_final)</span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a>  ),</span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a>  <span class="at">fill =</span> <span class="fu">c</span>(col_full, col_pruned),</span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;white&quot;</span>,</span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a>  <span class="at">bty =</span> <span class="st">&quot;o&quot;</span>,</span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a>  <span class="at">bg =</span> <span class="st">&quot;white&quot;</span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="section" class="section level2">
+<h2><img role="img" aria-label="Bar chart comparing regression coefficients between full model (19 variables, red bars) and pruned model (8 variables, blue bars). Variables dropped in pruning show only red bars with large magnitudes. Variables retained in both models show overlapping red-blue bars with more consistent effect sizes, demonstrating improved coefficient stability after pruning." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzUwNC4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTA0LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU1EUXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTA0LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTURRdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI3NC4yMCcgeDI9JzU5LjA0JyB5Mj0nMTI5Ljc1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjc0LjIwJyB4Mj0nNTEuODQnIHkyPScyNzQuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyMDEuOTgnIHgyPSc1MS44NCcgeTI9JzIwMS45OCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzEyOS43NScgeDI9JzUxLjg0JyB5Mj0nMTI5Ljc1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjc0LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPi0wLjU8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDIwMS45OCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDEyOS43NSkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjU8L3RleHQ+Cjxwb2x5Z29uIHBvaW50cz0nNTkuMDQsMjg2LjU2IDQ3My43NiwyODYuNTYgNDczLjc2LDU5LjA0IDU5LjA0LDU5LjA0ICcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzI2Ni40MCcgeT0nMzQuNjcnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzMwOC43MHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkNvZWZmaWNpZW50IENvbXBhcmlzb24gKEZ1bGwgdnMgbW9kZWxQcnVuZSk8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDEyLjk2LDE3Mi44MCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNTYuNDdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5Db2VmZmljaWVudDwvdGV4dD4KPGxpbmUgeDE9Jzc0LjQwJyB5MT0nMjg2LjU2JyB4Mj0nNDU4LjQwJyB5Mj0nMjg2LjU2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9Jzc0LjQwJyB5MT0nMjg2LjU2JyB4Mj0nNzQuNDAnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nOTUuNzMnIHkxPScyODYuNTYnIHgyPSc5NS43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScxMTcuMDcnIHkxPScyODYuNTYnIHgyPScxMTcuMDcnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMTM4LjQwJyB5MT0nMjg2LjU2JyB4Mj0nMTM4LjQwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzE1OS43MycgeTE9JzI4Ni41NicgeDI9JzE1OS43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScxODEuMDcnIHkxPScyODYuNTYnIHgyPScxODEuMDcnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMjAyLjQwJyB5MT0nMjg2LjU2JyB4Mj0nMjAyLjQwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzIyMy43MycgeTE9JzI4Ni41NicgeDI9JzIyMy43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScyNDUuMDcnIHkxPScyODYuNTYnIHgyPScyNDUuMDcnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMjY2LjQwJyB5MT0nMjg2LjU2JyB4Mj0nMjY2LjQwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzI4Ny43MycgeTE9JzI4Ni41NicgeDI9JzI4Ny43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczMDkuMDcnIHkxPScyODYuNTYnIHgyPSczMDkuMDcnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMzMwLjQwJyB5MT0nMjg2LjU2JyB4Mj0nMzMwLjQwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM1MS43MycgeTE9JzI4Ni41NicgeDI9JzM1MS43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczNzMuMDcnIHkxPScyODYuNTYnIHgyPSczNzMuMDcnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMzk0LjQwJyB5MT0nMjg2LjU2JyB4Mj0nMzk0LjQwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzQxNS43MycgeTE9JzI4Ni41NicgeDI9JzQxNS43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc0MzcuMDcnIHkxPScyODYuNTYnIHgyPSc0MzcuMDcnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNDU4LjQwJyB5MT0nMjg2LjU2JyB4Mj0nNDU4LjQwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNzcuNDAsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5LjEycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoOTguNzQsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5LjEycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMTIwLjA3LDMwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxOS4xMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzM8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDE0MS40MCwzMDAuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTkuMTJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU80PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxNjIuNzQsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5LjEycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPNTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMTg0LjA3LDMwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxOS4xMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzY8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDIwNS40MCwzMDAuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTkuMTJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU83PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgyMjYuNzQsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5LjEycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPODwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMjQ4LjA3LDMwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxOS4xMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzk8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDI2OS40MCwzMDAuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMjkwLjc0LDMwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy4xN3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzExPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgzMTIuMDcsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjgwcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTI8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMzMy40MCwzMDAuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xMzwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMzU0Ljc0LDMwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy44MHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzE0PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgzNzYuMDcsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjgwcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTU8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDM5Ny40MCwzMDAuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xNjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDE4Ljc0LDMwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy44MHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzE3PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0NDAuMDcsMzAwLjk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjgwcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTg8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQ2MS40MCwzMDAuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xOTwvdGV4dD4KPC9nPgo8ZGVmcz4KICA8Y2xpcFBhdGggaWQ9J2NwTlRrdU1EUjhORGN6TGpjMmZEVTVMakEwZkRJNE5pNDFOZz09Jz4KICAgIDxyZWN0IHg9JzU5LjA0JyB5PSc1OS4wNCcgd2lkdGg9JzQxNC43MicgaGVpZ2h0PScyMjcuNTInIC8+CiAgPC9jbGlwUGF0aD4KPC9kZWZzPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BOVGt1TURSOE5EY3pMamMyZkRVNUxqQTBmREk0Tmk0MU5nPT0pJz4KPHJlY3QgeD0nNjUuODcnIHk9Jzg1LjAxJyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMTE2Ljk3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9Jzg3LjIwJyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PSc2MS4zMicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PScxMDguNTMnIHk9JzE4Ni45OScgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzE0Ljk5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzEyOS44NycgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMTkuODcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMTUxLjIwJyB5PScyMDAuNjUnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScxLjMzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzE3Mi41MycgeT0nMTg3LjI2JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMTQuNzInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMTkzLjg3JyB5PScxOTEuODgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScxMC4xMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PScyMTUuMjAnIHk9JzE4OS44Nicgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzEyLjExJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzIzNi41MycgeT0nMTU2LjA3JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nNDUuOTEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMjU3Ljg3JyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PSc2Ni4yMicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PScyNzkuMjAnIHk9JzE4My44Mycgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzE4LjE1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzMwMC41MycgeT0nMTU4LjQxJyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nNDMuNTcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMzIxLjg3JyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScwLjY4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzM0My4yMCcgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMC4zMScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PSczNjQuNTMnIHk9JzE3NC4wNScgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzI3LjkzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzM4NS44NycgeT0nMjAwLjc0JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMS4yNCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PSc0MDcuMjAnIHk9JzIwMS43OCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzAuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nNDI4LjUzJyB5PScyMDEuOTUnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScwLjAzMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PSc0NDkuODcnIHk9JzIwMS45OCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzAuMjInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nNjUuODcnIHk9JzEzNy4yMycgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzY0Ljc1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9Jzg3LjIwJyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScwLjAwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzEwOC41MycgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nNDIuNDcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMTI5Ljg3JyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScwLjAwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzE1MS4yMCcgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PScxNzIuNTMnIHk9JzIwMS45OCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzU1Ljk4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzE5My44NycgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PScyMTUuMjAnIHk9JzIwMS45OCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMjM2LjUzJyB5PSc5MS42Nicgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzExMC4zMicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PScyNTcuODcnIHk9JzIwMS45OCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nMjc5LjIwJyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PSc2My42MScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PSczMDAuNTMnIHk9JzE2MS41MCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzQwLjQ3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzMyMS44NycgeT0nMTk5LjgwJyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMi4xOCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PSczNDMuMjAnIHk9JzE4OS4yNycgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzEyLjcxJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzM2NC41MycgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiBub25lOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNTA7JyAvPgo8cmVjdCB4PSczODUuODcnIHk9JzE5My4wMCcgd2lkdGg9JzE3LjA3JyBoZWlnaHQ9JzguOTcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nNDA3LjIwJyB5PScxOTkuMTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScyLjc5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzQyOC41MycgeT0nMjAxLjk4JyB3aWR0aD0nMTcuMDcnIGhlaWdodD0nMC4wNzgnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogbm9uZTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHJlY3QgeD0nNDQ5Ljg3JyB5PScyMDEuOTgnIHdpZHRoPScxNy4wNycgaGVpZ2h0PScwLjg5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzM2MS40MycgeT0nNTkuMDQnIHdpZHRoPScxMTIuMzMnIGhlaWdodD0nNDMuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNGRkZGRkY7JyAvPgo8cmVjdCB4PSczNzIuMjMnIHk9JzY5Ljg0JyB3aWR0aD0nOC42NCcgaGVpZ2h0PSc3LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICNGRkZGRkY7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC41MDsnIC8+CjxyZWN0IHg9JzM3Mi4yMycgeT0nODQuMjQnIHdpZHRoPSc4LjY0JyBoZWlnaHQ9JzcuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjUwOycgLz4KPHRleHQgeD0nMzkxLjY3JyB5PSc3Ny43NCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc3MC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkZ1bGwgKDE5IHZhcnMpPC90ZXh0Pgo8dGV4dCB4PSczOTEuNjcnIHk9JzkyLjE0JyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9Jzc2LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+RmluYWwgKDEyIHZhcnMpPC90ZXh0Pgo8L2c+CjwvZz4KPC9zdmc+Cg==" alt="Bar chart comparing regression coefficients between full model (19 variables, red bars) and pruned model (8 variables, blue bars). Variables dropped in pruning show only red bars with large magnitudes. Variables retained in both models show overlapping red-blue bars with more consistent effect sizes, demonstrating improved coefficient stability after pruning." /></h2>
+</div>
+</div>
+<div id="workflow-2-survey-data-analysis" class="section level1">
+<h1>Workflow 2: Survey Data Analysis</h1>
+<p><strong>Goal</strong>: Reduce questionnaire length while preserving
+construct coverage and protecting key demographic variables.</p>
+<p><strong>Challenge</strong>: Survey instruments often contain
+redundant items within constructs (e.g., multiple satisfaction questions
+that are highly correlated). Reducing the number of items improves
+response rates and reduces respondent burden without losing measurement
+quality.</p>
+<p><strong>Strategy</strong>: Use <code>corrPrune()</code> with
+<code>force_in</code> to:</p>
+<ol style="list-style-type: decimal">
+<li>Ensure critical variables (like age) appear in the final model</li>
+<li>Remove redundant Likert items within constructs</li>
+<li>Maintain balanced representation across satisfaction, engagement,
+and loyalty domains</li>
+</ol>
+<div id="data-1" class="section level3">
+<h3>Data</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">data</span>(survey_example)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># Data structure</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">dim</span>(survey_example)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; [1] 200  35</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="fu">str</span>(survey_example[, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>])  <span class="co"># First 10 columns</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    200 obs. of  10 variables:</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;  $ respondent_id       : int  1 2 3 4 5 6 7 8 9 10 ...</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt;  $ age                 : num  38 32 18 18 19 39 33 26 26 42 ...</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;  $ gender              : Factor w/ 3 levels &quot;Female&quot;,&quot;Male&quot;,..: 2 3 1 2 2 1 1 2 2 1 ...</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;  $ education           : Ord.factor w/ 4 levels &quot;High School&quot;&lt;..: 3 1 4 2 2 1 1 1 2 3 ...</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;  $ overall_satisfaction: num  58 40 44 40 58 67 61 49 51 52 ...</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt;  $ satisfaction_1      : Ord.factor w/ 7 levels &quot;1&quot;&lt;&quot;2&quot;&lt;&quot;3&quot;&lt;&quot;4&quot;&lt;..: 6 3 5 3 4 5 5 4 4 5 ...</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;  $ satisfaction_2      : Ord.factor w/ 7 levels &quot;1&quot;&lt;&quot;2&quot;&lt;&quot;3&quot;&lt;&quot;4&quot;&lt;..: 6 3 4 3 4 6 6 4 4 3 ...</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;  $ satisfaction_3      : Ord.factor w/ 7 levels &quot;1&quot;&lt;&quot;2&quot;&lt;&quot;3&quot;&lt;&quot;4&quot;&lt;..: 6 3 4 3 3 4 5 3 4 4 ...</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;  $ satisfaction_4      : Ord.factor w/ 7 levels &quot;1&quot;&lt;&quot;2&quot;&lt;&quot;3&quot;&lt;&quot;4&quot;&lt;..: 6 3 4 4 4 5 4 3 2 4 ...</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;  $ satisfaction_5      : Ord.factor w/ 7 levels &quot;1&quot;&lt;&quot;2&quot;&lt;&quot;3&quot;&lt;&quot;4&quot;&lt;..: 7 4 5 5 5 4 3 6 4 6 ...</span></span></code></pre></div>
+<p>The dataset contains 200 respondents, 30 Likert-scale items (10 each
+for satisfaction, engagement, loyalty), plus demographics (age, gender,
+education) and an overall satisfaction outcome.</p>
+</div>
+<div id="prune-with-protected-variables" class="section level3">
+<h3>Prune with protected variables</h3>
+<p>We use <code>force_in = &quot;age&quot;</code> to ensure age remains in the
+analysis regardless of its correlation with other variables. This is
+useful when domain knowledge identifies theoretically important
+covariates that must not be removed.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Exclude respondent_id, overall_satisfaction, and factor variables</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>survey_predictors <span class="ot">&lt;-</span> survey_example[, <span class="sc">!</span>(<span class="fu">names</span>(survey_example) <span class="sc">%in%</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                                         <span class="fu">c</span>(<span class="st">&quot;respondent_id&quot;</span>, <span class="st">&quot;overall_satisfaction&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                                           <span class="st">&quot;gender&quot;</span>, <span class="st">&quot;education&quot;</span>))]</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co"># Convert ordered factors (Likert items 1-7) to numeric for correlation analysis</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>survey_numeric <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(survey_predictors, <span class="cf">function</span>(x) {</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.ordered</span>(x)) <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(x)) <span class="cf">else</span> <span class="fu">as.numeric</span>(x)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>}))</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co"># Prune with protected variables</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>survey_clean <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="at">data =</span> survey_numeric,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  <span class="at">threshold =</span> <span class="fl">0.6</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="at">force_in =</span> <span class="st">&quot;age&quot;</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>)</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co"># How many items remain?</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Reduced from %d → %d variables</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>            <span class="fu">ncol</span>(survey_numeric),</span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>            <span class="fu">ncol</span>(survey_clean)))</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; Reduced from 31 → 4 variables</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co"># Which items were kept?</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>selected <span class="ot">&lt;-</span> <span class="fu">attr</span>(survey_clean, <span class="st">&quot;selected_vars&quot;</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="fu">print</span>(selected)</span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; [1] &quot;age&quot;            &quot;satisfaction_9&quot; &quot;engagement_1&quot;   &quot;loyalty_3&quot;</span></span></code></pre></div>
+<p>The pruning reduced the questionnaire substantially while ensuring
+age was retained. The remaining items span all three constructs,
+avoiding the loss of entire domains.</p>
+</div>
+<div id="construct-coverage" class="section level3">
+<h3>Construct coverage</h3>
+<p>It’s important to verify that pruning didn’t eliminate entire
+constructs. We check how many items from each domain (satisfaction,
+engagement, loyalty) survived the correlation threshold.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Count items per construct</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>satisfaction_kept <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">&quot;satisfaction_&quot;</span>, selected))</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>engagement_kept <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">&quot;engagement_&quot;</span>, selected))</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>loyalty_kept <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">&quot;loyalty_&quot;</span>, selected))</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Satisfaction: %d/10 items kept</span><span class="sc">\n</span><span class="st">&quot;</span>, satisfaction_kept))</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; Satisfaction: 1/10 items kept</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Engagement: %d/10 items kept</span><span class="sc">\n</span><span class="st">&quot;</span>, engagement_kept))</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; Engagement: 1/10 items kept</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Loyalty: %d/10 items kept</span><span class="sc">\n</span><span class="st">&quot;</span>, loyalty_kept))</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; Loyalty: 1/10 items kept</span></span></code></pre></div>
+<p>Good balance: all three constructs retained representation, ensuring
+the reduced questionnaire still measures all intended dimensions.</p>
+</div>
+<div id="visualization-1" class="section level3">
+<h3>Visualization</h3>
+<p>The barplots show (1) how many items survived pruning within each
+construct and (2) the overall variable reduction.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># Items kept per construct</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>construct_data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">c</span>(satisfaction_kept, engagement_kept, loyalty_kept)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="fu">barplot</span>(construct_data,</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>        <span class="at">beside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>        <span class="at">names.arg =</span> <span class="fu">c</span>(<span class="st">&quot;Satisfaction&quot;</span>, <span class="st">&quot;Engagement&quot;</span>, <span class="st">&quot;Loyalty&quot;</span>),</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;lightgray&quot;</span>, <span class="st">&quot;lightblue&quot;</span>),</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">c</span>(<span class="st">&quot;Original (10)&quot;</span>, <span class="st">&quot;After pruning&quot;</span>),</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>        <span class="at">args.legend =</span> <span class="fu">list</span>(<span class="at">x =</span> <span class="st">&quot;topright&quot;</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>),</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">&quot;Items per Construct&quot;</span>,</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Number of Items&quot;</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>))</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co"># Percentage reduction</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">c</span>(<span class="fu">ncol</span>(survey_numeric), <span class="fu">ncol</span>(survey_clean)),</span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>        <span class="at">names.arg =</span> <span class="fu">c</span>(<span class="st">&quot;Before&quot;</span>, <span class="st">&quot;After&quot;</span>),</span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;salmon&quot;</span>, <span class="st">&quot;lightgreen&quot;</span>),</span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">&quot;Total Variables&quot;</span>,</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Count&quot;</span>,</span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(<span class="fu">ncol</span>(survey_numeric)) <span class="sc">*</span> <span class="fl">1.2</span>))</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">0.7</span>, <span class="fu">ncol</span>(survey_numeric) <span class="sc">+</span> <span class="dv">1</span>, <span class="fu">ncol</span>(survey_numeric), <span class="at">pos =</span> <span class="dv">3</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">1.9</span>, <span class="fu">ncol</span>(survey_clean) <span class="sc">+</span> <span class="dv">1</span>, <span class="fu">ncol</span>(survey_clean), <span class="at">pos =</span> <span class="dv">3</span>)</span></code></pre></div>
+<p><img role="img" aria-label="Two side-by-side barplots. Left panel shows items kept per construct (Satisfaction, Engagement, Loyalty) with gray bars for original 10 items and blue bars showing reduced counts after pruning, demonstrating balanced retention across all three constructs. Right panel shows total variable reduction from 31 to approximately 10 variables using salmon and light green bars." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE1DNHdNSHd5T0RndU1EQjhNQzR3TUh3ek5qQXVNREE9Jz4KICAgIDxyZWN0IHg9JzAuMDAnIHk9JzAuMDAnIHdpZHRoPScyODguMDAnIGhlaWdodD0nMzYwLjAwJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01Id3lPRGd1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPHJlY3QgeD0nNjYuNDAnIHk9Jzk2Ljk2JyB3aWR0aD0nMjMuMDAnIGhlaWdodD0nMTg5LjYwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRDNEM0QzOycgLz4KPHJlY3QgeD0nODkuNDAnIHk9JzI2Ny42MCcgd2lkdGg9JzIzLjAwJyBoZWlnaHQ9JzE4Ljk2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjQUREOEU2OycgLz4KPHJlY3QgeD0nMTM1LjQwJyB5PSc5Ni45Nicgd2lkdGg9JzIzLjAwJyBoZWlnaHQ9JzE4OS42MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0QzRDNEMzsnIC8+CjxyZWN0IHg9JzE1OC40MCcgeT0nMjY3LjYwJyB3aWR0aD0nMjMuMDAnIGhlaWdodD0nMTguOTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNBREQ4RTY7JyAvPgo8cmVjdCB4PScyMDQuNDAnIHk9Jzk2Ljk2JyB3aWR0aD0nMjMuMDAnIGhlaWdodD0nMTg5LjYwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRDNEM0QzOycgLz4KPHJlY3QgeD0nMjI3LjQwJyB5PScyNjcuNjAnIHdpZHRoPScyMy4wMCcgaGVpZ2h0PScxOC45Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0FERDhFNjsnIC8+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01IdzFOell1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPHRleHQgeD0nODkuNDAnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2Mi4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPlNhdGlzZmFjdGlvbjwvdGV4dD4KPHRleHQgeD0nMjI3LjQwJyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzguMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5Mb3lhbHR5PC90ZXh0Pgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHd5T0RndU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjxyZWN0IHg9JzE2NC4yMycgeT0nNjkuODQnIHdpZHRoPSc4LjY0JyBoZWlnaHQ9JzcuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNEM0QzRDM7JyAvPgo8cmVjdCB4PScxNjQuMjMnIHk9Jzg0LjI0JyB3aWR0aD0nOC42NCcgaGVpZ2h0PSc3LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjQUREOEU2OycgLz4KPHRleHQgeD0nMTgzLjY3JyB5PSc3Ny43NCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2Ni4wM3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPk9yaWdpbmFsICgxMCk8L3RleHQ+Cjx0ZXh0IHg9JzE4My42NycgeT0nOTIuMTQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNjguNjlweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5BZnRlciBwcnVuaW5nPC90ZXh0Pgo8dGV4dCB4PScxNTguNDAnIHk9JzM0LjY3JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxNC40MHB4OyBmb250LXdlaWdodDogYm9sZDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxMzUuOTVweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5JdGVtcyBwZXIgQ29uc3RydWN0PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMi45NiwxNzIuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9Jzg4LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+TnVtYmVyIG9mIEl0ZW1zPC90ZXh0Pgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI4Ni41NicgeDI9JzU5LjA0JyB5Mj0nNTkuMDQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyODYuNTYnIHgyPSc1MS44NCcgeTI9JzI4Ni41Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI0OC42NCcgeDI9JzUxLjg0JyB5Mj0nMjQ4LjY0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjEwLjcyJyB4Mj0nNTEuODQnIHkyPScyMTAuNzInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScxNzIuODAnIHgyPSc1MS44NCcgeTI9JzE3Mi44MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzEzNC44OCcgeDI9JzUxLjg0JyB5Mj0nMTM0Ljg4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nOTYuOTYnIHgyPSc1MS44NCcgeTI9Jzk2Ljk2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nNTkuMDQnIHgyPSc1MS44NCcgeTI9JzU5LjA0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjg2LjU2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjQ4LjY0KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjEwLjcyKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTcyLjgwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTM0Ljg4KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+ODwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsOTYuOTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDU5LjA0KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxMy4zNHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjEyPC90ZXh0Pgo8L2c+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNamc0TGpBd2ZEVTNOaTR3TUh3d0xqQXdmRE0yTUM0d01BPT0nPgogICAgPHJlY3QgeD0nMjg4LjAwJyB5PScwLjAwJyB3aWR0aD0nMjg4LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1qZzRMakF3ZkRVM05pNHdNSHd3TGpBd2ZETTJNQzR3TUE9PSknPgo8cmVjdCB4PSczNTQuNDAnIHk9Jzk2Ljk2JyB3aWR0aD0nODMuNjQnIGhlaWdodD0nMTg5LjYwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkE4MDcyOycgLz4KPHJlY3QgeD0nNDU0Ljc2JyB5PScyNjIuMTAnIHdpZHRoPSc4My42NCcgaGVpZ2h0PScyNC40Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzkwRUU5MDsnIC8+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01IdzFOell1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPHRleHQgeD0nMzk2LjIyJyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzUuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CZWZvcmU8L3RleHQ+Cjx0ZXh0IHg9JzQ5Ni41OCcgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI1LjMzcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QWZ0ZXI8L3RleHQ+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTWpnNExqQXdmRFUzTmk0d01Id3dMakF3ZkRNMk1DNHdNQT09KSc+Cjx0ZXh0IHg9JzQ0Ni40MCcgeT0nMzQuNjcnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEwMC41MnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPlRvdGFsIFZhcmlhYmxlczwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMzAwLjk2LDE3Mi44MCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzIuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5Db3VudDwvdGV4dD4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSknPgo8bGluZSB4MT0nMzQ3LjA0JyB5MT0nMjg2LjU2JyB4Mj0nMzQ3LjA0JyB5Mj0nNzIuNTAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMzQ3LjA0JyB5MT0nMjg2LjU2JyB4Mj0nMzM5Ljg0JyB5Mj0nMjg2LjU2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM0Ny4wNCcgeTE9JzI1NS45OCcgeDI9JzMzOS44NCcgeTI9JzI1NS45OCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczNDcuMDQnIHkxPScyMjUuNDAnIHgyPSczMzkuODQnIHkyPScyMjUuNDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMzQ3LjA0JyB5MT0nMTk0LjgyJyB4Mj0nMzM5Ljg0JyB5Mj0nMTk0LjgyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM0Ny4wNCcgeTE9JzE2NC4yNCcgeDI9JzMzOS44NCcgeTI9JzE2NC4yNCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczNDcuMDQnIHkxPScxMzMuNjYnIHgyPSczMzkuODQnIHkyPScxMzMuNjYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMzQ3LjA0JyB5MT0nMTAzLjA4JyB4Mj0nMzM5Ljg0JyB5Mj0nMTAzLjA4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM0Ny4wNCcgeTE9JzcyLjUwJyB4Mj0nMzM5Ljg0JyB5Mj0nNzIuNTAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgzMjkuNzYsMjg2LjU2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMzI5Ljc2LDI1NS45OCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjU8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMyOS43NiwyMjUuNDApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMyOS43NiwxOTQuODIpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTU8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMyOS43NiwxNjQuMjQpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MjA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMyOS43NiwxMzMuNjYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MjU8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMyOS43NiwxMDMuMDgpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MzA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDMyOS43Niw3Mi41MCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4zNTwvdGV4dD4KPC9nPgo8ZGVmcz4KICA8Y2xpcFBhdGggaWQ9J2NwTXpRM0xqQTBmRFUwTlM0M05udzFPUzR3Tkh3eU9EWXVOVFk9Jz4KICAgIDxyZWN0IHg9JzM0Ny4wNCcgeT0nNTkuMDQnIHdpZHRoPScxOTguNzInIGhlaWdodD0nMjI3LjUyJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTXpRM0xqQTBmRFUwTlM0M05udzFPUzR3Tkh3eU9EWXVOVFk9KSc+Cjx0ZXh0IHg9JzM5Ni4yMicgeT0nODMuNjQnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4zMTwvdGV4dD4KPHRleHQgeD0nNDk2LjU4JyB5PScyNDguNzgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjQ8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Two side-by-side barplots. Left panel shows items kept per construct (Satisfaction, Engagement, Loyalty) with gray bars for original 10 items and blue bars showing reduced counts after pruning, demonstrating balanced retention across all three constructs. Right panel shows total variable reduction from 31 to approximately 10 variables using salmon and light green bars." /></p>
+</div>
+<div id="model-satisfaction" class="section level3">
+<h3>Model satisfaction</h3>
+<p>Now we fit a regression model predicting overall satisfaction from
+the pruned item set. Despite using fewer predictors, the model should
+maintain good explanatory power because we removed only redundant
+items.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Add response back</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>survey_model_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">overall_satisfaction =</span> survey_example<span class="sc">$</span>overall_satisfaction,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  survey_clean</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co"># Fit regression model</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>model_survey <span class="ot">&lt;-</span> <span class="fu">lm</span>(overall_satisfaction <span class="sc">~</span> ., <span class="at">data =</span> survey_model_data)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co"># Summary</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="fu">summary</span>(model_survey)</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; lm(formula = overall_satisfaction ~ ., data = survey_model_data)</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; -17.0653  -4.1416  -0.1467   4.2400  22.2405 </span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt;                Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt; (Intercept)    24.85040    2.03665  12.202   &lt;2e-16 ***</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; age             0.01951    0.04109   0.475   0.6354    </span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt; satisfaction_9  4.96640    0.34387  14.443   &lt;2e-16 ***</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; engagement_1    0.24937    0.32131   0.776   0.4386    </span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="co">#&gt; loyalty_3       0.54190    0.30190   1.795   0.0742 .  </span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 6.372 on 195 degrees of freedom</span></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.6893, Adjusted R-squared:  0.683 </span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a><span class="co">#&gt; F-statistic: 108.2 on 4 and 195 DF,  p-value: &lt; 2.2e-16</span></span></code></pre></div>
+</div>
+<div id="model-comparison-1" class="section level3">
+<h3>Model comparison</h3>
+<p>Comparing the pruned model against the full 33-variable model shows
+that we retain most of the explanatory power (R²) while dramatically
+reducing model complexity.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Full model (all 30 items + demographics)</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>full_survey_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">overall_satisfaction =</span> survey_example<span class="sc">$</span>overall_satisfaction,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  survey_predictors</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>model_full_survey <span class="ot">&lt;-</span> <span class="fu">lm</span>(overall_satisfaction <span class="sc">~</span> ., <span class="at">data =</span> full_survey_data)</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co"># Compare</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>  <span class="at">Model =</span> <span class="fu">c</span>(<span class="st">&quot;Full (33 vars)&quot;</span>, <span class="st">&quot;Pruned (10 vars)&quot;</span>),</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>  <span class="at">R2 =</span> <span class="fu">c</span>(<span class="fu">summary</span>(model_full_survey)<span class="sc">$</span>r.squared,</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>         <span class="fu">summary</span>(model_survey)<span class="sc">$</span>r.squared),</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>  <span class="at">Adj_R2 =</span> <span class="fu">c</span>(<span class="fu">summary</span>(model_full_survey)<span class="sc">$</span>adj.r.squared,</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>             <span class="fu">summary</span>(model_survey)<span class="sc">$</span>adj.r.squared),</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>  <span class="at">Num_Predictors =</span> <span class="fu">c</span>(<span class="dv">33</span>, <span class="dv">10</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>)</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt;              Model        R2    Adj_R2 Num_Predictors</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; 1   Full (33 vars) 0.9790144 0.7679931             33</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; 2 Pruned (10 vars) 0.6893327 0.6829600             10</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="workflow-3-high-dimensional-data" class="section level1">
+<h1>Workflow 3: High-Dimensional Data</h1>
+<p><strong>Goal</strong>: Reduce dimensionality in a gene expression
+dataset where the number of predictors far exceeds the number of samples
+(p &gt;&gt; n).</p>
+<p><strong>Challenge</strong>: With 200 genes and only 100 samples,
+exact enumeration of all maximal subsets becomes computationally
+expensive. Standard regression is also impossible due to rank
+deficiency.</p>
+<p><strong>Strategy</strong>: Use <code>mode = &quot;greedy&quot;</code> for fast,
+approximate pruning:</p>
+<ul>
+<li>The greedy algorithm scales linearly with the number of
+variables</li>
+<li>While not guaranteed to find the largest subset, it provides a
+high-quality solution orders of magnitude faster</li>
+<li>Ideal for exploratory analysis in high-dimensional settings</li>
+</ul>
+<div id="data-2" class="section level3">
+<h3>Data</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">data</span>(genes_example)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># Data structure</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">dim</span>(genes_example)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; [1] 100 202</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># Disease prevalence</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">table</span>(genes_example<span class="sc">$</span>disease_status)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; Healthy Disease </span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt;       2      98</span></span></code></pre></div>
+<p>The dataset contains gene expression measurements for 200 genes
+across 100 samples, with a binary disease outcome. This is a classic p
+&gt;&gt; n scenario where regularization or dimensionality reduction is
+essential.</p>
+</div>
+<div id="greedy-pruning" class="section level3">
+<h3>Greedy pruning</h3>
+<p>The greedy algorithm iteratively selects variables, prioritizing
+those with the lowest maximum correlation to already-selected variables.
+This heuristic runs in O(p²) time compared to the exponential complexity
+of exact methods.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">library</span>(microbenchmark)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co"># Extract gene expression data (exclude ID and outcome)</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>gene_expr <span class="ot">&lt;-</span> genes_example[, <span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)]</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co"># Greedy pruning with timing</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>greedy_timing <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>  genes_pruned <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>    <span class="at">data =</span> gene_expr,</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>    <span class="at">threshold =</span> <span class="fl">0.8</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>    <span class="at">mode =</span> <span class="st">&quot;greedy&quot;</span>  <span class="co"># Fast for large p</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>  ),</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">3</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>)</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>greedy_ms <span class="ot">&lt;-</span> <span class="fu">median</span>(greedy_timing<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co"># Reduction</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Reduced from %d → %d genes (%.1f ms)</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>            <span class="fu">ncol</span>(gene_expr),</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a>            <span class="fu">ncol</span>(genes_pruned),</span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>            greedy_ms))</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; Reduced from 200 → 177 genes (3.8 ms)</span></span></code></pre></div>
+<p>The greedy algorithm completed in milliseconds while ensuring all
+pairwise correlations remain below 0.8.</p>
+</div>
+<div id="dimensionality-reduction" class="section level3">
+<h3>Dimensionality reduction</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Barplot showing reduction</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>reduction_data <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">ncol</span>(gene_expr), <span class="fu">ncol</span>(genes_pruned))</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">barplot</span>(reduction_data,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>        <span class="at">names.arg =</span> <span class="fu">c</span>(<span class="st">&quot;Original&quot;</span>, <span class="st">&quot;After Pruning&quot;</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">&quot;Gene Dimensionality Reduction&quot;</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Number of Genes&quot;</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;salmon&quot;</span>, <span class="st">&quot;lightblue&quot;</span>),</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(reduction_data) <span class="sc">*</span> <span class="fl">1.2</span>))</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">0.7</span>, reduction_data[<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">10</span>, <span class="fu">paste</span>(reduction_data[<span class="dv">1</span>], <span class="st">&quot;genes&quot;</span>), <span class="at">pos =</span> <span class="dv">3</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">1.9</span>, reduction_data[<span class="dv">2</span>] <span class="sc">+</span> <span class="dv">10</span>, <span class="fu">paste</span>(reduction_data[<span class="dv">2</span>], <span class="st">&quot;genes</span><span class="sc">\n</span><span class="st">(&quot;</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>     <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> reduction_data[<span class="dv">2</span>] <span class="sc">/</span> reduction_data[<span class="dv">1</span>], <span class="dv">1</span>), <span class="st">&quot;% retained)&quot;</span>), <span class="at">pos =</span> <span class="dv">3</span>)</span></code></pre></div>
+<p><img role="img" aria-label="Barplot comparing gene counts before and after pruning. Salmon bar shows 200 original genes, light blue bar shows approximately 100 genes after pruning (50% retained). Text labels display exact counts and retention percentage, demonstrating substantial dimensionality reduction while maintaining low pairwise correlations." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjxyZWN0IHg9Jzc3LjA3JyB5PSc5Ni45Nicgd2lkdGg9JzIwNC44NScgaGVpZ2h0PScxODkuNjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNGQTgwNzI7JyAvPgo8cmVjdCB4PSczMjIuODgnIHk9JzExOC43Nicgd2lkdGg9JzIwNC44NScgaGVpZ2h0PScxNjcuODAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNBREQ4RTY7JyAvPgo8dGV4dCB4PScxNzkuNDknIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc0MS4zNnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPk9yaWdpbmFsPC90ZXh0Pgo8dGV4dCB4PSc0MjUuMzEnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc3MC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkFmdGVyIFBydW5pbmc8L3RleHQ+Cjx0ZXh0IHg9JzMwMi40MCcgeT0nMzQuNjcnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIxNi43M3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkdlbmUgRGltZW5zaW9uYWxpdHkgUmVkdWN0aW9uPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMi45NiwxNzIuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9Jzk0LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+TnVtYmVyIG9mIEdlbmVzPC90ZXh0Pgo8bGluZSB4MT0nNTkuMDQnIHkxPScyODYuNTYnIHgyPSc1OS4wNCcgeTI9Jzk2Ljk2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjg2LjU2JyB4Mj0nNTEuODQnIHkyPScyODYuNTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyMzkuMTYnIHgyPSc1MS44NCcgeTI9JzIzOS4xNicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzE5MS43NicgeDI9JzUxLjg0JyB5Mj0nMTkxLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMTQ0LjM2JyB4Mj0nNTEuODQnIHkyPScxNDQuMzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPSc5Ni45NicgeDI9JzUxLjg0JyB5Mj0nOTYuOTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyODYuNTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyMzkuMTYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NTA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDE5MS43Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xMDA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDE0NC4zNikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4xNTA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDk2Ljk2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjIwMDwvdGV4dD4KPC9nPgo8ZGVmcz4KICA8Y2xpcFBhdGggaWQ9J2NwTlRrdU1EUjhOVFExTGpjMmZEVTVMakEwZkRJNE5pNDFOZz09Jz4KICAgIDxyZWN0IHg9JzU5LjA0JyB5PSc1OS4wNCcgd2lkdGg9JzQ4Ni43MicgaGVpZ2h0PScyMjcuNTInIC8+CiAgPC9jbGlwUGF0aD4KPC9kZWZzPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BOVGt1TURSOE5UUTFMamMyZkRVNUxqQTBmREk0Tmk0MU5nPT0pJz4KPHRleHQgeD0nMTc5LjQ5JyB5PSc4MC4yOCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc1Ni4wM3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjIwMCBnZW5lczwvdGV4dD4KPHRleHQgeD0nNDI1LjMxJyB5PSc4Ny42OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc1Ni4wM3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjE3NyBnZW5lczwvdGV4dD4KPHRleHQgeD0nNDI1LjMxJyB5PScxMDIuMDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nOTUuMzZweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4oIDg4LjUgJSByZXRhaW5lZCk8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Barplot comparing gene counts before and after pruning. Salmon bar shows 200 original genes, light blue bar shows approximately 100 genes after pruning (50% retained). Text labels display exact counts and retention percentage, demonstrating substantial dimensionality reduction while maintaining low pairwise correlations." /></p>
+</div>
+<div id="exact-vs-greedy-comparison" class="section level3">
+<h3>Exact vs greedy comparison</h3>
+<p>To demonstrate the speed advantage of the greedy algorithm, we
+benchmark both approaches on a smaller subset. The performance gap
+widens dramatically as the number of variables increases.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Subset for comparison (use smaller subset for vignette build speed)</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>gene_subset <span class="ot">&lt;-</span> gene_expr[, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]  <span class="co"># Reduced from 50 to 20 for faster builds</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># Benchmark exact mode</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>exact_time <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">microbenchmark</span>(</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  exact_result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(gene_subset, <span class="at">threshold =</span> <span class="fl">0.8</span>, <span class="at">mode =</span> <span class="st">&quot;exact&quot;</span>),</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">3</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>  <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>)<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co"># Benchmark greedy mode</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>greedy_time <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">microbenchmark</span>(</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>  greedy_result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(gene_subset, <span class="at">threshold =</span> <span class="fl">0.8</span>, <span class="at">mode =</span> <span class="st">&quot;greedy&quot;</span>),</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">3</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>  <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>)<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="co"># Run once more to get actual results for comparison</span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a>exact_result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(gene_subset, <span class="at">threshold =</span> <span class="fl">0.8</span>, <span class="at">mode =</span> <span class="st">&quot;exact&quot;</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a>greedy_result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(gene_subset, <span class="at">threshold =</span> <span class="fl">0.8</span>, <span class="at">mode =</span> <span class="st">&quot;greedy&quot;</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co"># Compare</span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Exact mode: %d genes kept (%.1f ms)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">ncol</span>(exact_result), exact_time))</span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; Exact mode: 11 genes kept (1.8 ms)</span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Greedy mode: %d genes kept (%.1f ms)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">ncol</span>(greedy_result), greedy_time))</span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt; Greedy mode: 10 genes kept (0.4 ms)</span></span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Speedup: %.1fx faster</span><span class="sc">\n</span><span class="st">&quot;</span>, exact_time <span class="sc">/</span> greedy_time))</span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; Speedup: 4.9x faster</span></span></code></pre></div>
+<p>The greedy mode is substantially faster. For the full 200-gene
+dataset, exact enumeration would be prohibitively slow, while greedy
+mode completes in milliseconds.</p>
+</div>
+<div id="classification" class="section level3">
+<h3>Classification</h3>
+<p>Finally, we demonstrate that the pruned gene set is suitable for
+downstream classification, despite the dramatic dimensionality
+reduction.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Prepare classification data</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>classification_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  <span class="at">disease_status =</span> genes_example<span class="sc">$</span>disease_status,</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  genes_pruned</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>)</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co"># Logistic regression</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>model_genes <span class="ot">&lt;-</span> <span class="fu">glm</span>(disease_status <span class="sc">~</span> .,</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>                   <span class="at">data =</span> classification_data,</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>                   <span class="at">family =</span> <span class="fu">binomial</span>())</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co"># Prediction accuracy</span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">predict</span>(model_genes, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">&gt;</span> <span class="fl">0.5</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>                     <span class="st">&quot;Disease&quot;</span>, <span class="st">&quot;Healthy&quot;</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>accuracy <span class="ot">&lt;-</span> <span class="fu">mean</span>(predictions <span class="sc">==</span> genes_example<span class="sc">$</span>disease_status)</span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Classification accuracy: %.1f%%</span><span class="sc">\n</span><span class="st">&quot;</span>, accuracy <span class="sc">*</span> <span class="dv">100</span>))</span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="co">#&gt; Classification accuracy: 100.0%</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="workflow-4-mixed-models" class="section level1">
+<h1>Workflow 4: Mixed Models</h1>
+<p><strong>Goal</strong>: Apply correlation-based pruning to fixed
+effects in a mixed-effects model with longitudinal data.</p>
+<p><strong>Challenge</strong>: Longitudinal data has hierarchical
+structure (observations nested within subjects, subjects nested within
+sites). Standard VIF calculations don’t account for random effects, but
+we still need to control multicollinearity among fixed-effect
+predictors.</p>
+<p><strong>Strategy</strong>: Use <code>modelPrune()</code> with
+<code>engine = &quot;lme4&quot;</code>:</p>
+<ul>
+<li>Only fixed effects are pruned based on VIF</li>
+<li>Random effects <code>(1|subject)</code> and <code>(1|site)</code>
+are preserved in the model formula</li>
+<li>This maintains the hierarchical structure while reducing
+collinearity</li>
+</ul>
+<p><strong>Note</strong>: This workflow requires the <code>lme4</code>
+package and is shown with <code>eval=FALSE</code> for portability.</p>
+<div id="data-3" class="section level3">
+<h3>Data</h3>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">data</span>(longitudinal_example)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="co"># Data structure</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="fu">dim</span>(longitudinal_example)</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; [1] 500  25</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="fu">head</span>(longitudinal_example)</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co">#&gt;   obs_id subject site time  outcome          x1         x2          x3</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co">#&gt; 1      1       1    1    1 12.10893 -0.62045078 -0.8629274 -0.39625483</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co">#&gt; 2      2       1    1    2 13.97195  0.04255998  0.4086801  0.27069591</span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="co">#&gt; 3      3       1    1    3 15.71622  0.20445067 -1.0457672  1.69557480</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a><span class="co">#&gt; 4      4       1    1    4 12.61343  0.38437289  2.0301256 -1.17894923</span></span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a><span class="co">#&gt; 5      5       1    1    5 15.73139 -0.06402543  1.1645219 -0.19757260</span></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a><span class="co">#&gt; 6      6       1    1    6 13.19571  0.65208588 -1.5040345  0.07671762</span></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a><span class="co">#&gt;           x4         x5          x6         x7         x8           x9</span></span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a><span class="co">#&gt; 1 -0.4557709 -1.2550770 -0.35966846 -1.9288176  0.8393628  0.151111346</span></span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="co">#&gt; 2 -0.7652493 -1.2136755 -0.05181211 -0.4759841  0.9063848  1.429621637</span></span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a><span class="co">#&gt; 3  0.5569423 -1.4962408  0.23986408 -1.7077822  1.0343806  0.797974670</span></span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="co">#&gt; 4  0.1604224 -0.8192580 -0.94858863 -1.9314095 -0.0639552  0.887413164</span></span>
+<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a><span class="co">#&gt; 5 -1.3331022 -0.6162473 -0.61339605 -0.9439486 -0.1220047 -0.796244469</span></span>
+<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a><span class="co">#&gt; 6  0.5205094 -0.8547461  0.24120308 -1.3083776  0.8716209  0.005423635</span></span>
+<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a><span class="co">#&gt;          x10        x11       x12         x13        x14        x15         x16</span></span>
+<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a><span class="co">#&gt; 1  0.9681971 -0.1384342 0.2598923  0.37082493 -0.1829715 -1.1853721 -0.72703262</span></span>
+<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a><span class="co">#&gt; 2  2.0989531  0.6303914 0.6211064 -0.91103843 -0.1125705 -0.3458058 -0.44331165</span></span>
+<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a><span class="co">#&gt; 3  0.2329831 -0.8618361 2.0854289  0.02634099 -1.3522055 -1.2151804  0.00311954</span></span>
+<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a><span class="co">#&gt; 4  1.5491815  1.7595441 0.8198899  0.18115372 -0.5638401 -1.3637072 -0.55274223</span></span>
+<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a><span class="co">#&gt; 5  2.3485234 -0.1267969 2.6230203 -1.13918808 -1.1559678 -0.3214032 -0.87713586</span></span>
+<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a><span class="co">#&gt; 6 -0.1860167 -0.4620834 1.6075140 -1.81586413 -0.0172986 -0.1041232 -0.56268259</span></span>
+<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a><span class="co">#&gt;           x17        x18        x19       x20</span></span>
+<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="co">#&gt; 1  0.91333399  1.2398417  1.2973339 1.0590334</span></span>
+<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a><span class="co">#&gt; 2 -0.09799793 -1.3670758 -1.0050198 0.9990451</span></span>
+<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a><span class="co">#&gt; 3 -0.14957945 -0.8573087  0.9004974 0.5399732</span></span>
+<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a><span class="co">#&gt; 4  0.55650397  0.7458841  0.7415159 1.7067212</span></span>
+<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a><span class="co">#&gt; 5  0.36401595 -0.4019171  1.1669136 0.7799264</span></span>
+<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a><span class="co">#&gt; 6  0.30234421 -0.6646296 -0.6615620 1.5092899</span></span>
+<span id="cb19-35"><a href="#cb19-35" tabindex="-1"></a></span>
+<span id="cb19-36"><a href="#cb19-36" tabindex="-1"></a><span class="co"># Study design</span></span>
+<span id="cb19-37"><a href="#cb19-37" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Subjects: %d</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">length</span>(<span class="fu">unique</span>(longitudinal_example<span class="sc">$</span>subject))))</span>
+<span id="cb19-38"><a href="#cb19-38" tabindex="-1"></a><span class="co">#&gt; Subjects: 50</span></span>
+<span id="cb19-39"><a href="#cb19-39" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Sites: %d</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">length</span>(<span class="fu">unique</span>(longitudinal_example<span class="sc">$</span>site))))</span>
+<span id="cb19-40"><a href="#cb19-40" tabindex="-1"></a><span class="co">#&gt; Sites: 5</span></span>
+<span id="cb19-41"><a href="#cb19-41" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Observations per subject: %d</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb19-42"><a href="#cb19-42" tabindex="-1"></a>            <span class="fu">nrow</span>(longitudinal_example) <span class="sc">/</span> <span class="fu">length</span>(<span class="fu">unique</span>(longitudinal_example<span class="sc">$</span>subject))))</span>
+<span id="cb19-43"><a href="#cb19-43" tabindex="-1"></a><span class="co">#&gt; Observations per subject: 10</span></span></code></pre></div>
+<p>The dataset has 500 observations from 50 subjects across 5 sites,
+with 10 measurements per subject. We have 5 correlated fixed-effect
+predictors (x1-x5).</p>
+</div>
+<div id="prune-fixed-effects" class="section level3">
+<h3>Prune fixed effects</h3>
+<p>The <code>modelPrune()</code> function with
+<code>engine = &quot;lme4&quot;</code> respects the random-effects structure. Only
+the fixed effects (x1-x5) are candidates for removal; the random
+intercepts for subject and site remain untouched.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Note: This example requires lme4 package</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="co"># Define formula with random effects</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="co"># Note: Only fixed effects (x1-x5) will be pruned</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="co">#       Random effects (1|subject), (1|site) are preserved</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>pruned_mixed <span class="ot">&lt;-</span> <span class="fu">modelPrune</span>(</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>  <span class="at">formula =</span> outcome <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x3 <span class="sc">+</span> x4 <span class="sc">+</span> x5 <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>site),</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>  <span class="at">data =</span> longitudinal_example,</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>  <span class="at">engine =</span> <span class="st">&quot;lme4&quot;</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>  <span class="at">limit =</span> <span class="dv">5</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>)</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="co"># Which fixed effects were kept?</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>selected_fixed <span class="ot">&lt;-</span> <span class="fu">attr</span>(pruned_mixed, <span class="st">&quot;selected_vars&quot;</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Fixed effects kept:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="fu">print</span>(selected_fixed)</span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a></span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1"></a><span class="co"># Which were removed?</span></span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a>removed_fixed <span class="ot">&lt;-</span> <span class="fu">attr</span>(pruned_mixed, <span class="st">&quot;removed_vars&quot;</span>)</span>
+<span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Fixed effects removed:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb20-23"><a href="#cb20-23" tabindex="-1"></a><span class="fu">print</span>(removed_fixed)</span></code></pre></div>
+<p>The algorithm sequentially removes fixed effects with VIF &gt; 5
+until all remaining predictors satisfy the limit. The random effects
+structure is never modified.</p>
+</div>
+<div id="final-model" class="section level3">
+<h3>Final model</h3>
+<p>The final model contains only the fixed effects that passed the VIF
+threshold, along with the original random effects.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>final_mixed <span class="ot">&lt;-</span> <span class="fu">attr</span>(pruned_mixed, <span class="st">&quot;final_model&quot;</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">summary</span>(final_mixed)</span></code></pre></div>
+</div>
+<div id="vif-verification" class="section level3">
+<h3>VIF verification</h3>
+<p>We can manually verify that the pruning successfully reduced
+multicollinearity by comparing VIF values before and after pruning.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Note: This example requires lme4 package</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="co"># Fit full model</span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>full_formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">&quot;outcome ~&quot;</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>                                 <span class="fu">paste</span>(<span class="fu">paste0</span>(<span class="st">&quot;x&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>), <span class="at">collapse =</span> <span class="st">&quot; + &quot;</span>),</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a>                                 <span class="st">&quot;+ (1|subject) + (1|site)&quot;</span>))</span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>model_full_mixed <span class="ot">&lt;-</span> <span class="fu">lmer</span>(full_formula, <span class="at">data =</span> longitudinal_example)</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="co"># Extract fixed effects design matrices</span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a>X_full <span class="ot">&lt;-</span> <span class="fu">getME</span>(model_full_mixed, <span class="st">&quot;X&quot;</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a>X_pruned <span class="ot">&lt;-</span> <span class="fu">getME</span>(final_mixed, <span class="st">&quot;X&quot;</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="co"># Compute VIF</span></span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a>compute_vif <span class="ot">&lt;-</span> <span class="cf">function</span>(X) {</span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a>  X_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(X[, <span class="sc">-</span><span class="dv">1</span>])  <span class="co"># Remove intercept</span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="fu">seq_len</span>(<span class="fu">ncol</span>(X_scaled)), <span class="cf">function</span>(i) {</span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a>    r2 <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(X_scaled[, i] <span class="sc">~</span> X_scaled[, <span class="sc">-</span>i]))<span class="sc">$</span>r.squared</span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a>    <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> r2)</span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a>  })</span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a>}</span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a>vif_full <span class="ot">&lt;-</span> <span class="fu">compute_vif</span>(X_full)</span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a>vif_pruned <span class="ot">&lt;-</span> <span class="fu">compute_vif</span>(X_pruned)</span>
+<span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" tabindex="-1"></a><span class="co"># Compare</span></span>
+<span id="cb22-28"><a href="#cb22-28" tabindex="-1"></a>comparison_vif <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb22-29"><a href="#cb22-29" tabindex="-1"></a>  <span class="at">Predictor =</span> <span class="fu">colnames</span>(X_pruned)[<span class="sc">-</span><span class="dv">1</span>],</span>
+<span id="cb22-30"><a href="#cb22-30" tabindex="-1"></a>  <span class="at">VIF_Before =</span> vif_full,</span>
+<span id="cb22-31"><a href="#cb22-31" tabindex="-1"></a>  <span class="at">VIF_After =</span> vif_pruned</span>
+<span id="cb22-32"><a href="#cb22-32" tabindex="-1"></a>)</span>
+<span id="cb22-33"><a href="#cb22-33" tabindex="-1"></a><span class="fu">print</span>(comparison_vif)</span></code></pre></div>
+<p>All remaining predictors now have VIF &lt; 5, indicating acceptable
+multicollinearity levels for mixed-effects modeling.</p>
+</div>
+<div id="vif-reduction-visualization" class="section level3">
+<h3>VIF reduction visualization</h3>
+<p>The plot below shows how pruning reduced VIF values across the
+retained fixed effects:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Extract VIF values</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> comparison_vif<span class="sc">$</span>Predictor</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>vif_before <span class="ot">&lt;-</span> comparison_vif<span class="sc">$</span>VIF_Before</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>vif_after <span class="ot">&lt;-</span> comparison_vif<span class="sc">$</span>VIF_After</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="co"># Set up bar positions</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq_along</span>(predictors)</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>width <span class="ot">&lt;-</span> <span class="fl">0.35</span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="co"># Create plot</span></span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>))</span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a>  x, vif_before,</span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a>  <span class="at">xaxt =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Fixed Effects&quot;</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;VIF&quot;</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;VIF Reduction After Pruning (Mixed Model)&quot;</span>,</span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(vif_before) <span class="sc">*</span> <span class="fl">1.15</span>)</span>
+<span id="cb23-20"><a href="#cb23-20" tabindex="-1"></a>)</span>
+<span id="cb23-21"><a href="#cb23-21" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" tabindex="-1"></a><span class="co"># Add horizontal line at VIF = 5 threshold</span></span>
+<span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">5</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb23-24"><a href="#cb23-24" tabindex="-1"></a></span>
+<span id="cb23-25"><a href="#cb23-25" tabindex="-1"></a><span class="co"># Before bars (darker)</span></span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a><span class="fu">rect</span>(</span>
+<span id="cb23-27"><a href="#cb23-27" tabindex="-1"></a>  x <span class="sc">-</span> width, <span class="dv">0</span>,</span>
+<span id="cb23-28"><a href="#cb23-28" tabindex="-1"></a>  x, vif_before,</span>
+<span id="cb23-29"><a href="#cb23-29" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.6</span>),</span>
+<span id="cb23-30"><a href="#cb23-30" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;white&quot;</span></span>
+<span id="cb23-31"><a href="#cb23-31" tabindex="-1"></a>)</span>
+<span id="cb23-32"><a href="#cb23-32" tabindex="-1"></a></span>
+<span id="cb23-33"><a href="#cb23-33" tabindex="-1"></a><span class="co"># After bars (lighter)</span></span>
+<span id="cb23-34"><a href="#cb23-34" tabindex="-1"></a><span class="fu">rect</span>(</span>
+<span id="cb23-35"><a href="#cb23-35" tabindex="-1"></a>  x, <span class="dv">0</span>,</span>
+<span id="cb23-36"><a href="#cb23-36" tabindex="-1"></a>  x <span class="sc">+</span> width, vif_after,</span>
+<span id="cb23-37"><a href="#cb23-37" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.6</span>),</span>
+<span id="cb23-38"><a href="#cb23-38" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;white&quot;</span></span>
+<span id="cb23-39"><a href="#cb23-39" tabindex="-1"></a>)</span>
+<span id="cb23-40"><a href="#cb23-40" tabindex="-1"></a></span>
+<span id="cb23-41"><a href="#cb23-41" tabindex="-1"></a><span class="co"># Add x-axis labels</span></span>
+<span id="cb23-42"><a href="#cb23-42" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> x, <span class="at">labels =</span> predictors, <span class="at">las =</span> <span class="dv">2</span>)</span>
+<span id="cb23-43"><a href="#cb23-43" tabindex="-1"></a></span>
+<span id="cb23-44"><a href="#cb23-44" tabindex="-1"></a><span class="co"># Add legend</span></span>
+<span id="cb23-45"><a href="#cb23-45" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb23-46"><a href="#cb23-46" tabindex="-1"></a>  <span class="st">&quot;topright&quot;</span>,</span>
+<span id="cb23-47"><a href="#cb23-47" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;Before Pruning&quot;</span>, <span class="st">&quot;After Pruning&quot;</span>, <span class="st">&quot;VIF = 5 Threshold&quot;</span>),</span>
+<span id="cb23-48"><a href="#cb23-48" tabindex="-1"></a>  <span class="at">fill =</span> <span class="fu">c</span>(<span class="fu">rgb</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.6</span>), <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.6</span>), <span class="cn">NA</span>),</span>
+<span id="cb23-49"><a href="#cb23-49" tabindex="-1"></a>  <span class="at">border =</span> <span class="fu">c</span>(<span class="st">&quot;white&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="cn">NA</span>),</span>
+<span id="cb23-50"><a href="#cb23-50" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">2</span>),</span>
+<span id="cb23-51"><a href="#cb23-51" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">2</span>),</span>
+<span id="cb23-52"><a href="#cb23-52" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb23-53"><a href="#cb23-53" tabindex="-1"></a>  <span class="at">bty =</span> <span class="st">&quot;o&quot;</span>,</span>
+<span id="cb23-54"><a href="#cb23-54" tabindex="-1"></a>  <span class="at">bg =</span> <span class="st">&quot;white&quot;</span></span>
+<span id="cb23-55"><a href="#cb23-55" tabindex="-1"></a>)</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>These four workflows demonstrate how <strong>corrselect</strong>
+integrates into diverse analytical pipelines:</p>
+<p><strong>Key takeaways</strong>:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Ecological modeling</strong>: Two-stage pruning (correlation
+→ VIF) balances fit and stability</li>
+<li><strong>Survey analysis</strong>: <code>force_in</code> protects
+theoretically important variables while reducing redundancy</li>
+<li><strong>High-dimensional data</strong>: Greedy mode enables fast
+pruning when p &gt;&gt; n</li>
+<li><strong>Mixed models</strong>: VIF-based pruning respects
+hierarchical structure by targeting only fixed effects</li>
+</ol>
+<p><strong>Workflow selection guide</strong>:</p>
+<table>
+<colgroup>
+<col width="27%" />
+<col width="27%" />
+<col width="44%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scenario</th>
+<th>Function</th>
+<th>Key Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Small to moderate p (&lt; 50)</td>
+<td><code>corrPrune()</code></td>
+<td><code>mode = &quot;auto&quot;</code> or <code>&quot;exact&quot;</code></td>
+</tr>
+<tr class="even">
+<td>High-dimensional (p &gt;&gt; n)</td>
+<td><code>corrPrune()</code></td>
+<td><code>mode = &quot;greedy&quot;</code></td>
+</tr>
+<tr class="odd">
+<td>Model-based refinement</td>
+<td><code>modelPrune()</code></td>
+<td><code>limit</code> (VIF threshold)</td>
+</tr>
+<tr class="even">
+<td>Protected variables</td>
+<td><code>corrPrune()</code></td>
+<td><code>force_in</code></td>
+</tr>
+<tr class="odd">
+<td>Mixed-effects models</td>
+<td><code>modelPrune()</code></td>
+<td><code>engine = &quot;lme4&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use each approach</strong>:</p>
+<ul>
+<li><strong>corrPrune()</strong>: First-stage dimensionality reduction
+based purely on pairwise correlations</li>
+<li><strong>modelPrune()</strong>: Second-stage refinement that accounts
+for model-specific multicollinearity (VIF)</li>
+<li><strong>Combining both</strong>: Often yields best results
+(correlation pruning → VIF refinement → final model)</li>
+</ul>
+</div>
+<div id="see-also" class="section level1">
+<h1>See Also</h1>
+<ul>
+<li><code>vignette(&quot;quickstart&quot;)</code> - Interface overview</li>
+<li><code>vignette(&quot;advanced&quot;)</code> - Custom engines and algorithmic
+control</li>
+<li><code>vignette(&quot;comparison&quot;)</code> - Comparison with
+alternatives</li>
+<li><code>vignette(&quot;theory&quot;)</code> - Mathematical foundations</li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p><strong>Thresholds</strong>:</p>
+<ul>
+<li>O’Brien, R. M. (2007). A caution regarding rules of thumb for
+variance inflation factors. <em>Quality &amp; Quantity</em>, 41(5),
+673-690.</li>
+<li>Dormann, C. F., et al. (2013). Collinearity: a review of methods to
+deal with it. <em>Ecography</em>, 36(1), 27-46.</li>
+</ul>
+<p><strong>Methods</strong>: - See package documentation and JOSS paper
+for algorithm details</p>
+<div id="session-info" class="section level2">
+<h2>Session Info</h2>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="co">#&gt; R version 4.5.1 (2025-06-13 ucrt)</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 11 x64 (build 26200)</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
+<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-19"><a href="#cb24-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a><span class="co">#&gt; [1] igraph_2.1.4         car_3.1-3            carData_3.0-5       </span></span>
+<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a><span class="co">#&gt; [4] microbenchmark_1.5.0 corrselect_3.0.2    </span></span>
+<span id="cb24-25"><a href="#cb24-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-26"><a href="#cb24-26" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb24-27"><a href="#cb24-27" tabindex="-1"></a><span class="co">#&gt;  [1] tidyselect_1.2.1     timeDate_4051.111    dplyr_1.1.4         </span></span>
+<span id="cb24-28"><a href="#cb24-28" tabindex="-1"></a><span class="co">#&gt;  [4] farver_2.1.2         S7_0.2.0             fastmap_1.2.0       </span></span>
+<span id="cb24-29"><a href="#cb24-29" tabindex="-1"></a><span class="co">#&gt;  [7] pROC_1.19.0.1        caret_7.0-1          digest_0.6.37       </span></span>
+<span id="cb24-30"><a href="#cb24-30" tabindex="-1"></a><span class="co">#&gt; [10] rpart_4.1.24         timechange_0.3.0     lifecycle_1.0.4     </span></span>
+<span id="cb24-31"><a href="#cb24-31" tabindex="-1"></a><span class="co">#&gt; [13] survival_3.8-3       magrittr_2.0.4       compiler_4.5.1      </span></span>
+<span id="cb24-32"><a href="#cb24-32" tabindex="-1"></a><span class="co">#&gt; [16] rlang_1.1.6          sass_0.4.10          tools_4.5.1         </span></span>
+<span id="cb24-33"><a href="#cb24-33" tabindex="-1"></a><span class="co">#&gt; [19] yaml_2.3.10          Boruta_9.0.0         data.table_1.17.8   </span></span>
+<span id="cb24-34"><a href="#cb24-34" tabindex="-1"></a><span class="co">#&gt; [22] knitr_1.50           plyr_1.8.9           RColorBrewer_1.1-3  </span></span>
+<span id="cb24-35"><a href="#cb24-35" tabindex="-1"></a><span class="co">#&gt; [25] abind_1.4-8          withr_3.0.2          purrr_1.2.0         </span></span>
+<span id="cb24-36"><a href="#cb24-36" tabindex="-1"></a><span class="co">#&gt; [28] nnet_7.3-20          grid_4.5.1           stats4_4.5.1        </span></span>
+<span id="cb24-37"><a href="#cb24-37" tabindex="-1"></a><span class="co">#&gt; [31] future_1.67.0        ggplot2_4.0.0        globals_0.18.0      </span></span>
+<span id="cb24-38"><a href="#cb24-38" tabindex="-1"></a><span class="co">#&gt; [34] scales_1.4.0         iterators_1.0.14     MASS_7.3-65         </span></span>
+<span id="cb24-39"><a href="#cb24-39" tabindex="-1"></a><span class="co">#&gt; [37] cli_3.6.5            rmarkdown_2.30       generics_0.1.4      </span></span>
+<span id="cb24-40"><a href="#cb24-40" tabindex="-1"></a><span class="co">#&gt; [40] rstudioapi_0.17.1    future.apply_1.20.0  reshape2_1.4.4      </span></span>
+<span id="cb24-41"><a href="#cb24-41" tabindex="-1"></a><span class="co">#&gt; [43] cachem_1.1.0         stringr_1.5.2        splines_4.5.1       </span></span>
+<span id="cb24-42"><a href="#cb24-42" tabindex="-1"></a><span class="co">#&gt; [46] parallel_4.5.1       vctrs_0.6.5          hardhat_1.4.2       </span></span>
+<span id="cb24-43"><a href="#cb24-43" tabindex="-1"></a><span class="co">#&gt; [49] glmnet_4.1-10        Matrix_1.7-4         jsonlite_2.0.0      </span></span>
+<span id="cb24-44"><a href="#cb24-44" tabindex="-1"></a><span class="co">#&gt; [52] Formula_1.2-5        listenv_0.9.1        systemfonts_1.3.1   </span></span>
+<span id="cb24-45"><a href="#cb24-45" tabindex="-1"></a><span class="co">#&gt; [55] foreach_1.5.2        gower_1.0.2          jquerylib_0.1.4     </span></span>
+<span id="cb24-46"><a href="#cb24-46" tabindex="-1"></a><span class="co">#&gt; [58] recipes_1.3.1        glue_1.8.0           parallelly_1.45.1   </span></span>
+<span id="cb24-47"><a href="#cb24-47" tabindex="-1"></a><span class="co">#&gt; [61] codetools_0.2-20     lubridate_1.9.4      stringi_1.8.7       </span></span>
+<span id="cb24-48"><a href="#cb24-48" tabindex="-1"></a><span class="co">#&gt; [64] gtable_0.3.6         shape_1.4.6.1        tibble_3.3.0        </span></span>
+<span id="cb24-49"><a href="#cb24-49" tabindex="-1"></a><span class="co">#&gt; [67] pillar_1.11.1        htmltools_0.5.8.1    ipred_0.9-15        </span></span>
+<span id="cb24-50"><a href="#cb24-50" tabindex="-1"></a><span class="co">#&gt; [70] lava_1.8.2           R6_2.6.1             textshaping_1.0.3   </span></span>
+<span id="cb24-51"><a href="#cb24-51" tabindex="-1"></a><span class="co">#&gt; [73] evaluate_1.0.5       lattice_0.22-7       bslib_0.9.0         </span></span>
+<span id="cb24-52"><a href="#cb24-52" tabindex="-1"></a><span class="co">#&gt; [76] class_7.3-23         Rcpp_1.1.0           svglite_2.2.2       </span></span>
+<span id="cb24-53"><a href="#cb24-53" tabindex="-1"></a><span class="co">#&gt; [79] nlme_3.1-168         prodlim_2025.04.28   ranger_0.17.0       </span></span>
+<span id="cb24-54"><a href="#cb24-54" tabindex="-1"></a><span class="co">#&gt; [82] xfun_0.53            ModelMetrics_1.2.2.2 pkgconfig_2.0.3</span></span></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
