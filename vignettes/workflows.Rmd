@@ -26,7 +26,7 @@ library(corrselect)
 
 This vignette demonstrates integration of corrselect into complete modeling workflows, from raw predictors to final models under correlation constraints. Four applied settings illustrate interface selection and workflow composition. See `vignette("quickstart")` for interface descriptions and `vignette("theory")` for mathematical foundations.
 
-**Functions used**: `corrPrune()`, `modelPrune()` — see `vignette("quickstart")` for full signatures and parameter details.
+**Functions used**: `corrPrune()`, `modelPrune()`, see `vignette("quickstart")` for full signatures and parameter details.
 
 Each workflow showcases different aspects of the package:
 

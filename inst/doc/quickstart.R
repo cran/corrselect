@@ -14,8 +14,8 @@ library(corrselect)
 # install.packages("corrselect")
 # 
 # # Or install development version from GitHub
-# # install.packages("devtools")
-# devtools::install_github("GillesColling/corrselect")
+# # install.packages("pak")
+# pak::pak("gcol33/corrselect")
 
 ## -----------------------------------------------------------------------------
 data(mtcars)
