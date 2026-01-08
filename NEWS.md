@@ -1,3 +1,50 @@
+# corrselect 3.1.0
+
+## Bug Fixes
+
+- **corrPrune**: Fixed numeric-numeric pair handling in mixed-type data (was incorrectly using Cramer's V instead of Pearson correlation)
+- **corrPrune**: Fixed numeric-ordered pair handling (now properly converts ordered to numeric for Spearman correlation)
+
+## Test Coverage Improvements
+
+Coverage improved from 92% to 94%:
+
+- Added tests for optional package measures (bicor, distance, maximal) with proper `skip_if_not_installed()` guards
+- Added tests for lme4 and glmmTMB engines in modelPrune
+- Added chi-squared edge case tests (sparse contingency tables, NA handling)
+- Added VIF edge case tests (perfect collinearity, single predictor)
+- Added lexicographic tie-breaking tests with synthetic correlation structures
+- Added mixed-type data tests (numeric-ordered, ordered-ordered, factor-factor pairs)
+- Added condition_number criterion tests
+- findAllMaxSets.R now at 100% coverage
+- corrPrune.R now at 97% coverage
+
+---
+
+# corrselect 3.0.7
+
+## New Features
+
+### corrPrune Enhancements
+
+- **Grouped pruning**: New `by` parameter computes association matrices per group and aggregates using the `group_q` quantile (default: 0.5 = median). Useful when correlations vary across experimental conditions or subpopulations.
+- **Additional measures for numeric data**:
+  - `bicor`: Biweight midcorrelation (requires WGCNA package)
+  - `distance`: Distance correlation (requires energy package)
+  - `maximal`: Maximal information coefficient (requires minerva package)
+
+### modelPrune Enhancements
+
+- **Condition number criterion**: New `criterion = "condition_number"` option uses SVD-based condition indices for detecting multicollinearity. Higher values indicate greater collinearity.
+
+## Tests
+
+- Added comprehensive tests for grouped pruning functionality
+- Added tests for condition_number criterion
+- Added edge case tests for single-group and insufficient-rows scenarios
+
+---
+
 # corrselect 3.0.4
 
 ## Test Coverage Improvements

@@ -2,6 +2,7 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/corrselect)](https://CRAN.R-project.org/package=corrselect)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/corrselect)](https://cran.r-project.org/package=corrselect)
+[![Monthly downloads](https://cranlogs.r-pkg.org/badges/corrselect)](https://cran.r-project.org/package=corrselect)
 [![R-CMD-check](https://github.com/gcol33/corrselect/actions/workflows/R-CMD-check.yml/badge.svg)](https://github.com/gcol33/corrselect/actions/workflows/R-CMD-check.yml)
 [![Codecov test coverage](https://codecov.io/gh/gcol33/corrselect/graph/badge.svg)](https://app.codecov.io/gh/gcol33/corrselect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -102,7 +103,7 @@ pruned <- corrPrune(mtcars, threshold = 0.7, mode = "exact")
 # Use greedy mode (faster for large datasets)
 pruned <- corrPrune(mtcars, threshold = 0.7, mode = "greedy")
 
-# Check what was removed
+# Check what was retained
 attr(pruned, "selected_vars")
 ```
 
@@ -114,9 +115,10 @@ pruned <- modelPrune(mpg ~ cyl + disp + hp + wt, data = mtcars, limit = 5)
 attr(pruned, "removed_vars")
 
 # GLM with binomial family
-mtcars$am_binary <- as.factor(mtcars$am)
+mtcars_glm <- mtcars
+mtcars_glm$am_binary <- as.factor(mtcars_glm$am)
 pruned <- modelPrune(am_binary ~ cyl + disp + hp,
-                     data = mtcars, engine = "glm",
+                     data = mtcars_glm, engine = "glm",
                      family = binomial(), limit = 5)
 
 # Mixed model (requires lme4)
@@ -203,7 +205,7 @@ show(res)
 Work directly with correlation matrices:
 
 ```r
-mat <- cor(mtcars)
+mat <- cor(mtcars[, sapply(mtcars, is.numeric)])
 res <- MatSelect(mat, threshold = 0.7, method = "els")
 ```
 

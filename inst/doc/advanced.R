@@ -136,6 +136,26 @@ cat("Run 1 selected:", names(result1), "\n")
 cat("Run 2 selected:", names(result2), "\n")
 cat("Identical:", identical(names(result1), names(result2)), "\n")
 
+## -----------------------------------------------------------------------------
+# Create data with grouping variable
+set.seed(123)
+n <- 100
+df <- data.frame(
+  x1 = rnorm(n),
+  x2 = rnorm(n),
+  x3 = rnorm(n),
+  site = rep(c("A", "B", "C", "D"), each = n/4)
+)
+
+# Prune using per-group correlations (aggregated with median)
+result <- corrPrune(df, threshold = 0.5, by = "site", group_q = 0.5)
+cat("Selected:", attr(result, "selected_vars"), "\n")
+
+## -----------------------------------------------------------------------------
+# Using condition number instead of VIF
+result_cn <- modelPrune(mpg ~ ., data = mtcars, criterion = "condition_number", limit = 10)
+cat("Selected:", attr(result_cn, "selected_vars"), "\n")
+
 ## ----eval=FALSE---------------------------------------------------------------
 # my_engine <- list(
 #   # Required: How to fit the model

@@ -68,12 +68,14 @@ test_that("min and max correlations are valid", {
 })
 
 test_that("works with tibble-like input", {
+  skip_if_not_installed("tibble")
   df <- as.data.frame(tibble::tibble(x = rnorm(5), y = rnorm(5)))
   res <- corrSelect(df, threshold = 0.9, method = "els")
   expect_s4_class(res, "CorrCombo")
 })
 
 test_that("force_in accepts numeric indices", {
+  set.seed(1234)
   df <- data.frame(x = rnorm(10), y = rnorm(10), z = rnorm(10))
   res <- corrSelect(df, threshold = 0.8, method = "els", force_in = c(1, 3))
   expect_true(all(c("x", "z") %in% unlist(res@subset_list)))
@@ -687,3 +689,265 @@ test_that("corrSelect handles data.table input", {
   res <- corrSelect(dt, threshold = 0.8)
   expect_s4_class(res, "CorrCombo")
 })
+
+# ===========================================================================
+# Additional edge case tests for full coverage
+# ===========================================================================
+
+test_that("corrSelect handles logical column type message", {
+  set.seed(4001)
+  df <- data.frame(
+    num1 = rnorm(20),
+    num2 = rnorm(20),
+    logical_col = sample(c(TRUE, FALSE), 20, replace = TRUE)
+  )
+
+  expect_message(
+    res <- corrSelect(df, threshold = 0.8),
+    "excluded"
+  )
+
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect handles Date column exclusion", {
+  set.seed(4002)
+  df <- data.frame(
+    num1 = rnorm(20),
+    num2 = rnorm(20),
+    date_col = Sys.Date() + 1:20
+  )
+
+  expect_message(
+    res <- corrSelect(df, threshold = 0.8),
+    "excluded"
+  )
+
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect handles complex column type exclusion", {
+  set.seed(4003)
+  df <- data.frame(
+    num1 = rnorm(15),
+    num2 = rnorm(15)
+  )
+  df$complex_col <- complex(real = 1:15, imaginary = 1:15)
+
+  expect_message(
+    res <- corrSelect(df, threshold = 0.8),
+    "excluded"
+  )
+
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect force_in with non-existent name after constant removal", {
+  set.seed(4004)
+  df <- data.frame(
+    num1 = rnorm(20),
+    const = rep(5, 20),  # Constant, will be removed
+    num2 = rnorm(20)
+  )
+
+  expect_warning(
+    expect_error(
+      corrSelect(df, threshold = 0.8, force_in = "const"),
+      "excluded from correlation"
+    ),
+    "constant"
+  )
+})
+
+test_that("corrSelect auto-selects bron-kerbosch without force_in", {
+  set.seed(4005)
+  df <- data.frame(a = rnorm(15), b = rnorm(15), c = rnorm(15))
+
+  res <- corrSelect(df, threshold = 0.8)
+
+  expect_equal(res@search_type, "bron-kerbosch")
+})
+
+test_that("corrSelect auto-selects els with force_in", {
+  set.seed(4006)
+  df <- data.frame(a = rnorm(15), b = rnorm(15), c = rnorm(15))
+
+  res <- corrSelect(df, threshold = 0.9, force_in = "a")
+
+  expect_equal(res@search_type, "els")
+})
+
+test_that("corrSelect handles multiple excluded column types", {
+  set.seed(4007)
+  df <- data.frame(
+    num1 = rnorm(15),
+    num2 = rnorm(15),
+    factor_col = factor(letters[1:15]),
+    char_col = letters[1:15],
+    logical_col = sample(c(TRUE, FALSE), 15, replace = TRUE),
+    ordered_col = ordered(1:15)
+  )
+
+  expect_message(
+    res <- corrSelect(df, threshold = 0.8),
+    "excluded"
+  )
+
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect with spearman handles tied ranks", {
+  set.seed(4008)
+  # Data with many ties
+  df <- data.frame(
+    a = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5),
+    b = c(1, 2, 1, 2, 1, 2, 1, 2, 1, 2),
+    c = rnorm(10)
+  )
+
+  res <- corrSelect(df, threshold = 0.8, cor_method = "spearman")
+
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect with kendall correlation", {
+  set.seed(4009)
+  df <- data.frame(
+    a = rnorm(15),
+    b = rnorm(15),
+    c = rnorm(15)
+  )
+
+  res <- corrSelect(df, threshold = 0.8, cor_method = "kendall")
+
+  expect_s4_class(res, "CorrCombo")
+  expect_equal(res@cor_method, "kendall")
+})
+
+test_that("corrSelect records n_rows_used correctly", {
+  set.seed(4010)
+  df <- data.frame(
+    a = c(rnorm(18), NA, NA),
+    b = rnorm(20),
+    c = rnorm(20)
+  )
+
+  expect_warning(
+    res <- corrSelect(df, threshold = 0.8),
+    "Removed"
+  )
+
+  expect_equal(res@n_rows_used, 18L)
+})
+
+test_that("corrSelect handles all-constant after NA removal", {
+  set.seed(4011)
+  df <- data.frame(
+    a = c(5, 5, NA, NA, NA),
+    b = c(5, 5, NA, NA, NA),
+    c = c(1, 2, 3, 4, 5)
+  )
+
+  # After NA removal, a and b become constant
+  expect_warning(
+    expect_error(
+      corrSelect(df, threshold = 0.7),
+      "Less than two numeric"
+    )
+  )
+})
+
+# ===========================================================================
+# Edge case tests to increase coverage
+# ===========================================================================
+
+test_that("corrSelect errors on empty numeric data", {
+  set.seed(4101)
+  df <- data.frame(
+    char1 = letters[1:10],
+    char2 = LETTERS[1:10]
+  )
+
+  expect_error(
+    corrSelect(df, threshold = 0.8),
+    "Less than two numeric"
+  )
+})
+
+test_that("corrSelect bicor method skipped if WGCNA not installed", {
+  skip_if_not_installed("WGCNA")
+  set.seed(4102)
+  df <- data.frame(num1 = rnorm(20), num2 = rnorm(20), num3 = rnorm(20))
+
+  res <- corrSelect(df, threshold = 0.9, cor_method = "bicor")
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect distance method skipped if energy not installed", {
+  skip_if_not_installed("energy")
+  set.seed(4103)
+  df <- data.frame(num1 = rnorm(20), num2 = rnorm(20), num3 = rnorm(20))
+
+  res <- corrSelect(df, threshold = 0.9, cor_method = "distance")
+  expect_s4_class(res, "CorrCombo")
+})
+
+test_that("corrSelect maximal method skipped if minerva not installed", {
+  skip_if_not_installed("minerva")
+  set.seed(4104)
+  df <- data.frame(num1 = rnorm(20), num2 = rnorm(20), num3 = rnorm(20))
+
+  res <- corrSelect(df, threshold = 0.9, cor_method = "maximal")
+  expect_s4_class(res, "CorrCombo")
+})
+
+
+# ===========================================================================
+# Tests for corrSelect with optional measures
+# ===========================================================================
+
+test_that("corrSelect with bicor works", {
+  skip_if_not(requireNamespace("WGCNA", quietly = TRUE))
+
+  set.seed(7001)
+  n <- 50
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  result <- corrSelect(df, threshold = 0.5, cor_method = "bicor")
+  expect_s4_class(result, "CorrCombo")
+})
+
+test_that("corrSelect with distance correlation works", {
+  skip_if_not(requireNamespace("energy", quietly = TRUE))
+
+  set.seed(7002)
+  n <- 30
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  result <- corrSelect(df, threshold = 0.5, cor_method = "distance")
+  expect_s4_class(result, "CorrCombo")
+})
+
+test_that("corrSelect with maximal works", {
+  skip_if_not(requireNamespace("minerva", quietly = TRUE))
+
+  set.seed(7003)
+  n <- 30
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  result <- corrSelect(df, threshold = 0.5, cor_method = "maximal")
+  expect_s4_class(result, "CorrCombo")
+})
+

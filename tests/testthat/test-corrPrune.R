@@ -538,7 +538,7 @@ test_that("corrPrune errors on unsupported measure for numeric data", {
 
   expect_error(
     corrPrune(df, threshold = 0.7, measure = "eta"),
-    "not yet implemented"
+    "not supported"
   )
 })
 
@@ -566,7 +566,7 @@ test_that("corrPrune handles all rows with NA (errors)", {
     x2 = c(NA, NA, NA)
   )
 
-  # Should error - either "All rows contain missing values" or NA in matrix
+  # Should error - either "no complete element pairs|All rows contain missing values" or NA in matrix
   expect_error(
     corrPrune(df, threshold = 0.7)
   )
@@ -712,17 +712,23 @@ test_that("corrPrune handles eta with constant numeric variable", {
   expect_s3_class(result, "data.frame")
 })
 
-test_that("corrPrune errors on grouped pruning (not implemented)", {
+test_that("corrPrune grouped pruning works with by parameter", {
+  set.seed(1112)
+  # Create data with three uncorrelated numeric variables and a grouping factor
+  n <- 60
   df <- data.frame(
-    x = 1:10,
-    y = 1:10,
-    group = rep(1:2, each = 5)
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n),
+    group = rep(c("A", "B"), each = n/2)
   )
-
-  expect_error(
-    corrPrune(df, threshold = 0.7, by = "group"),
-    "not yet implemented"
-  )
+  
+  # With grouped pruning using quantile aggregation
+  result <- corrPrune(df, threshold = 0.5, by = "group", group_q = 0.5)
+  expect_s3_class(result, "data.frame")
+  expect_true("selected_vars" %in% names(attributes(result)))
+  # Should keep all 3 numeric variables since they are uncorrelated
+  expect_equal(length(attr(result, "selected_vars")), 3)
 })
 
 test_that("corrPrune handles no valid subset (all vars correlated)", {
@@ -886,4 +892,729 @@ test_that("corrPrune integer column conversion to numeric", {
   result <- corrPrune(df, threshold = 0.8, mode = "greedy")
 
   expect_s3_class(result, "data.frame")
+})
+
+# ===========================================================================
+# Additional edge case tests for full coverage
+# ===========================================================================
+
+test_that("corrPrune lexicographic tie-breaking with identical avg correlations", {
+  set.seed(8001)
+  n <- 100
+
+  # Create data with multiple subsets of same size and same avg correlation
+  # This triggers the lexicographic tie-breaker in exact mode
+  df <- data.frame(
+    a = rnorm(n),
+    b = rnorm(n),
+    c = rnorm(n),
+    d = rnorm(n)
+  )
+
+  # All independent variables - all subsets have avg = 0
+  result1 <- corrPrune(df, threshold = 0.99, mode = "exact")
+  result2 <- corrPrune(df, threshold = 0.99, mode = "exact")
+
+  # Should be deterministic
+  expect_identical(names(result1), names(result2))
+})
+
+test_that("corrPrune handles multiple max-size subsets with same avg correlation", {
+  set.seed(8002)
+  n <- 50
+
+  # All pairs have very similar low correlations -> same avg
+  x1 <- rnorm(n)
+  df <- data.frame(
+    a1 = x1,
+    a2 = rnorm(n),
+    a3 = rnorm(n),
+    a4 = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.95, mode = "exact")
+
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune lexicographic ordering with alphabetical names", {
+  set.seed(8003)
+  n <- 50
+
+  # Alphabetically ordered names for predictable tie-breaking
+  df <- data.frame(
+    apple = rnorm(n),
+    banana = rnorm(n),
+    cherry = rnorm(n),
+    date = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.99, mode = "exact")
+
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune exact mode with single variable forced in", {
+  set.seed(8004)
+  n <- 50
+  df <- data.frame(
+    x1 = rnorm(n),
+    x2 = rnorm(n),
+    x3 = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.9, force_in = "x2", mode = "exact")
+
+  expect_true("x2" %in% names(result))
+})
+
+
+test_that("corrPrune greedy mode with multiple force_in variables", {
+  set.seed(8006)
+  n <- 50
+  df <- data.frame(
+    x1 = rnorm(n),
+    x2 = rnorm(n),
+    x3 = rnorm(n),
+    x4 = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.9, force_in = c("x1", "x3"), mode = "greedy")
+
+  expect_true(all(c("x1", "x3") %in% names(result)))
+})
+
+
+test_that("corrPrune exact mode finds largest subset", {
+  set.seed(8008)
+  n <- 100
+  x1 <- rnorm(n)
+  df <- data.frame(
+    x1 = x1,
+    x2 = x1 + rnorm(n, sd = 0.05),  # High correlation with x1
+    x3 = rnorm(n),
+    x4 = rnorm(n),
+    x5 = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.5, mode = "exact")
+
+  # Should have at least 3 variables (x3, x4, x5 + one of x1/x2)
+  expect_true(ncol(result) >= 3)
+})
+
+test_that("corrPrune greedy removes variable with most violations first", {
+  set.seed(8009)
+  n <- 100
+  x1 <- rnorm(n)
+  df <- data.frame(
+    bad = x1,  # Correlated with many
+    x2 = x1 + rnorm(n, sd = 0.1),
+    x3 = x1 + rnorm(n, sd = 0.1),
+    good1 = rnorm(n),
+    good2 = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.5, mode = "greedy")
+
+  # "bad" should likely be removed since it violates threshold with x2 and x3
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune returns consistent n_vars_original attribute", {
+  set.seed(8010)
+  n <- 50
+  df <- data.frame(
+    x1 = rnorm(n),
+    x2 = rnorm(n),
+    x3 = rnorm(n),
+    x4 = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.8, mode = "exact")
+
+  expect_equal(attr(result, "n_vars_original"), 4)
+  expect_equal(attr(result, "n_vars_selected"), ncol(result))
+})
+
+
+# ===========================================================================
+# Grouped pruning tests
+# ===========================================================================
+
+test_that("corrPrune grouped pruning aggregates with different quantiles", {
+  set.seed(2001)
+  n <- 100
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n),
+    group = rep(c("A", "B", "C", "D"), each = n/4)
+  )
+
+  # Test with median (0.5)
+  result1 <- corrPrune(df, threshold = 0.5, by = "group", group_q = 0.5)
+  expect_s3_class(result1, "data.frame")
+
+  # Test with max (1.0)
+  result2 <- corrPrune(df, threshold = 0.5, by = "group", group_q = 1.0)
+  expect_s3_class(result2, "data.frame")
+
+  # Test with minimum (0.0)
+  result3 <- corrPrune(df, threshold = 0.5, by = "group", group_q = 0.01)
+  expect_s3_class(result3, "data.frame")
+})
+
+test_that("corrPrune grouped pruning returns only numeric columns", {
+  set.seed(2002)
+  n <- 90
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n),
+    group = factor(rep(1:3, each = n/3))
+  )
+  
+  result <- corrPrune(df, threshold = 0.8, by = "group")
+  # Grouping column is not included in result (only numeric columns)
+  expect_false("group" %in% names(result))
+  # Selected variables should all be numeric
+  expect_true(all(attr(result, "selected_vars") %in% c("x", "y", "z")))
+})
+
+test_that("corrPrune grouped pruning validates by parameter", {
+  set.seed(2003)
+  df <- data.frame(x = rnorm(20), y = rnorm(20), z = factor(1:20))
+
+  expect_error(
+    corrPrune(df, threshold = 0.5, by = "nonexistent"),
+    "not found"
+  )
+})
+
+test_that("corrPrune grouped pruning with interaction of multiple by columns", {
+  set.seed(2004)
+  n <- 80
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    grp1 = rep(c("A", "B"), each = n/2),
+    grp2 = rep(c("X", "Y"), n/2)
+  )
+
+  result <- corrPrune(df, threshold = 0.5, by = c("grp1", "grp2"))
+  expect_s3_class(result, "data.frame")
+})
+
+
+# ===========================================================================
+# Grouped pruning edge case tests
+# ===========================================================================
+
+test_that("corrPrune grouped pruning with single group warns and continues", {
+  set.seed(3001)
+  n <- 50
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n),
+    group = factor(rep("A", n))  # Only one group
+  )
+
+  expect_warning(
+    result <- corrPrune(df, threshold = 0.5, by = "group"),
+    "Only one group found"
+  )
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune grouped pruning with insufficient rows in a group warns", {
+  set.seed(3002)
+  n <- 50
+  df <- data.frame(
+    x = c(1, rnorm(n - 1)),
+    y = c(NA, rnorm(n - 1)),  # First row incomplete
+    z = rnorm(n),
+    group = factor(c("small", rep("large", n - 1)))  # One group has only 1 row
+  )
+
+  expect_warning(
+    result <- corrPrune(df, threshold = 0.8, by = "group"),
+    "fewer than 2 complete rows"
+  )
+  expect_s3_class(result, "data.frame")
+})
+
+
+# ===========================================================================
+# Tests for optional package measures (bicor, distance, maximal)
+# ===========================================================================
+
+test_that("corrPrune with bicor measure works", {
+  skip_if_not(requireNamespace("WGCNA", quietly = TRUE))
+
+  set.seed(4001)
+  n <- 50
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.5, measure = "bicor")
+  expect_s3_class(result, "data.frame")
+  expect_equal(attr(result, "measure"), "bicor")
+})
+
+test_that("corrPrune with distance correlation works", {
+  skip_if_not(requireNamespace("energy", quietly = TRUE))
+
+  set.seed(4002)
+  n <- 30  # Smaller for speed
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.5, measure = "distance")
+  expect_s3_class(result, "data.frame")
+  expect_equal(attr(result, "measure"), "distance")
+})
+
+test_that("corrPrune with maximal information coefficient works", {
+  skip_if_not(requireNamespace("minerva", quietly = TRUE))
+
+  set.seed(4003)
+  n <- 30  # Smaller for speed
+  df <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.5, measure = "maximal")
+  expect_s3_class(result, "data.frame")
+  expect_equal(attr(result, "measure"), "maximal")
+})
+
+# ===========================================================================
+# Tests for mixed-type data in corrPrune
+# ===========================================================================
+
+test_that("corrPrune handles numeric-ordered pairs", {
+  set.seed(4004)
+  n <- 50
+  df <- data.frame(
+    num1 = rnorm(n),
+    num2 = rnorm(n),
+    ord1 = ordered(sample(1:3, n, replace = TRUE))
+  )
+
+  result <- corrPrune(df, threshold = 0.8)
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune handles ordered-ordered pairs", {
+  set.seed(4005)
+  n <- 50
+  df <- data.frame(
+    ord1 = ordered(sample(1:4, n, replace = TRUE)),
+    ord2 = ordered(sample(1:4, n, replace = TRUE)),
+    ord3 = ordered(sample(1:4, n, replace = TRUE))
+  )
+
+  result <- corrPrune(df, threshold = 0.8)
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune handles factor-factor pairs with sparse tables", {
+  set.seed(4006)
+  n <- 50
+  df <- data.frame(
+    fac1 = factor(sample(c("A", "B"), n, replace = TRUE)),
+    fac2 = factor(sample(c("X", "Y"), n, replace = TRUE)),
+    fac3 = factor(sample(c("P", "Q"), n, replace = TRUE))
+  )
+
+  result <- corrPrune(df, threshold = 0.8)
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune handles numeric-factor pairs", {
+  set.seed(4007)
+  n <- 50
+  df <- data.frame(
+    num1 = rnorm(n),
+    num2 = rnorm(n),
+    fac1 = factor(sample(c("A", "B", "C"), n, replace = TRUE))
+  )
+
+  result <- corrPrune(df, threshold = 0.8)
+  expect_s3_class(result, "data.frame")
+})
+
+test_that("corrPrune handles ordered-factor pairs", {
+  set.seed(4008)
+  n <- 50
+  df <- data.frame(
+    ord1 = ordered(sample(1:3, n, replace = TRUE)),
+    fac1 = factor(sample(c("A", "B"), n, replace = TRUE)),
+    fac2 = factor(sample(c("X", "Y"), n, replace = TRUE))
+  )
+
+  result <- corrPrune(df, threshold = 0.8)
+  expect_s3_class(result, "data.frame")
+})
+
+# ===========================================================================
+# Tests for edge cases in exact mode tie-breaking
+# ===========================================================================
+
+test_that("corrPrune exact mode handles lexicographic tie-breaking", {
+  set.seed(4009)
+  # Create data where multiple subsets have same size and correlation
+  n <- 50
+  df <- data.frame(
+    a = rnorm(n),
+    b = rnorm(n),
+    c = rnorm(n),
+    d = rnorm(n)
+  )
+
+  result <- corrPrune(df, threshold = 0.95, mode = "exact")
+  expect_s3_class(result, "data.frame")
+  # Should be deterministic
+  result2 <- corrPrune(df, threshold = 0.95, mode = "exact")
+  expect_equal(names(result), names(result2))
+})
+
+# ===========================================================================
+# Test for chi-squared edge case
+# ===========================================================================
+
+test_that("corrPrune handles chi-squared NA gracefully", {
+  set.seed(4010)
+  n <- 30
+  # Create factors where chi-squared might fail
+  df <- data.frame(
+    fac1 = factor(c(rep("A", n-1), "B")),  # Very unbalanced
+    fac2 = factor(sample(c("X", "Y"), n, replace = TRUE)),
+    num1 = rnorm(n)
+  )
+
+  # Should not error
+  result <- corrPrune(df, threshold = 0.9)
+  expect_s3_class(result, "data.frame")
+})
+
+
+# ===========================================================================
+# Edge case: Lexicographic tie-breaking in exact mode
+# ===========================================================================
+
+test_that("corrPrune exact mode uses lexicographic tie-breaking when size and avg tied", {
+  set.seed(5001)
+  # Create symmetric data where subsets {a,c} and {b,d} have same size and similar correlations
+  # This is tricky - we need multiple maximal subsets with identical avg correlation
+  n <- 100
+
+  # Create 4 variables where pairs (a,b) and (c,d) are correlated
+  # but (a,c), (a,d), (b,c), (b,d) are uncorrelated
+  a <- rnorm(n)
+  b <- a + rnorm(n, sd = 0.01)  # a and b highly correlated
+  c <- rnorm(n)
+  d <- c + rnorm(n, sd = 0.01)  # c and d highly correlated
+
+  df <- data.frame(a = a, b = b, c = c, d = d)
+
+  # With threshold 0.5, should get subsets like {a,c}, {a,d}, {b,c}, {b,d}
+  # all with size 2 and potentially similar avg correlations
+  result <- corrPrune(df, threshold = 0.5, mode = "exact")
+  expect_s3_class(result, "data.frame")
+
+  # Result should be deterministic
+  result2 <- corrPrune(df, threshold = 0.5, mode = "exact")
+  expect_identical(names(result), names(result2))
+})
+
+# ===========================================================================
+# Edge case: All rows have NA in grouped aggregation
+# ===========================================================================
+
+test_that("corrPrune grouped pruning handles groups with all NA", {
+  set.seed(5002)
+  n <- 40
+
+  # Create data where one group has only NA values
+  df <- data.frame(
+    x = c(rnorm(30), rep(NA, 10)),
+    y = c(rnorm(30), rep(NA, 10)),
+    z = rnorm(n),
+    group = rep(c("good", "bad"), c(30, 10))
+  )
+
+  # Should handle the NA group gracefully
+  expect_warning(
+    result <- corrPrune(df, threshold = 0.8, by = "group"),
+    "fewer than 2 complete rows"
+  )
+  expect_s3_class(result, "data.frame")
+})
+
+
+# ===========================================================================
+# Lexicographic tie-breaking: lines 502-508 in corrPrune
+# Need: multiple subsets with SAME size AND SAME avg correlation
+# ===========================================================================
+
+test_that("corrPrune exact mode triggers lexicographic tie-breaking", {
+  # Create correlation matrix where:
+  # - a,b are highly correlated (0.9)
+  # - c,d are highly correlated (0.9)
+  # - All other pairs are uncorrelated (0)
+  # This gives 4 maximal subsets: {a,c}, {a,d}, {b,c}, {b,d}
+  # All size 2, all avg_corr = 0 -> triggers lexicographic tie-breaking
+
+  n <- 200
+  set.seed(9001)
+
+  # Generate base variables
+  base1 <- rnorm(n)
+  base2 <- rnorm(n)
+
+  # a and b highly correlated
+  a <- base1
+  b <- base1 + rnorm(n, sd = 0.1)
+
+  # c and d highly correlated (independent of a,b)
+  c <- base2
+  d <- base2 + rnorm(n, sd = 0.1)
+
+  df <- data.frame(a = a, b = b, c = c, d = d)
+
+  # Verify the correlation structure
+  cor_mat <- cor(df)
+  expect_true(abs(cor_mat["a", "b"]) > 0.9)  # a-b correlated
+  expect_true(abs(cor_mat["c", "d"]) > 0.9)  # c-d correlated
+  expect_true(abs(cor_mat["a", "c"]) < 0.3)  # cross pairs uncorrelated
+
+  # With threshold 0.5, should get multiple subsets of size 2
+  # All with same avg_corr -> lexicographic tie-breaking
+  result <- corrPrune(df, threshold = 0.5, mode = "exact")
+  expect_s3_class(result, "data.frame")
+  expect_equal(ncol(result), 2)
+
+  # Should be deterministic (lexicographic: "a,c" comes first)
+  result2 <- corrPrune(df, threshold = 0.5, mode = "exact")
+  expect_identical(sort(names(result)), sort(names(result2)))
+})
+
+# ===========================================================================
+# Chi-squared returning NA: line 350 in corrPrune
+# Need: contingency table where chisq.test returns NA
+# ===========================================================================
+
+test_that("corrPrune handles chi-squared NA from degenerate table", {
+  set.seed(9002)
+  n <- 50
+
+  # Create factors where chi-squared might produce NA
+  # This happens with very sparse tables
+  df <- data.frame(
+    fac1 = factor(c(rep("A", 48), "B", "C")),  # Very unbalanced
+    fac2 = factor(c(rep("X", 48), "Y", "Z")),  # Very unbalanced
+    num1 = rnorm(n)
+  )
+
+  # Should handle gracefully
+  result <- corrPrune(df, threshold = 0.95)
+  expect_s3_class(result, "data.frame")
+})
+
+# ===========================================================================
+# All NA in grouped aggregation: line 410 in corrPrune
+# Need: all groups produce NA for a variable pair
+# ===========================================================================
+
+
+# ===========================================================================
+# assocSelect: single-level factor (line 197) and constant numeric (line 199)
+# ===========================================================================
+
+test_that("assocSelect handles eta with single-level factor", {
+  set.seed(9004)
+  n <- 30
+
+  df <- data.frame(
+    num1 = rnorm(n),
+    num2 = rnorm(n),
+    fac_single = factor(rep("only_level", n))
+  )
+
+  # eta computation should return 0 for single-level factor
+  result <- assocSelect(df, threshold = 0.9)
+  expect_s4_class(result, "CorrCombo")
+})
+
+test_that("assocSelect handles eta with constant numeric", {
+  set.seed(9005)
+  n <- 30
+
+  df <- data.frame(
+    const_num = rep(42, n),  # Constant - ss_tot = 0
+    fac1 = factor(sample(c("A", "B", "C"), n, replace = TRUE)),
+    num2 = rnorm(n)
+  )
+
+  # eta computation should handle ss_tot = 0
+  result <- assocSelect(df, threshold = 0.9)
+  expect_s4_class(result, "CorrCombo")
+})
+
+# ===========================================================================
+# corrSelect: bicor, distance, maximal with installed packages
+# ===========================================================================
+
+test_that("corrSelect with bicor computes correctly", {
+  skip_if_not(requireNamespace("WGCNA", quietly = TRUE))
+
+  set.seed(9006)
+  n <- 50
+  x <- rnorm(n)
+  df <- data.frame(
+    a = x,
+    b = x + rnorm(n, sd = 0.5),
+    c = rnorm(n)
+  )
+
+  result <- corrSelect(df, threshold = 0.7, cor_method = "bicor")
+  expect_s4_class(result, "CorrCombo")
+  expect_true(length(result@subset_list) >= 1)
+})
+
+test_that("corrSelect with distance computes correctly", {
+  skip_if_not(requireNamespace("energy", quietly = TRUE))
+
+  set.seed(9007)
+  n <- 30
+  df <- data.frame(a = rnorm(n), b = rnorm(n), c = rnorm(n))
+
+  result <- corrSelect(df, threshold = 0.5, cor_method = "distance")
+  expect_s4_class(result, "CorrCombo")
+})
+
+test_that("corrSelect with maximal computes correctly", {
+  skip_if_not(requireNamespace("minerva", quietly = TRUE))
+
+  set.seed(9008)
+  n <- 30
+  df <- data.frame(a = rnorm(n), b = rnorm(n), c = rnorm(n))
+
+  result <- corrSelect(df, threshold = 0.5, cor_method = "maximal")
+  expect_s4_class(result, "CorrCombo")
+})
+
+# ===========================================================================
+# VIF: predictor column matching edge case
+# ===========================================================================
+
+
+# ===========================================================================
+# corrPrune: Deep edge case tests
+# ===========================================================================
+
+test_that("corrPrune errors when all rows have missing values", {
+  df <- data.frame(
+    x = c(NA, NA, NA, NA),
+    y = c(NA, 1, NA, NA),
+    z = c(NA, NA, 2, NA)
+  )
+
+  expect_error(
+    corrPrune(df, threshold = 0.7),
+    "no complete element pairs|All rows contain missing values"
+  )
+})
+
+test_that("corrPrune handles character columns by converting to factor", {
+  set.seed(12001)
+  n <- 20
+  df <- data.frame(
+    char_col = sample(c("apple", "banana", "cherry"), n, replace = TRUE),
+    num_col = rnorm(n),
+    stringsAsFactors = FALSE
+  )
+
+  res <- corrPrune(df, threshold = 0.9)
+  expect_s3_class(res, "data.frame")
+})
+
+test_that("corrPrune handles logical columns by converting to factor", {
+  set.seed(12002)
+  n <- 20
+  df <- data.frame(
+    bool_col = sample(c(TRUE, FALSE), n, replace = TRUE),
+    num_col = rnorm(n)
+  )
+
+  res <- corrPrune(df, threshold = 0.9)
+  expect_s3_class(res, "data.frame")
+})
+
+test_that("corrPrune handles integer columns by converting to numeric", {
+  set.seed(12003)
+  n <- 20
+  df <- data.frame(
+    int_col = as.integer(sample(1:100, n, replace = TRUE)),
+    num_col = rnorm(n)
+  )
+
+  res <- corrPrune(df, threshold = 0.9)
+  expect_s3_class(res, "data.frame")
+})
+
+# ===========================================================================
+# corrPrune: Mixed-type chi2 edge cases
+# ===========================================================================
+
+test_that("corrPrune handles factor-factor with sparse contingency table", {
+  set.seed(16001)
+  n <- 15
+  df <- data.frame(
+    f1 = factor(c(rep("A", 12), rep("B", 3))),
+    f2 = factor(c(rep("X", 13), rep("Y", 2))),
+    num = rnorm(n)
+  )
+
+  res <- corrPrune(df, threshold = 0.9)
+  expect_s3_class(res, "data.frame")
+})
+
+test_that("corrPrune handles chi2 NA in mixed-type matrix computation", {
+  set.seed(16002)
+  # Create very degenerate factor-factor pair
+  n <- 10
+  df <- data.frame(
+    f1 = factor(c(rep("A", 9), "B")),
+    f2 = factor(c(rep("X", 9), "Y")),
+    num = rnorm(n)
+  )
+
+  res <- corrPrune(df, threshold = 0.95)
+  expect_s3_class(res, "data.frame")
+})
+
+test_that("corrPrune all-numeric with all rows NA errors correctly", {
+  # All-numeric data where complete.cases returns nothing
+  df <- data.frame(
+    x = c(1, NA, NA),
+    y = c(NA, 2, NA),
+    z = c(NA, NA, 3)
+  )
+
+  expect_error(
+    corrPrune(df, threshold = 0.7, measure = "pearson"),
+    "no complete element pairs|All rows"
+  )
 })

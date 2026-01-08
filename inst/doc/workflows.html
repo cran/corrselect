@@ -12,7 +12,7 @@
 
 <meta name="author" content="Gilles Colling" />
 
-<meta name="date" content="2025-12-16" />
+<meta name="date" content="2026-01-08" />
 
 <title>Complete Workflows: Real-World Examples</title>
 
@@ -342,7 +342,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Complete Workflows: Real-World
 Examples</h1>
 <h4 class="author">Gilles Colling</h4>
-<h4 class="date">2025-12-16</h4>
+<h4 class="date">2026-01-08</h4>
 
 
 
@@ -979,7 +979,7 @@ of exact methods.</p>
 <span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>            <span class="fu">ncol</span>(gene_expr),</span>
 <span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a>            <span class="fu">ncol</span>(genes_pruned),</span>
 <span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>            greedy_ms))</span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; Reduced from 200 → 177 genes (3.7 ms)</span></span></code></pre></div>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; Reduced from 200 → 177 genes (6.7 ms)</span></span></code></pre></div>
 <p>The greedy algorithm completed in milliseconds while ensuring all
 pairwise correlations remain below 0.8.</p>
 </div>
@@ -1026,11 +1026,11 @@ widens dramatically as the number of variables increases.</p>
 <span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a></span>
 <span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co"># Compare</span></span>
 <span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Exact mode: %d genes kept (%.1f ms)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">ncol</span>(exact_result), exact_time))</span>
-<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; Exact mode: 11 genes kept (1.8 ms)</span></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; Exact mode: 11 genes kept (3.2 ms)</span></span>
 <span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Greedy mode: %d genes kept (%.1f ms)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">ncol</span>(greedy_result), greedy_time))</span>
-<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt; Greedy mode: 10 genes kept (0.4 ms)</span></span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt; Greedy mode: 10 genes kept (0.7 ms)</span></span>
 <span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Speedup: %.1fx faster</span><span class="sc">\n</span><span class="st">&quot;</span>, exact_time <span class="sc">/</span> greedy_time))</span>
-<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; Speedup: 4.9x faster</span></span></code></pre></div>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; Speedup: 4.8x faster</span></span></code></pre></div>
 <p>The greedy mode is substantially faster. For the full 200-gene
 dataset, exact enumeration would be prohibitively slow, while greedy
 mode completes in milliseconds.</p>
@@ -1387,7 +1387,7 @@ for algorithm details</p>
 <span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
 <span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a><span class="co">#&gt; [1] igraph_2.1.4         car_3.1-3            carData_3.0-5       </span></span>
-<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a><span class="co">#&gt; [4] microbenchmark_1.5.0 corrselect_3.0.5    </span></span>
+<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a><span class="co">#&gt; [4] microbenchmark_1.5.0 corrselect_3.1.0    </span></span>
 <span id="cb24-25"><a href="#cb24-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb24-26"><a href="#cb24-26" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span id="cb24-27"><a href="#cb24-27" tabindex="-1"></a><span class="co">#&gt;  [1] tidyselect_1.2.1     timeDate_4051.111    dplyr_1.1.4         </span></span>
@@ -1396,7 +1396,7 @@ for algorithm details</p>
 <span id="cb24-30"><a href="#cb24-30" tabindex="-1"></a><span class="co">#&gt; [10] rpart_4.1.24         timechange_0.3.0     lifecycle_1.0.4     </span></span>
 <span id="cb24-31"><a href="#cb24-31" tabindex="-1"></a><span class="co">#&gt; [13] survival_3.8-3       magrittr_2.0.4       compiler_4.5.2      </span></span>
 <span id="cb24-32"><a href="#cb24-32" tabindex="-1"></a><span class="co">#&gt; [16] rlang_1.1.6          sass_0.4.10          tools_4.5.2         </span></span>
-<span id="cb24-33"><a href="#cb24-33" tabindex="-1"></a><span class="co">#&gt; [19] yaml_2.3.10          Boruta_9.0.0         data.table_1.17.8   </span></span>
+<span id="cb24-33"><a href="#cb24-33" tabindex="-1"></a><span class="co">#&gt; [19] yaml_2.3.10          Boruta_9.0.0         data.table_1.18.0   </span></span>
 <span id="cb24-34"><a href="#cb24-34" tabindex="-1"></a><span class="co">#&gt; [22] knitr_1.50           plyr_1.8.9           RColorBrewer_1.1-3  </span></span>
 <span id="cb24-35"><a href="#cb24-35" tabindex="-1"></a><span class="co">#&gt; [25] abind_1.4-8          withr_3.0.2          purrr_1.2.0         </span></span>
 <span id="cb24-36"><a href="#cb24-36" tabindex="-1"></a><span class="co">#&gt; [28] nnet_7.3-20          grid_4.5.2           stats4_4.5.2        </span></span>
