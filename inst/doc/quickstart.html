@@ -12,7 +12,7 @@
 
 <meta name="author" content="Gilles Colling" />
 
-<meta name="date" content="2026-01-08" />
+<meta name="date" content="2026-03-23" />
 
 <title>Quick Start</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Quick Start</h1>
 <h4 class="author">Gilles Colling</h4>
-<h4 class="date">2026-01-08</h4>
+<h4 class="date">2026-03-23</h4>
 
 
 
@@ -355,12 +355,12 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">&quot;gcol33/corrselect&quot;</span>)</span></code></pre></div>
 <p><strong>Suggested packages</strong> (for extended functionality):</p>
 <ul>
-<li><code>lme4</code>, <code>glmmTMB</code>: Mixed-effects models in
-<code>modelPrune()</code></li>
-<li><code>WGCNA</code>: Biweight midcorrelation
-(<code>bicor</code>)</li>
-<li><code>energy</code>: Distance correlation</li>
-<li><code>minerva</code>: Maximal information coefficient</li>
+<li><p><code>lme4</code>, <code>glmmTMB</code>: Mixed-effects models in
+<code>modelPrune()</code></p></li>
+<li><p><code>WGCNA</code>: Biweight midcorrelation
+(<code>bicor</code>)</p></li>
+<li><p><code>energy</code>: Distance correlation</p></li>
+<li><p><code>minerva</code>: Maximal information coefficient</p></li>
 </ul>
 </div>
 <div id="what-corrselect-does" class="section level2">
@@ -379,15 +379,15 @@ formulation).</p>
 <p><strong>corrPrune()</strong> - Removes redundant predictors based on
 pairwise correlation:</p>
 <ul>
-<li>Returns a single pruned dataset</li>
-<li>No response variable required</li>
-<li>Fast greedy or exact search</li>
+<li><p>Returns a single pruned dataset</p></li>
+<li><p>No response variable required</p></li>
+<li><p>Fast greedy or exact search</p></li>
 </ul>
 <p><strong>modelPrune()</strong> - Reduces VIF in regression models:</p>
 <ul>
-<li>Returns a single pruned dataset with response</li>
-<li>Iteratively removes high-VIF predictors</li>
-<li>Works with lm, glm, lme4, glmmTMB</li>
+<li><p>Returns a single pruned dataset with response</p></li>
+<li><p>Iteratively removes high-VIF predictors</p></li>
+<li><p>Works with lm, glm, lme4, glmmTMB</p></li>
 </ul>
 </div>
 <div id="level-2-structured-subset-selection" class="section level3">
@@ -395,26 +395,27 @@ pairwise correlation:</p>
 <p><strong>corrSelect()</strong> - Returns all maximal subsets (numeric
 data):</p>
 <ul>
-<li>Enumerates all maximal valid subsets satisfying threshold (see
-<code>vignette(&quot;theory&quot;)</code>)</li>
-<li>Provides full metadata (size, avg_corr, max_corr, min_corr)</li>
-<li>Exact or greedy search</li>
+<li><p>Enumerates all maximal valid subsets satisfying threshold (see
+<code>vignette(&quot;theory&quot;)</code>)</p></li>
+<li><p>Provides full metadata (size, avg_corr, max_corr,
+min_corr)</p></li>
+<li><p>Exact or greedy search</p></li>
 </ul>
 <p><strong>assocSelect()</strong> - Returns all maximal subsets
 (mixed-type data):</p>
 <ul>
-<li>Handles numeric, factor, and ordered variables</li>
-<li>Uses appropriate association measures per variable pair</li>
-<li>Exact or greedy search</li>
+<li><p>Handles numeric, factor, and ordered variables</p></li>
+<li><p>Uses appropriate association measures per variable pair</p></li>
+<li><p>Exact or greedy search</p></li>
 </ul>
 </div>
 <div id="level-3-low-level-matrix-interface" class="section level3">
 <h3>Level 3: Low-Level Matrix Interface</h3>
 <p><strong>MatSelect()</strong> - Direct matrix input:</p>
 <ul>
-<li>Accepts precomputed correlation/association matrices</li>
-<li>No data preprocessing</li>
-<li>Useful for repeated analyses</li>
+<li><p>Accepts precomputed correlation/association matrices</p></li>
+<li><p>No data preprocessing</p></li>
+<li><p>Useful for repeated analyses</p></li>
 </ul>
 </div>
 </div>
@@ -442,12 +443,12 @@ subsets</strong>:</p>
 average absolute correlation</strong>. This selection criterion balances
 three goals:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Minimize redundancy</strong>: Lower average correlation
-means more independent variables</li>
-<li><strong>Maximize information</strong>: Prefers diverse variable
-combinations over tightly clustered ones</li>
-<li><strong>Deterministic behavior</strong>: Always returns the same
-result for the same data</li>
+<li><p><strong>Minimize redundancy</strong>: Lower average correlation
+means more independent variables</p></li>
+<li><p><strong>Maximize information</strong>: Prefers diverse variable
+combinations over tightly clustered ones</p></li>
+<li><p><strong>Deterministic behavior</strong>: Always returns the same
+result for the same data</p></li>
 </ol>
 <p>To explore <strong>all</strong> maximal subsets instead of just the
 optimal one, use <code>corrSelect()</code> (see below).</p>
@@ -529,11 +530,11 @@ optimal one, use <code>corrSelect()</code> (see below).</p>
 <span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; Top combinations:</span></span>
 <span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt;   No.  Variables                          Avg    Max    Size</span></span>
 <span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt;   ------------------------------------------------------------</span></span>
-<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt;   [ 1] x1, x2, cat1, ord1                0.103  0.198     4</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt;   [ 1] x1, x2, cat1, ord1                0.082  0.261     4</span></span>
 <span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a></span>
 <span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co"># Verify all pairwise associations are below threshold</span></span>
 <span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Max pairwise association:&quot;</span>, <span class="fu">max</span>(results_mixed<span class="sc">@</span>max_corr), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; Max pairwise association: 0.1981817</span></span></code></pre></div>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; Max pairwise association: 0.2613954</span></span></code></pre></div>
 </div>
 </div>
 <div id="protecting-variables" class="section level2">
@@ -782,8 +783,8 @@ model.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Returns</strong>: <code>CorrCombo</code> S4 object with
-slots: <code>subset_list</code>, <code>avg_corr</code>,
+<p><strong>Returns</strong>: <code>CorrCombo</code> object with
+properties: <code>subset_list</code>, <code>avg_corr</code>,
 <code>min_corr</code>, <code>max_corr</code>.</p>
 </div>
 <div id="assocselect" class="section level3">
@@ -837,7 +838,7 @@ etc.</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Returns</strong>: <code>CorrCombo</code> S4 object.</p>
+<p><strong>Returns</strong>: <code>CorrCombo</code> object.</p>
 </div>
 <div id="matselect" class="section level3">
 <h3>MatSelect()</h3>
@@ -875,7 +876,7 @@ matrices.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Returns</strong>: <code>CorrCombo</code> S4 object.</p>
+<p><strong>Returns</strong>: <code>CorrCombo</code> object.</p>
 </div>
 <div id="corrsubset" class="section level3">
 <h3>corrSubset()</h3>
@@ -925,35 +926,45 @@ variables.</p>
 <div id="troubleshooting" class="section level2">
 <h2>Troubleshooting</h2>
 <p><strong>“No valid subsets found” error</strong> - Threshold too
-strict: all variable pairs exceed it - Solution: Increase threshold or
-use <code>force_in</code> to keep at least one variable</p>
+strict: all variable pairs exceed it</p>
+<ul>
+<li>Solution: Increase threshold or use <code>force_in</code> to keep at
+least one variable</li>
+</ul>
 <p><strong>VIF computation fails in modelPrune()</strong> - Perfect
-multicollinearity (R² = 1) present - Solution: Use
-<code>corrPrune(threshold = 0.99)</code> first to remove
-near-duplicates</p>
+multicollinearity (R² = 1) present</p>
+<ul>
+<li>Solution: Use <code>corrPrune(threshold = 0.99)</code> first to
+remove near-duplicates</li>
+</ul>
 <p><strong>Forced variables conflict</strong> - Variables in
-<code>force_in</code> are too highly correlated with each other -
-Solution: Increase threshold or reduce <code>force_in</code> set</p>
+<code>force_in</code> are too highly correlated with each other</p>
+<ul>
+<li>Solution: Increase threshold or reduce <code>force_in</code>
+set</li>
+</ul>
 <p><strong>Slow performance with many variables</strong> - Exact mode is
-exponential for large p - Solution: Use <code>mode = &quot;greedy&quot;</code> for
-p &gt; 25</p>
+exponential for large p</p>
+<ul>
+<li>Solution: Use <code>mode = &quot;greedy&quot;</code> for p &gt; 25</li>
+</ul>
 <p>For comprehensive troubleshooting with code examples, see
 <code>vignette(&quot;advanced&quot;)</code>, Section 5.</p>
 </div>
 <div id="see-also" class="section level2">
 <h2>See Also</h2>
 <ul>
-<li><code>vignette(&quot;workflows&quot;)</code> - Complete real-world workflows
-(ecological, survey, genomic, mixed models)</li>
-<li><code>vignette(&quot;advanced&quot;)</code> - Algorithmic control and custom
-engines</li>
-<li><code>vignette(&quot;comparison&quot;)</code> - Comparison with caret, Boruta,
-glmnet</li>
-<li><code>vignette(&quot;theory&quot;)</code> - Theoretical foundations and
-formulation</li>
-<li><code>?corrPrune</code>, <code>?modelPrune</code>,
+<li><p><code>vignette(&quot;workflows&quot;)</code> - Complete real-world
+workflows (ecological, survey, genomic, mixed models)</p></li>
+<li><p><code>vignette(&quot;advanced&quot;)</code> - Algorithmic control and
+custom engines</p></li>
+<li><p><code>vignette(&quot;comparison&quot;)</code> - Comparison with caret,
+Boruta, glmnet</p></li>
+<li><p><code>vignette(&quot;theory&quot;)</code> - Theoretical foundations and
+formulation</p></li>
+<li><p><code>?corrPrune</code>, <code>?modelPrune</code>,
 <code>?corrSelect</code>, <code>?assocSelect</code>,
-<code>?MatSelect</code></li>
+<code>?MatSelect</code></p></li>
 </ul>
 </div>
 <div id="session-info" class="section level2">
@@ -967,51 +978,45 @@ formulation</li>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
 <span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=en_US.UTF-8  LC_CTYPE=en_US.UTF-8    LC_MONETARY=en_US.UTF-8</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C            LC_TIME=en_US.UTF-8    </span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
 <span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; [1] microbenchmark_1.5.0 corrselect_3.2.1    </span></span>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; [1] car_3.1-3            carData_3.0-5        microbenchmark_1.5.0</span></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; [4] corrselect_3.1.0    </span></span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt;  [1] shape_1.4.6.1        gtable_0.3.6         xfun_0.53           </span></span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt;  [4] bslib_0.9.0          ggplot2_4.0.0        recipes_1.3.1       </span></span>
-<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt;  [7] lattice_0.22-7       vctrs_0.6.5          tools_4.5.2         </span></span>
-<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt; [10] generics_0.1.4       stats4_4.5.2         parallel_4.5.2      </span></span>
-<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt; [13] tibble_3.3.0         pkgconfig_2.0.3      ModelMetrics_1.2.2.2</span></span>
-<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; [16] Matrix_1.7-4         data.table_1.18.0    RColorBrewer_1.1-3  </span></span>
-<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; [19] S7_0.2.0             lifecycle_1.0.4      compiler_4.5.2      </span></span>
-<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt; [22] farver_2.1.2         stringr_1.5.2        textshaping_1.0.3   </span></span>
-<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a><span class="co">#&gt; [25] codetools_0.2-20     Boruta_9.0.0         htmltools_0.5.8.1   </span></span>
-<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a><span class="co">#&gt; [28] class_7.3-23         sass_0.4.10          glmnet_4.1-10       </span></span>
-<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a><span class="co">#&gt; [31] yaml_2.3.10          Formula_1.2-5        prodlim_2025.04.28  </span></span>
-<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; [34] pillar_1.11.1        jquerylib_0.1.4      MASS_7.3-65         </span></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; [37] cachem_1.1.0         gower_1.0.2          iterators_1.0.14    </span></span>
-<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; [40] abind_1.4-8          rpart_4.1.24         foreach_1.5.2       </span></span>
-<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; [43] nlme_3.1-168         parallelly_1.45.1    lava_1.8.2          </span></span>
-<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; [46] tidyselect_1.2.1     digest_0.6.37        stringi_1.8.7       </span></span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; [49] future_1.67.0        dplyr_1.1.4          reshape2_1.4.4      </span></span>
-<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; [52] purrr_1.2.0          listenv_0.9.1        splines_4.5.2       </span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; [55] fastmap_1.2.0        grid_4.5.2           cli_3.6.5           </span></span>
-<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; [58] magrittr_2.0.4       survival_3.8-3       future.apply_1.20.0 </span></span>
-<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; [61] withr_3.0.2          scales_1.4.0         lubridate_1.9.4     </span></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; [64] timechange_0.3.0     rmarkdown_2.30       globals_0.18.0      </span></span>
-<span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a><span class="co">#&gt; [67] nnet_7.3-20          timeDate_4051.111    ranger_0.17.0       </span></span>
-<span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="co">#&gt; [70] evaluate_1.0.5       knitr_1.50           hardhat_1.4.2       </span></span>
-<span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a><span class="co">#&gt; [73] caret_7.0-1          rlang_1.1.6          Rcpp_1.1.0          </span></span>
-<span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a><span class="co">#&gt; [76] glue_1.8.0           pROC_1.19.0.1        ipred_0.9-15        </span></span>
-<span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a><span class="co">#&gt; [79] svglite_2.2.2        jsonlite_2.0.0       R6_2.6.1            </span></span>
-<span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a><span class="co">#&gt; [82] plyr_1.8.9           systemfonts_1.3.1</span></span></code></pre></div>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;  [1] gtable_0.3.6         xfun_0.55            bslib_0.9.0         </span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt;  [4] ggplot2_4.0.1        recipes_1.3.1        lattice_0.22-7      </span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt;  [7] vctrs_0.7.1          tools_4.5.2          generics_0.1.4      </span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; [10] stats4_4.5.2         parallel_4.5.2       tibble_3.3.1        </span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; [13] pkgconfig_2.0.3      ModelMetrics_1.2.2.2 Matrix_1.7-4        </span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; [16] data.table_1.18.0    RColorBrewer_1.1-3   S7_0.2.1            </span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; [19] lifecycle_1.0.5      compiler_4.5.2       farver_2.1.2        </span></span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt; [22] stringr_1.6.0        textshaping_1.0.4    codetools_0.2-20    </span></span>
+<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt; [25] htmltools_0.5.9      class_7.3-23         sass_0.4.10         </span></span>
+<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; [28] yaml_2.3.12          prodlim_2025.04.28   pillar_1.11.1       </span></span>
+<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; [31] jquerylib_0.1.4      MASS_7.3-65          cachem_1.1.0        </span></span>
+<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt; [34] gower_1.0.2          iterators_1.0.14     rpart_4.1.24        </span></span>
+<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a><span class="co">#&gt; [37] foreach_1.5.2        nlme_3.1-168         parallelly_1.46.1   </span></span>
+<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a><span class="co">#&gt; [40] lava_1.8.2           tidyselect_1.2.1     digest_0.6.39       </span></span>
+<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a><span class="co">#&gt; [43] stringi_1.8.7        future_1.68.0        dplyr_1.2.0         </span></span>
+<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; [46] reshape2_1.4.5       purrr_1.2.0          listenv_0.10.0      </span></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; [49] splines_4.5.2        fastmap_1.2.0        grid_4.5.2          </span></span>
+<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; [52] cli_3.6.5            magrittr_2.0.4       survival_3.8-3      </span></span>
+<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; [55] future.apply_1.20.1  withr_3.0.2          scales_1.4.0        </span></span>
+<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; [58] lubridate_1.9.4      timechange_0.3.0     rmarkdown_2.30      </span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; [61] globals_0.18.0       otel_0.2.0           nnet_7.3-20         </span></span>
+<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; [64] timeDate_4051.111    evaluate_1.0.5       knitr_1.51          </span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; [67] hardhat_1.4.2        caret_7.0-1          rlang_1.1.7         </span></span>
+<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; [70] Rcpp_1.1.1           glue_1.8.0           pROC_1.19.0.1       </span></span>
+<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; [73] ipred_0.9-15         svglite_2.2.2        jsonlite_2.0.0      </span></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; [76] R6_2.6.1             plyr_1.8.9           systemfonts_1.3.1</span></span></code></pre></div>
 </div>
 
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Gilles Colling" />
 
-<meta name="date" content="2026-01-08" />
+<meta name="date" content="2026-03-23" />
 
 <title>Comparison with Alternatives</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Comparison with Alternatives</h1>
 <h4 class="author">Gilles Colling</h4>
-<h4 class="date">2026-01-08</h4>
+<h4 class="date">2026-03-23</h4>
 
 
 
@@ -351,12 +351,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 established methods for multicollinearity management and variable
 selection:</p>
 <ol style="list-style-type: decimal">
-<li><strong>caret::findCorrelation()</strong> - Greedy correlation-based
-pruning</li>
-<li><strong>Boruta</strong> - Random forest permutation importance</li>
-<li><strong>glmnet</strong> - L1/L2 regularization (LASSO/Ridge)</li>
-<li><strong>Manual VIF removal</strong> - Iterative variance inflation
-factor thresholding</li>
+<li><p><strong>caret::findCorrelation()</strong> - Greedy
+correlation-based pruning</p></li>
+<li><p><strong>Boruta</strong> - Random forest permutation
+importance</p></li>
+<li><p><strong>glmnet</strong> - L1/L2 regularization
+(LASSO/Ridge)</p></li>
+<li><p><strong>Manual VIF removal</strong> - Iterative variance
+inflation factor thresholding</p></li>
 </ol>
 <p>Each comparison examines algorithmic differences, performance
 characteristics, and appropriate use cases. Evaluations use the
@@ -411,10 +413,10 @@ characteristics, and appropriate use cases. Evaluations use the
 <p>caret’s <code>findCorrelation()</code> applies greedy iterative
 removal:</p>
 <ol style="list-style-type: decimal">
-<li>Identify pair with maximum <span class="math inline">\(|r_{ij}|\)</span></li>
-<li>Remove variable with larger mean absolute correlation</li>
-<li>Repeat until all <span class="math inline">\(|r_{ij}| &lt;
-\tau\)</span></li>
+<li><p>Identify pair with maximum <span class="math inline">\(|r_{ij}|\)</span></p></li>
+<li><p>Remove variable with larger mean absolute correlation</p></li>
+<li><p>Repeat until all <span class="math inline">\(|r_{ij}| &lt;
+\tau\)</span></p></li>
 </ol>
 <p>Non-deterministic: results depend on internal ordering. Typically
 removes more variables than graph-theoretic methods.</p>
@@ -571,11 +573,11 @@ retention, forced variable constraints, mixed data types.</p>
 <h3>Method</h3>
 <p>Boruta tests variable importance via random forest permutation:</p>
 <ol style="list-style-type: decimal">
-<li>Create shadow features (permuted copies)</li>
-<li>Fit random forest on original + shadow features</li>
-<li>Test: <span class="math inline">\(\text{importance}(X_i) &gt;
-\max(\text{importance}(\text{shadow}))\)</span></li>
-<li>Iteratively confirm/reject until convergence</li>
+<li><p>Create shadow features (permuted copies)</p></li>
+<li><p>Fit random forest on original + shadow features</p></li>
+<li><p>Test: <span class="math inline">\(\text{importance}(X_i) &gt;
+\max(\text{importance}(\text{shadow}))\)</span></p></li>
+<li><p>Iteratively confirm/reject until convergence</p></li>
 </ol>
 <p><strong>Orthogonal objective</strong>: Boruta selects predictive
 variables (supervised). corrselect removes redundant variables
@@ -601,14 +603,7 @@ variables (supervised). corrselect removes redundant variables
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">  Confirmed predictors:&quot;</span>, <span class="fu">length</span>(important_vars), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot; &quot;</span>, <span class="fu">paste</span>(important_vars, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>}</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; Boruta variable importance screening:</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; Tentative Confirmed  Rejected </span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt;         0         6        13 </span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt;   Confirmed predictors: 6 </span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt;   BIO12, BIO13, BIO14, BIO15, BIO16, BIO17</span></span></code></pre></div>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>}</span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># corrselect: &quot;Which variables are redundant?&quot;</span></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>corrselect_result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(predictors, <span class="at">threshold =</span> <span class="fl">0.7</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
@@ -704,12 +699,12 @@ requiring both redundancy removal and importance testing.</p>
 \|\beta\|_1 + (1-\alpha) \|\beta\|_2^2\right]
 \]</span></p>
 <ul>
-<li><span class="math inline">\(\alpha = 1\)</span>: LASSO (L1 penalty,
-sparse <span class="math inline">\(\beta\)</span>)</li>
-<li><span class="math inline">\(\alpha = 0\)</span>: Ridge (L2 penalty,
-shrinkage)</li>
-<li><span class="math inline">\(\lambda\)</span>: Cross-validation
-selected</li>
+<li><p><span class="math inline">\(\alpha = 1\)</span>: LASSO (L1
+penalty, sparse <span class="math inline">\(\beta\)</span>)</p></li>
+<li><p><span class="math inline">\(\alpha = 0\)</span>: Ridge (L2
+penalty, shrinkage)</p></li>
+<li><p><span class="math inline">\(\lambda\)</span>: Cross-validation
+selected</p></li>
 </ul>
 <p><strong>Difference</strong>: glmnet performs soft selection
 (shrinkage) optimizing prediction. corrselect performs hard selection
@@ -732,10 +727,7 @@ selected</li>
 <span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;glmnet (LASSO, λ = lambda.1se):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  Variables retained:&quot;</span>, <span class="fu">length</span>(selected_lasso), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot; &quot;</span>, <span class="fu">paste</span>(selected_lasso, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>}</span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; glmnet (LASSO, λ = lambda.1se):</span></span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;   Variables retained: 4 </span></span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;   BIO1, BIO12, BIO15, BIO16</span></span></code></pre></div>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>}</span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">&quot;glmnet&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="co"># Compare model performance</span></span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  model_glmnet <span class="ot">&lt;-</span> <span class="fu">lm</span>(species_richness <span class="sc">~</span> .,</span>
@@ -749,11 +741,7 @@ selected</li>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>      <span class="st">&quot;with&quot;</span>, <span class="fu">length</span>(selected_lasso), <span class="st">&quot;predictors</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  corrselect: R² =&quot;</span>, <span class="fu">round</span>(<span class="fu">summary</span>(model_corrselect)<span class="sc">$</span>r.squared, <span class="dv">3</span>),</span>
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>      <span class="st">&quot;with&quot;</span>, <span class="fu">ncol</span>(result_corrselect), <span class="st">&quot;predictors</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>}</span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; Model comparison (OLS on selected variables):</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt;   glmnet:     R² = 0.983 with 4 predictors</span></span>
-<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt;   corrselect: R² = 0.909 with 12 predictors</span></span></code></pre></div>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>}</span></code></pre></div>
 <p>glmnet selects fewer variables (<span class="math inline">\(|S_{\text{glmnet}}| \le
 |S_{\text{corrselect}}|\)</span>) optimizing prediction. corrselect
 maximizes retention under correlation constraint.</p>
@@ -781,7 +769,6 @@ maximizes retention under correlation constraint.</p>
 <span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>          <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.7</span>),</span>
 <span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>          <span class="at">cex.names =</span> <span class="fl">0.7</span>)</span>
 <span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>}</span></code></pre></div>
-<p><img role="img" aria-label="Side-by-side barplots comparing coefficient magnitudes between glmnet (left panel, salmon bars) and corrselect (right panel, blue bars). Left panel shows glmnet&#39;s shrunk coefficients affected by L1 penalty, biased toward zero. Right panel shows corrselect&#39;s unbiased OLS coefficients on pruned variables with preserved effect sizes. The comparison illustrates the tradeoff between prediction-focused shrinkage and interpretation-focused hard selection." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzcyMC4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNzIwLjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3M01qQXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNzIwLjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHczTWpBdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE1DNHdNSHd6TmpBdU1EQjhNQzR3TUh3ek5qQXVNREE9Jz4KICAgIDxyZWN0IHg9JzAuMDAnIHk9JzAuMDAnIHdpZHRoPSczNjAuMDAnIGhlaWdodD0nMzYwLjAwJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01Id3pOakF1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPHJlY3QgeD0nNjcuNzMnIHk9JzQzLjIwJyB3aWR0aD0nNTUuMDcnIGhlaWdodD0nMTk5LjYwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkE4MDcyOycgLz4KPHJlY3QgeD0nMTMzLjgyJyB5PSc0My42OScgd2lkdGg9JzU1LjA3JyBoZWlnaHQ9JzE5OS4xMScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0ZBODA3MjsnIC8+CjxyZWN0IHg9JzE5OS45MScgeT0nMTE3LjM1JyB3aWR0aD0nNTUuMDcnIGhlaWdodD0nMTI1LjQ2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkE4MDcyOycgLz4KPHJlY3QgeD0nMjY1Ljk5JyB5PScyNDAuOTgnIHdpZHRoPSc1NS4wNycgaGVpZ2h0PScxLjgyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkE4MDcyOycgLz4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNQzR3TUh3M01qQXVNREI4TUM0d01Id3pOakF1TURBPSknPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg5OC4yNywyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTkuMTJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxNjQuMzYsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjgwcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTI8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDIzMC40NSwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xNTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMjk2LjUzLDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy44MHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzE2PC90ZXh0Pgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHd6TmpBdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+Cjx0ZXh0IHg9JzE5NC40MCcgeT0nMjYuNzUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5MS45NHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPmdsbW5ldDogU2hydW5rIENvZWZmaWNpZW50czwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMTEuNTIsMTQ0LjAwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxMzkuNjFweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5BYnNvbHV0ZSBDb2VmZmljaWVudCBWYWx1ZTwvdGV4dD4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNQzR3TUh3M01qQXVNREI4TUM0d01Id3pOakF1TURBPSknPgo8bGluZSB4MT0nNTcuNjAnIHkxPScyNDIuODAnIHgyPSc1Ny42MCcgeTI9JzcwLjk0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMjQyLjgwJyB4Mj0nNTAuNDAnIHkyPScyNDIuODAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTcuNjAnIHkxPScyMDguNDMnIHgyPSc1MC40MCcgeTI9JzIwOC40Mycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1Ny42MCcgeTE9JzE3NC4wNicgeDI9JzUwLjQwJyB5Mj0nMTc0LjA2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMTM5LjY5JyB4Mj0nNTAuNDAnIHkyPScxMzkuNjknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTcuNjAnIHkxPScxMDUuMzInIHgyPSc1MC40MCcgeTI9JzEwNS4zMicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1Ny42MCcgeTE9JzcwLjk0JyB4Mj0nNTAuNDAnIHkyPSc3MC45NCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzQzLjIwJyB5PScyNDcuMTAnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjAwPC90ZXh0Pgo8dGV4dCB4PSc0My4yMCcgeT0nMjEyLjczJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4wNTwvdGV4dD4KPHRleHQgeD0nNDMuMjAnIHk9JzE3OC4zNicgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy4zNHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuMTA8L3RleHQ+Cjx0ZXh0IHg9JzQzLjIwJyB5PScxNDMuOTknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjE1PC90ZXh0Pgo8dGV4dCB4PSc0My4yMCcgeT0nMTA5LjYxJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4yMDwvdGV4dD4KPHRleHQgeD0nNDMuMjAnIHk9Jzc1LjI0JyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4yNTwvdGV4dD4KPC9nPgo8ZGVmcz4KICA8Y2xpcFBhdGggaWQ9J2NwTXpZd0xqQXdmRGN5TUM0d01Id3dMakF3ZkRNMk1DNHdNQT09Jz4KICAgIDxyZWN0IHg9JzM2MC4wMCcgeT0nMC4wMCcgd2lkdGg9JzM2MC4wMCcgaGVpZ2h0PSczNjAuMDAnIC8+CiAgPC9jbGlwUGF0aD4KPC9kZWZzPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNell3TGpBd2ZEY3lNQzR3TUh3d0xqQXdmRE0yTUM0d01BPT0pJz4KPHJlY3QgeD0nNDI3LjczJyB5PSc0My4yMCcgd2lkdGg9JzE3Ljg0JyBoZWlnaHQ9JzE5OS42MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNDQ5LjE0JyB5PScxMjUuNjUnIHdpZHRoPScxNy44NCcgaGVpZ2h0PScxMTcuMTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQ3MC41NScgeT0nMTI3LjcyJyB3aWR0aD0nMTcuODQnIGhlaWdodD0nMTE1LjA5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PSc0OTEuOTYnIHk9JzE0MS41MScgd2lkdGg9JzE3Ljg0JyBoZWlnaHQ9JzEwMS4yOScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNTEzLjM3JyB5PScxNjUuOTUnIHdpZHRoPScxNy44NCcgaGVpZ2h0PSc3Ni44NScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNTM0Ljc4JyB5PScxNjkuNTcnIHdpZHRoPScxNy44NCcgaGVpZ2h0PSc3My4yMycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNTU2LjE4JyB5PScyMTkuODEnIHdpZHRoPScxNy44NCcgaGVpZ2h0PScyMi45OScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNTc3LjU5JyB5PScyMjYuNTcnIHdpZHRoPScxNy44NCcgaGVpZ2h0PScxNi4yNCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNTk5LjAwJyB5PScyMzcuNzUnIHdpZHRoPScxNy44NCcgaGVpZ2h0PSc1LjA2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PSc2MjAuNDEnIHk9JzIzOC44Nicgd2lkdGg9JzE3Ljg0JyBoZWlnaHQ9JzMuOTQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzY0MS44MicgeT0nMjQxLjIwJyB3aWR0aD0nMTcuODQnIGhlaWdodD0nMS42MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNjYzLjIzJyB5PScyNDIuNjYnIHdpZHRoPScxNy44NCcgaGVpZ2h0PScwLjE0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHczTWpBdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQzOS42NiwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTkuMTJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU85PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0NjEuMDYsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5LjEycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDgyLjQ3LDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy4xN3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzExPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg1MDMuODgsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE5LjEycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPNjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNTI1LjI5LDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxOS4xMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzM8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDU0Ni43MCwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xMjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNTY4LjExLDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy44MHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzE0PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg1ODkuNTIsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjgwcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTY8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDYxMC45MiwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xNzwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNjMyLjMzLDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDguNDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy44MHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzEzPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg2NTMuNzQsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogOC40MHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjgwcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTk8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDY3NS4xNSwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA4LjQwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjMuODBweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xODwvdGV4dD4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNell3TGpBd2ZEY3lNQzR3TUh3d0xqQXdmRE0yTUM0d01BPT0pJz4KPHRleHQgeD0nNTU0LjQwJyB5PScyNi43NScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTQuNDBweDsgZm9udC13ZWlnaHQ6IGJvbGQ7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjYyLjMxcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+Y29ycnNlbGVjdDogVW5iaWFzZWQgT0xTIENvZWZmaWNpZW50czwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMzcxLjUyLDE0NC4wMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTM5LjYxcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QWJzb2x1dGUgQ29lZmZpY2llbnQgVmFsdWU8L3RleHQ+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01IdzNNakF1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPGxpbmUgeDE9JzQxNy42MCcgeTE9JzI0Mi44MCcgeDI9JzQxNy42MCcgeTI9JzU5Ljg1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzQxNy42MCcgeTE9JzI0Mi44MCcgeDI9JzQxMC40MCcgeTI9JzI0Mi44MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc0MTcuNjAnIHkxPScyMTYuNjcnIHgyPSc0MTAuNDAnIHkyPScyMTYuNjcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNDE3LjYwJyB5MT0nMTkwLjUzJyB4Mj0nNDEwLjQwJyB5Mj0nMTkwLjUzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzQxNy42MCcgeTE9JzE2NC4zOScgeDI9JzQxMC40MCcgeTI9JzE2NC4zOScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc0MTcuNjAnIHkxPScxMzguMjYnIHgyPSc0MTAuNDAnIHkyPScxMzguMjYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNDE3LjYwJyB5MT0nMTEyLjEyJyB4Mj0nNDEwLjQwJyB5Mj0nMTEyLjEyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzQxNy42MCcgeTE9Jzg1Ljk4JyB4Mj0nNDEwLjQwJyB5Mj0nODUuOTgnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNDE3LjYwJyB5MT0nNTkuODUnIHgyPSc0MTAuNDAnIHkyPSc1OS44NScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzQwMy4yMCcgeT0nMjQ3LjEwJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4wPC90ZXh0Pgo8dGV4dCB4PSc0MDMuMjAnIHk9JzIyMC45NycgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuMTwvdGV4dD4KPHRleHQgeD0nNDAzLjIwJyB5PScxOTQuODMnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjI8L3RleHQ+Cjx0ZXh0IHg9JzQwMy4yMCcgeT0nMTY4LjY5JyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MC4zPC90ZXh0Pgo8dGV4dCB4PSc0MDMuMjAnIHk9JzE0Mi41NScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuNDwvdGV4dD4KPHRleHQgeD0nNDAzLjIwJyB5PScxMTYuNDInIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjU8L3RleHQ+Cjx0ZXh0IHg9JzQwMy4yMCcgeT0nOTAuMjgnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjY8L3RleHQ+Cjx0ZXh0IHg9JzQwMy4yMCcgeT0nNjQuMTQnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4wLjc8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Side-by-side barplots comparing coefficient magnitudes between glmnet (left panel, salmon bars) and corrselect (right panel, blue bars). Left panel shows glmnet&#39;s shrunk coefficients affected by L1 penalty, biased toward zero. Right panel shows corrselect&#39;s unbiased OLS coefficients on pruned variables with preserved effect sizes. The comparison illustrates the tradeoff between prediction-focused shrinkage and interpretation-focused hard selection." /></p>
 <p>Left: L1 penalty shrinks coefficients toward zero (biased). Right:
 OLS on pruned variables (unbiased). glmnet optimizes prediction with
 shrinkage. corrselect preserves effect sizes.</p>
@@ -858,9 +845,9 @@ followed by sparse prediction (glmnet).</p>
 regressing <span class="math inline">\(X_j\)</span> on remaining
 predictors. Thresholds:</p>
 <ul>
-<li>VIF &lt; 5: Low collinearity</li>
-<li>VIF &lt; 10: Moderate (acceptable)</li>
-<li>VIF ≥ 10: High (problematic)</li>
+<li><p>VIF &lt; 5: Low collinearity</p></li>
+<li><p>VIF &lt; 10: Moderate (acceptable)</p></li>
+<li><p>VIF ≥ 10: High (problematic)</p></li>
 </ul>
 <p>Manual approach: iteratively remove max(VIF) until all VIF &lt;
 threshold.</p>
@@ -907,15 +894,7 @@ threshold.</p>
 <span id="cb12-38"><a href="#cb12-38" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>manual_result<span class="sc">$</span>converged) {</span>
 <span id="cb12-39"><a href="#cb12-39" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;(Stopped at max_iter = 10; VIF threshold not yet reached)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb12-40"><a href="#cb12-40" tabindex="-1"></a>  }</span>
-<span id="cb12-41"><a href="#cb12-41" tabindex="-1"></a>}</span>
-<span id="cb12-42"><a href="#cb12-42" tabindex="-1"></a><span class="co">#&gt; Manual VIF removal (iterative):</span></span>
-<span id="cb12-43"><a href="#cb12-43" tabindex="-1"></a><span class="co">#&gt; Loading required package: car</span></span>
-<span id="cb12-44"><a href="#cb12-44" tabindex="-1"></a><span class="co">#&gt; Loading required package: carData</span></span>
-<span id="cb12-45"><a href="#cb12-45" tabindex="-1"></a><span class="co">#&gt; Iteration 1 : Removing BIO2 (VIF = 5.83 )</span></span>
-<span id="cb12-46"><a href="#cb12-46" tabindex="-1"></a><span class="co">#&gt; Iteration 2 : Removing BIO7 (VIF = 5.66 )</span></span>
-<span id="cb12-47"><a href="#cb12-47" tabindex="-1"></a><span class="co">#&gt; Iteration 3 : Removing BIO5 (VIF = 5.03 )</span></span>
-<span id="cb12-48"><a href="#cb12-48" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb12-49"><a href="#cb12-49" tabindex="-1"></a><span class="co">#&gt; Variables kept: 16</span></span></code></pre></div>
+<span id="cb12-41"><a href="#cb12-41" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 </div>
 <div id="modelprune-comparison" class="section level2">
@@ -936,13 +915,7 @@ threshold.</p>
 <span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">&quot;car&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
 <span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Final VIF values:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">round</span>(car<span class="sc">::</span><span class="fu">vif</span>(final_model), <span class="dv">2</span>))</span>
-<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>}</span>
-<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; Final VIF values:</span></span>
-<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt;  BIO1  BIO3  BIO4  BIO6  BIO8  BIO9 BIO10 BIO11 BIO12 BIO13 BIO14 BIO15 BIO16 </span></span>
-<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="co">#&gt;  2.09  3.68  3.81  2.57  4.03  4.27  4.96  3.06  1.76  2.51  3.11  3.01  2.43 </span></span>
-<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#&gt; BIO17 BIO18 BIO19 </span></span>
-<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="co">#&gt;  2.88  2.82  1.70</span></span></code></pre></div>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="visual-vif-comparison" class="section level2">
 <h2>Visual: VIF Comparison</h2>
@@ -985,7 +958,6 @@ threshold.</p>
 <span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a>         <span class="at">bty    =</span> <span class="st">&quot;o&quot;</span>,</span>
 <span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a>         <span class="at">bg =</span> <span class="st">&quot;white&quot;</span>)</span>
 <span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a>}</span></code></pre></div>
-<p><img role="img" aria-label="Side-by-side barplot showing VIF values before (red bars) and after (blue bars) applying modelPrune() for the top 15 variables ordered by initial VIF. Black horizontal dashed line marks the VIF limit of 5. Before pruning, many variables show high VIF values indicating severe multicollinearity. After modelPrune(), all retained variables have VIF below the threshold, and high-VIF variables are completely removed (shown as red-only bars), demonstrating automated and effective multicollinearity reduction." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjxyZWN0IHg9Jzc1LjczJyB5PSc1Ny42MCcgd2lkdGg9JzEwLjMwJyBoZWlnaHQ9JzE4NS4zNScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nODYuMDQnIHk9JzI0Mi45NScgd2lkdGg9JzEwLjMwJyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzEwNi42NCcgeT0nNjAuNTAnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PScxODIuNDUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzExNi45NScgeT0nMjQyLjk1JyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMC4wMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nMTM3LjU1JyB5PSc2Mi44Nycgd2lkdGg9JzEwLjMwJyBoZWlnaHQ9JzE4MC4wOCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nMTQ3Ljg1JyB5PScxMTQuNzAnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PScxMjguMjUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzE2OC40NicgeT0nNzcuODknIHdpZHRoPScxMC4zMCcgaGVpZ2h0PScxNjUuMDYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzE3OC43NicgeT0nMTI2LjEyJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMTE2LjgzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PScxOTkuMzcnIHk9Jzc4LjIyJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMTY0LjczJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PScyMDkuNjcnIHk9JzI0Mi45NScgd2lkdGg9JzEwLjMwJyBoZWlnaHQ9JzAuMDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzIzMC4yOCcgeT0nODEuMDUnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PScxNjEuODknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzI0MC41OCcgeT0nMTIxLjgzJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMTIxLjEyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PScyNjEuMTknIHk9Jzg0LjAxJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMTU4Ljk0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjQ0MzMzMzOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PScyNzEuNDknIHk9Jzg1LjM3JyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMTU3LjU4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PScyOTIuMTAnIHk9JzEwMC44Nicgd2lkdGg9JzEwLjMwJyBoZWlnaHQ9JzE0Mi4wOCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nMzAyLjQwJyB5PScxNjEuMjAnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PSc4MS43NScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nMzIzLjAxJyB5PScxMDMuODUnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PScxMzkuMTAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzMzMy4zMScgeT0nMTA3LjMyJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nMTM1LjYyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PSczNTMuOTInIHk9JzEzNC4xMycgd2lkdGg9JzEwLjMwJyBoZWlnaHQ9JzEwOC44Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nMzY0LjIyJyB5PScxNzYuNjQnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PSc2Ni4zMScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogIzMzODBDQzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nMzg0LjgyJyB5PScxNDEuNzQnIHdpZHRoPScxMC4zMCcgaGVpZ2h0PScxMDEuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzM5NS4xMycgeT0nMTQ0LjE3JyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTguNzcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQxNS43MycgeT0nMTQzLjIzJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTkuNzInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQyNi4wNCcgeT0nMTUzLjIzJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nODkuNzInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQ0Ni42NCcgeT0nMTQ0LjAwJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTguOTUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQ1Ni45NScgeT0nMTQ1LjYzJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTcuMzInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQ3Ny41NScgeT0nMTQ2Ljc2JyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTYuMTknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzQ4Ny44NScgeT0nMTQ3LjIwJyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTUuNzQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzUwOC40NicgeT0nMTQ3LjE0JyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTUuODAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICNDQzMzMzM7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+CjxyZWN0IHg9JzUxOC43NicgeT0nMTUxLjU0JyB3aWR0aD0nMTAuMzAnIGhlaWdodD0nOTEuNDEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IGZpbGw6ICMzMzgwQ0M7IGZpbGwtb3BhY2l0eTogMC43MDsnIC8+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDg4LjYxLDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDcuMjBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi4zOXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzI8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDExOS41MiwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA3LjIwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuMzlweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU83PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxNTAuNDMsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogNy4yMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjM5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPODwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMTgxLjM0LDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDcuMjBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi4zOXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzM8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDIxMi4yNSwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA3LjIwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuMzlweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU81PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgyNDMuMTYsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogNy4yMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjM5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPNDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMjc0LjA2LDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDcuMjBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4zOXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzEwPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgzMDQuOTcsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogNy4yMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2LjM5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPNjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMzM1Ljg4LDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDcuMjBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi4zOXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzk8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDM2Ni43OSwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA3LjIwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTYuMzlweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgzOTcuNzAsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogNy4yMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjM5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTQ8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQyOC42MSwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA3LjIwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMzlweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xODwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDU5LjUyLDI1OS4yMCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDcuMjBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxOS44NnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkJJTzExPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0OTAuNDMsMjU5LjIwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogNy4yMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjM5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QklPMTU8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDUyMS4zNCwyNTkuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nZW5kJyBzdHlsZT0nZm9udC1zaXplOiA3LjIwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMzlweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5CSU8xNzwvdGV4dD4KPHRleHQgeD0nMzAyLjQwJyB5PSczMy45NScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTQuNDBweDsgZm9udC13ZWlnaHQ6IGJvbGQ7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjM1LjM4cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+VklGIEJlZm9yZSBhbmQgQWZ0ZXIgbW9kZWxQcnVuZSgpPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMS41MiwxNTEuMjApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE4LjY2cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+VklGPC90ZXh0Pgo8bGluZSB4MT0nNTcuNjAnIHkxPScyNDIuOTUnIHgyPSc1Ny42MCcgeTI9Jzg0LjAzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMjQyLjk1JyB4Mj0nNTAuNDAnIHkyPScyNDIuOTUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTcuNjAnIHkxPScyMTEuMTYnIHgyPSc1MC40MCcgeTI9JzIxMS4xNicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1Ny42MCcgeTE9JzE3OS4zOCcgeDI9JzUwLjQwJyB5Mj0nMTc5LjM4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nMTQ3LjYwJyB4Mj0nNTAuNDAnIHkyPScxNDcuNjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTcuNjAnIHkxPScxMTUuODEnIHgyPSc1MC40MCcgeTI9JzExNS44MScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1Ny42MCcgeTE9Jzg0LjAzJyB4Mj0nNTAuNDAnIHkyPSc4NC4wMycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzQzLjIwJyB5PScyNDcuMjQnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjA8L3RleHQ+Cjx0ZXh0IHg9JzQzLjIwJyB5PScyMTUuNDYnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjE8L3RleHQ+Cjx0ZXh0IHg9JzQzLjIwJyB5PScxODMuNjgnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjI8L3RleHQ+Cjx0ZXh0IHg9JzQzLjIwJyB5PScxNTEuODknIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjM8L3RleHQ+Cjx0ZXh0IHg9JzQzLjIwJyB5PScxMjAuMTEnIHRleHQtYW5jaG9yPSdlbmQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjQ8L3RleHQ+Cjx0ZXh0IHg9JzQzLjIwJyB5PSc4OC4zMycgdGV4dC1hbmNob3I9J2VuZCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NTwvdGV4dD4KPC9nPgo8ZGVmcz4KICA8Y2xpcFBhdGggaWQ9J2NwTlRjdU5qQjhOVFEzTGpJd2ZEVTNMall3ZkRJME5DNDRNQT09Jz4KICAgIDxyZWN0IHg9JzU3LjYwJyB5PSc1Ny42MCcgd2lkdGg9JzQ4OS42MCcgaGVpZ2h0PScxODcuMjAnIC8+CiAgPC9jbGlwUGF0aD4KPC9kZWZzPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BOVGN1TmpCOE5UUTNMakl3ZkRVM0xqWXdmREkwTkM0NE1BPT0pJz4KPGxpbmUgeDE9JzU3LjYwJyB5MT0nODQuMDMnIHgyPSc1NDcuMjAnIHkyPSc4NC4wMycgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlLWRhc2hhcnJheTogOC4wMCw4LjAwOycgLz4KPHJlY3QgeD0nNDQ0LjI3JyB5PSc1Ny42MCcgd2lkdGg9JzEwMi45MycgaGVpZ2h0PSc1Ny42MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgZmlsbDogI0ZGRkZGRjsnIC8+CjxyZWN0IHg9JzQ1NS4wNycgeT0nNjguNDAnIHdpZHRoPSc4LjY0JyBoZWlnaHQ9JzcuMjAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogI0ZGRkZGRjsgZmlsbDogI0NDMzMzMzsgZmlsbC1vcGFjaXR5OiAwLjcwOycgLz4KPHJlY3QgeD0nNDU1LjA3JyB5PSc4Mi44MCcgd2lkdGg9JzguNjQnIGhlaWdodD0nNy4yMCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsgc3Ryb2tlOiAjRkZGRkZGOyBmaWxsOiAjMzM4MENDOyBmaWxsLW9wYWNpdHk6IDAuNzA7JyAvPgo8cmVjdCB4PSc0NTUuMDcnIHk9Jzk3LjIwJyB3aWR0aD0nOC42NCcgaGVpZ2h0PSc3LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6IG5vbmU7JyAvPgo8bGluZSB4MT0nNDYzLjcxJyB5MT0nMTAwLjgwJyB4Mj0nNDg1LjMxJyB5Mj0nMTAwLjgwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2UtZGFzaGFycmF5OiA4LjAwLDguMDA7JyAvPgo8dGV4dCB4PSc0OTYuMTEnIHk9Jzc2LjMwJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzM1LjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QmVmb3JlPC90ZXh0Pgo8dGV4dCB4PSc0OTYuMTEnIHk9JzkwLjcwJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI1LjMzcHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+QWZ0ZXI8L3RleHQ+Cjx0ZXh0IHg9JzQ5Ni4xMScgeT0nMTA1LjEwJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzQ1LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+TGltaXQgPSA1PC90ZXh0Pgo8L2c+CjwvZz4KPC9zdmc+Cg==" alt="Side-by-side barplot showing VIF values before (red bars) and after (blue bars) applying modelPrune() for the top 15 variables ordered by initial VIF. Black horizontal dashed line marks the VIF limit of 5. Before pruning, many variables show high VIF values indicating severe multicollinearity. After modelPrune(), all retained variables have VIF below the threshold, and high-VIF variables are completely removed (shown as red-only bars), demonstrating automated and effective multicollinearity reduction." /></p>
 <div id="comparison-3" class="section level3">
 <h3>Comparison</h3>
 <table>
@@ -1093,16 +1065,17 @@ constraints, reproducible documentation.</p>
 <div id="corrselect-distinguishing-features" class="section level3">
 <h3>corrselect Distinguishing Features</h3>
 <ol style="list-style-type: decimal">
-<li><strong>Maximal clique enumeration</strong>: Optimal retention under
-<span class="math inline">\(|r_{ij}| &lt; \tau\)</span> constraint</li>
-<li><strong>Deterministic</strong>: ELS and Bron-Kerbosch algorithms
-guarantee reproducibility</li>
-<li><strong>Flexible</strong>: Forced variables, mixed types,
-greedy/exact modes</li>
-<li><strong>Unbiased estimates</strong>: Hard removal preserves
-coefficient interpretability</li>
-<li><strong>Model-agnostic</strong>: Correlation-based
-preprocessing</li>
+<li><p><strong>Maximal clique enumeration</strong>: Optimal retention
+under <span class="math inline">\(|r_{ij}| &lt; \tau\)</span>
+constraint</p></li>
+<li><p><strong>Deterministic</strong>: ELS and Bron-Kerbosch algorithms
+guarantee reproducibility</p></li>
+<li><p><strong>Flexible</strong>: Forced variables, mixed types,
+greedy/exact modes</p></li>
+<li><p><strong>Unbiased estimates</strong>: Hard removal preserves
+coefficient interpretability</p></li>
+<li><p><strong>Model-agnostic</strong>: Correlation-based
+preprocessing</p></li>
 </ol>
 </div>
 <div id="integrated-workflow" class="section level3">
@@ -1146,14 +1119,14 @@ Sources of Collinearity</em>. Wiley. <a href="https://doi.org/10.1002/0471725153
 <div id="see-also" class="section level2">
 <h2>See Also</h2>
 <ul>
-<li><code>vignette(&quot;quickstart&quot;)</code> - Interface overview and usage
-examples</li>
-<li><code>vignette(&quot;workflows&quot;)</code> - Domain-specific workflows
-(genomics, ecology, surveys)</li>
-<li><code>vignette(&quot;advanced&quot;)</code> - Algorithm selection and
-performance tuning</li>
-<li><code>vignette(&quot;theory&quot;)</code> - Graph-theoretic foundations and
-formal proofs</li>
+<li><p><code>vignette(&quot;quickstart&quot;)</code> - Interface overview and
+usage examples</p></li>
+<li><p><code>vignette(&quot;workflows&quot;)</code> - Domain-specific workflows
+(genomics, ecology, surveys)</p></li>
+<li><p><code>vignette(&quot;advanced&quot;)</code> - Algorithm selection and
+performance tuning</p></li>
+<li><p><code>vignette(&quot;theory&quot;)</code> - Graph-theoretic foundations and
+formal proofs</p></li>
 </ul>
 </div>
 <div id="session-info" class="section level2">
@@ -1167,51 +1140,45 @@ formal proofs</li>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
 <span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=en_US.UTF-8  LC_CTYPE=en_US.UTF-8    LC_MONETARY=en_US.UTF-8</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C            LC_TIME=en_US.UTF-8    </span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
 <span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; [1] microbenchmark_1.5.0 corrselect_3.2.1    </span></span>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; [1] car_3.1-3            carData_3.0-5        microbenchmark_1.5.0</span></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; [4] corrselect_3.1.0    </span></span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt;  [1] shape_1.4.6.1        gtable_0.3.6         xfun_0.53           </span></span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt;  [4] bslib_0.9.0          ggplot2_4.0.0        recipes_1.3.1       </span></span>
-<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt;  [7] lattice_0.22-7       vctrs_0.6.5          tools_4.5.2         </span></span>
-<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt; [10] generics_0.1.4       stats4_4.5.2         parallel_4.5.2      </span></span>
-<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt; [13] tibble_3.3.0         pkgconfig_2.0.3      ModelMetrics_1.2.2.2</span></span>
-<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; [16] Matrix_1.7-4         data.table_1.18.0    RColorBrewer_1.1-3  </span></span>
-<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; [19] S7_0.2.0             lifecycle_1.0.4      compiler_4.5.2      </span></span>
-<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt; [22] farver_2.1.2         stringr_1.5.2        textshaping_1.0.3   </span></span>
-<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a><span class="co">#&gt; [25] codetools_0.2-20     Boruta_9.0.0         htmltools_0.5.8.1   </span></span>
-<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a><span class="co">#&gt; [28] class_7.3-23         sass_0.4.10          glmnet_4.1-10       </span></span>
-<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a><span class="co">#&gt; [31] yaml_2.3.10          Formula_1.2-5        prodlim_2025.04.28  </span></span>
-<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; [34] pillar_1.11.1        jquerylib_0.1.4      MASS_7.3-65         </span></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; [37] cachem_1.1.0         gower_1.0.2          iterators_1.0.14    </span></span>
-<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; [40] abind_1.4-8          rpart_4.1.24         foreach_1.5.2       </span></span>
-<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; [43] nlme_3.1-168         parallelly_1.45.1    lava_1.8.2          </span></span>
-<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; [46] tidyselect_1.2.1     digest_0.6.37        stringi_1.8.7       </span></span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; [49] future_1.67.0        dplyr_1.1.4          reshape2_1.4.4      </span></span>
-<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; [52] purrr_1.2.0          listenv_0.9.1        splines_4.5.2       </span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; [55] fastmap_1.2.0        grid_4.5.2           cli_3.6.5           </span></span>
-<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; [58] magrittr_2.0.4       survival_3.8-3       future.apply_1.20.0 </span></span>
-<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; [61] withr_3.0.2          scales_1.4.0         lubridate_1.9.4     </span></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; [64] timechange_0.3.0     rmarkdown_2.30       globals_0.18.0      </span></span>
-<span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a><span class="co">#&gt; [67] nnet_7.3-20          timeDate_4051.111    ranger_0.17.0       </span></span>
-<span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="co">#&gt; [70] evaluate_1.0.5       knitr_1.50           hardhat_1.4.2       </span></span>
-<span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a><span class="co">#&gt; [73] caret_7.0-1          rlang_1.1.6          Rcpp_1.1.0          </span></span>
-<span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a><span class="co">#&gt; [76] glue_1.8.0           pROC_1.19.0.1        ipred_0.9-15        </span></span>
-<span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a><span class="co">#&gt; [79] svglite_2.2.2        jsonlite_2.0.0       R6_2.6.1            </span></span>
-<span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a><span class="co">#&gt; [82] plyr_1.8.9           systemfonts_1.3.1</span></span></code></pre></div>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;  [1] gtable_0.3.6         xfun_0.55            bslib_0.9.0         </span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt;  [4] ggplot2_4.0.1        recipes_1.3.1        lattice_0.22-7      </span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt;  [7] vctrs_0.7.1          tools_4.5.2          generics_0.1.4      </span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; [10] stats4_4.5.2         parallel_4.5.2       tibble_3.3.1        </span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; [13] pkgconfig_2.0.3      ModelMetrics_1.2.2.2 Matrix_1.7-4        </span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; [16] data.table_1.18.0    RColorBrewer_1.1-3   S7_0.2.1            </span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; [19] lifecycle_1.0.5      compiler_4.5.2       farver_2.1.2        </span></span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt; [22] stringr_1.6.0        textshaping_1.0.4    codetools_0.2-20    </span></span>
+<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt; [25] htmltools_0.5.9      class_7.3-23         sass_0.4.10         </span></span>
+<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; [28] yaml_2.3.12          prodlim_2025.04.28   pillar_1.11.1       </span></span>
+<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; [31] jquerylib_0.1.4      MASS_7.3-65          cachem_1.1.0        </span></span>
+<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt; [34] gower_1.0.2          iterators_1.0.14     rpart_4.1.24        </span></span>
+<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a><span class="co">#&gt; [37] foreach_1.5.2        nlme_3.1-168         parallelly_1.46.1   </span></span>
+<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a><span class="co">#&gt; [40] lava_1.8.2           tidyselect_1.2.1     digest_0.6.39       </span></span>
+<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a><span class="co">#&gt; [43] stringi_1.8.7        future_1.68.0        dplyr_1.2.0         </span></span>
+<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; [46] reshape2_1.4.5       purrr_1.2.0          listenv_0.10.0      </span></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; [49] splines_4.5.2        fastmap_1.2.0        grid_4.5.2          </span></span>
+<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; [52] cli_3.6.5            magrittr_2.0.4       survival_3.8-3      </span></span>
+<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; [55] future.apply_1.20.1  withr_3.0.2          scales_1.4.0        </span></span>
+<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; [58] lubridate_1.9.4      timechange_0.3.0     rmarkdown_2.30      </span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; [61] globals_0.18.0       otel_0.2.0           nnet_7.3-20         </span></span>
+<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; [64] timeDate_4051.111    evaluate_1.0.5       knitr_1.51          </span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; [67] hardhat_1.4.2        caret_7.0-1          rlang_1.1.7         </span></span>
+<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; [70] Rcpp_1.1.1           glue_1.8.0           pROC_1.19.0.1       </span></span>
+<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; [73] ipred_0.9-15         svglite_2.2.2        jsonlite_2.0.0      </span></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; [76] R6_2.6.1             plyr_1.8.9           systemfonts_1.3.1</span></span></code></pre></div>
 </div>
 
 

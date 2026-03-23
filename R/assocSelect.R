@@ -38,7 +38,7 @@
 #' @param ...  Additional arguments passed unchanged to \code{\link{MatSelect}()}
 #'   (e.g., \code{use_pivot = TRUE} for Bron–Kerbosch).
 #'
-#' @return A \code{\link{CorrCombo}} S4 object containing:
+#' @return A \code{\link{CorrCombo}} object containing:
 #'   \itemize{
 #'     \item all valid subsets,
 #'     \item their summary association statistics,
@@ -89,7 +89,6 @@
 #'             force_in        = "height")
 #'
 #' @importFrom stats cor complete.cases chisq.test
-#' @importFrom methods is
 #' @export
 assocSelect <- function(df,
                         threshold = 0.7,
@@ -256,7 +255,7 @@ assocSelect <- function(df,
   res@n_rows_used <- nrow(df)
   res@cor_method  <- "mixed"
 
-  # Save methods used as attributes (not slots)
+  # Save methods used as attributes (not properties)
   attr(res, "assoc_methods_used") <- assoc_methods_used
   attr(res, "assoc_methods_all")  <- full_assoc_methods
 

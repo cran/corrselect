@@ -12,7 +12,7 @@
 
 <meta name="author" content="Gilles Colling" />
 
-<meta name="date" content="2026-01-08" />
+<meta name="date" content="2026-03-23" />
 
 <title>Advanced Topics</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Advanced Topics</h1>
 <h4 class="author">Gilles Colling</h4>
-<h4 class="date">2026-01-08</h4>
+<h4 class="date">2026-03-23</h4>
 
 
 
@@ -350,15 +350,16 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>This vignette covers advanced topics for power users, researchers,
 and method developers:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Understanding the Algorithms</strong> - Exact vs greedy,
-complexity analysis</li>
-<li><strong>Custom Engines</strong> - Integrate any modeling package
-(INLA, mgcv, brms)</li>
-<li><strong>Exact Subset Enumeration</strong> - Multiple maximal
-subsets</li>
-<li><strong>Performance Optimization</strong> - Speed and memory
-considerations</li>
-<li><strong>Troubleshooting</strong> - Common issues and solutions</li>
+<li><p><strong>Understanding the Algorithms</strong> - Exact vs greedy,
+complexity analysis</p></li>
+<li><p><strong>Custom Engines</strong> - Integrate any modeling package
+(INLA, mgcv, brms)</p></li>
+<li><p><strong>Exact Subset Enumeration</strong> - Multiple maximal
+subsets</p></li>
+<li><p><strong>Performance Optimization</strong> - Speed and memory
+considerations</p></li>
+<li><p><strong>Troubleshooting</strong> - Common issues and
+solutions</p></li>
 </ol>
 <p><strong>Target audience</strong>: Users comfortable with R
 programming and statistical methods</p>
@@ -385,10 +386,10 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; Exact mode kept: 5 variables</span></span></code></pre></div>
 <p><strong>Use exact mode when</strong>:</p>
 <ul>
-<li>p ≤ 20 (feasible runtime)</li>
-<li>You need guaranteed optimal solution</li>
-<li>Reproducibility is critical</li>
-<li>You’re writing a paper (justify optimality)</li>
+<li><p>p ≤ 20 (feasible runtime)</p></li>
+<li><p>You need guaranteed optimal solution</p></li>
+<li><p>Reproducibility is critical</p></li>
+<li><p>You’re writing a paper (justify optimality)</p></li>
 </ul>
 </div>
 <div id="greedy-mode-heuristic" class="section level3">
@@ -402,10 +403,10 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Greedy mode kept: 5 variables</span></span></code></pre></div>
 <p><strong>Use greedy mode when</strong>:</p>
 <ul>
-<li>p &gt; 20 (exact becomes slow)</li>
-<li>Speed is priority</li>
-<li>Near-optimal is acceptable</li>
-<li>High-dimensional data (p &gt; 100)</li>
+<li><p>p &gt; 20 (exact becomes slow)</p></li>
+<li><p>Speed is priority</p></li>
+<li><p>Near-optimal is acceptable</p></li>
+<li><p>High-dimensional data (p &gt; 100)</p></li>
 </ul>
 </div>
 <div id="auto-mode-recommended" class="section level3">
@@ -469,14 +470,14 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>benchmark <span class="ot">&lt;-</span> <span class="fu">benchmark_corrPrune</span>(p_values)</span>
 <span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="fu">print</span>(benchmark)</span>
 <span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt;      p exact_time_ms greedy_time_ms</span></span>
-<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; 1   10           0.4            0.2</span></span>
-<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; 2   20           0.5            0.3</span></span>
-<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; 3   50           1.0            0.7</span></span>
-<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; 4  100           1.8            1.5</span></span>
-<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; 5  200           4.8            3.0</span></span>
-<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; 6  300          11.9            5.4</span></span>
-<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; 7  500          31.6           12.8</span></span>
-<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; 8 1000            NA           43.6</span></span></code></pre></div>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; 1   10           0.5            0.3</span></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; 2   20           0.6            0.4</span></span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; 3   50           1.2            0.7</span></span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; 4  100           2.0            1.6</span></span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; 5  200           5.5            3.2</span></span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; 6  300          13.2            5.7</span></span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; 7  500          33.7           13.4</span></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; 8 1000            NA           46.9</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Visualize scaling</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Separate data for exact mode (only where available) and greedy mode (all points)</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>exact_valid <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(benchmark<span class="sc">$</span>exact_time_ms) <span class="sc">&amp;</span> benchmark<span class="sc">$</span>exact_time_ms <span class="sc">&gt;</span> <span class="dv">0</span></span>
@@ -517,7 +518,7 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="dv">2</span>,</span>
 <span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;o&quot;</span>,</span>
 <span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>       <span class="at">bg =</span> <span class="st">&quot;white&quot;</span>)</span></code></pre></div>
-<p><img role="img" aria-label="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE5Ua3VNRFI4TlRRMUxqYzJmRFU1TGpBMGZESTROaTQxTmc9PSc+CiAgICA8cmVjdCB4PSc1OS4wNCcgeT0nNTkuMDQnIHdpZHRoPSc0ODYuNzInIGhlaWdodD0nMjI3LjUyJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRrdU1EUjhOVFExTGpjMmZEVTVMakEwZkRJNE5pNDFOZz09KSc+CjxsaW5lIHgxPSc4NC45MycgeTE9JzIzNy41NicgeDI9JzkxLjk2JyB5Mj0nMjIzLjk4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nMTAwLjI2JyB5MT0nMjEyLjM5JyB4Mj0nMTEzLjA1JyB5Mj0nMTk5LjA3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nMTI0LjU0JyB5MT0nMTkwLjc5JyB4Mj0nMTU3LjA1JyB5Mj0nMTc1LjM5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nMTcwLjI0JyB5MT0nMTY5LjYyJyB4Mj0nMjAyLjQwJyB5Mj0nMTU2LjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nMjE1Ljk5JyB5MT0nMTUxLjk4JyB4Mj0nMjkzLjIyJyB5Mj0nMTI5LjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nMzA3LjIyJyB5MT0nMTI1Ljk4JyB4Mj0nNTIwLjYzJyB5Mj0nOTAuMjInIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9Jzc3LjA3JyBjeT0nMjU2LjU3JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc4MS42MicgY3k9JzI0My45NScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nOTUuMjgnIGN5PScyMTcuNTknIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzExOC4wNCcgY3k9JzE5My44Nycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nMTYzLjU2JyBjeT0nMTcyLjMxJyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PScyMDkuMDgnIGN5PScxNTQuMDInIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzMwMC4xMicgY3k9JzEyNy4xNycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nNTI3LjczJyBjeT0nODkuMDMnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTUM0d01IdzFOell1TURCOE1DNHdNSHd6TmpBdU1EQT0pJz4KPGxpbmUgeDE9JzcyLjUxJyB5MT0nMjg2LjU2JyB4Mj0nNTI3LjczJyB5Mj0nMjg2LjU2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzcyLjUxJyB5MT0nMjg2LjU2JyB4Mj0nNzIuNTEnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMTYzLjU2JyB5MT0nMjg2LjU2JyB4Mj0nMTYzLjU2JyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzI1NC42MCcgeTE9JzI4Ni41NicgeDI9JzI1NC42MCcgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSczNDUuNjUnIHkxPScyODYuNTYnIHgyPSczNDUuNjUnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNDM2LjY5JyB5MT0nMjg2LjU2JyB4Mj0nNDM2LjY5JyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzUyNy43MycgeTE9JzI4Ni41NicgeDI9JzUyNy43MycgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzcyLjUxJyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjA8L3RleHQ+Cjx0ZXh0IHg9JzE2My41NicgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MjAwPC90ZXh0Pgo8dGV4dCB4PScyNTQuNjAnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjQwMDwvdGV4dD4KPHRleHQgeD0nMzQ1LjY1JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz42MDA8L3RleHQ+Cjx0ZXh0IHg9JzQzNi42OScgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+ODAwPC90ZXh0Pgo8dGV4dCB4PSc1MjcuNzMnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyNi42OXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjEwMDA8L3RleHQ+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI3OC4xMycgeDI9JzU5LjA0JyB5Mj0nNjMuMjEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyNzguMTMnIHgyPSc1MS44NCcgeTI9JzI3OC4xMycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzIyOC4wNicgeDI9JzUxLjg0JyB5Mj0nMjI4LjA2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjA2LjQ5JyB4Mj0nNTEuODQnIHkyPScyMDYuNDknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScxNTYuNDEnIHgyPSc1MS44NCcgeTI9JzE1Ni40MScgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzEzNC44NScgeDI9JzUxLjg0JyB5Mj0nMTM0Ljg1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nODQuNzcnIHgyPSc1MS44NCcgeTI9Jzg0Ljc3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nNjMuMjEnIHgyPSc1MS44NCcgeTI9JzYzLjIxJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjc4LjEzKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuMTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjI4LjA2KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuNTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTU2LjQxKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjUuMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsODQuNzcpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NTAuMDwvdGV4dD4KPHBvbHlnb24gcG9pbnRzPSc1OS4wNCwyODYuNTYgNTQ1Ljc2LDI4Ni41NiA1NDUuNzYsNTkuMDQgNTkuMDQsNTkuMDQgJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgeD0nMzAyLjQwJyB5PSczNC42NycgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTQuNDBweDsgZm9udC13ZWlnaHQ6IGJvbGQ7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTY3LjE2cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+RXhhY3QgdnMgR3JlZWR5IFNjYWxpbmc8L3RleHQ+Cjx0ZXh0IHg9JzMwMi40MCcgeT0nMzQxLjI4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzMS4zNnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPk51bWJlciBvZiBQcmVkaWN0b3JzIChwKTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMTIuOTYsMTcyLjgwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNTYuOTVweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5UaW1lIChtaWxsaXNlY29uZHMsIGxvZyBzY2FsZSk8L3RleHQ+CjwvZz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRrdU1EUjhOVFExTGpjMmZEVTVMakEwZkRJNE5pNDFOZz09KSc+CjxsaW5lIHgxPSc4NS40NycgeTE9JzIyMS45NycgeDI9JzkxLjQyJyB5Mj0nMjEyLjU3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nMTAwLjg5JyB5MT0nMjAxLjk4JyB4Mj0nMTEyLjQyJyB5Mj0nMTkyLjcxJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nMTI0LjAyJyB5MT0nMTg0LjE5JyB4Mj0nMTU3LjU4JyB5Mj0nMTYxLjY5JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nMTY5LjY4JyB5MT0nMTUzLjg5JyB4Mj0nMjAyLjk2JyB5Mj0nMTMzLjIzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nMjE1LjkxJyB5MT0nMTI3LjE2JyB4Mj0nMjkzLjI5JyB5Mj0nMTAxLjMzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PSc3Ny4wNycgY3k9JzIzNS4wMCcgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nODEuNjInIGN5PScyMjguMDYnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9Jzk1LjI4JyBjeT0nMjA2LjQ5JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PScxMTguMDQnIGN5PScxODguMjAnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzE2My41NicgY3k9JzE1Ny42OCcgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nMjA5LjA4JyBjeT0nMTI5LjQ0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PSczMDAuMTInIGN5PSc5OS4wNScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGxpbmUgeDE9JzMwMC4xMicgeTE9JzI4Ni41NicgeDI9JzMwMC4xMicgeTI9JzU5LjA0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICM3RjdGN0Y7IHN0cm9rZS1kYXNoYXJyYXk6IDQuMDAsNC4wMDsnIC8+Cjx0ZXh0IHg9JzMwNy4zMicgeT0nOTEuOTAnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7ZmlsbDogIzRENEQ0RDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc4OC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0IG1vZGUgbGltaXQ8L3RleHQ+CjxyZWN0IHg9JzU5LjA0JyB5PSc1OS4wNCcgd2lkdGg9JzgwLjM4JyBoZWlnaHQ9JzQzLjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkZGRkZGOycgLz4KPGxpbmUgeDE9JzYyLjI4JyB5MT0nNzMuNDQnIHgyPSc4My44OCcgeTI9JzczLjQ0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nNjIuMjgnIHkxPSc4Ny44NCcgeDI9JzgzLjg4JyB5Mj0nODcuODQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nNzMuNDQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nODcuODQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+Cjx0ZXh0IHg9Jzk0LjY4JyB5PSc3Ny43NCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSczMC4wMHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0PC90ZXh0Pgo8dGV4dCB4PSc5NC42OCcgeT0nOTIuMTQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzkuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5HcmVlZHk8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." /></p>
+<p><img role="img" aria-label="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE5Ua3VNRFI4TlRRMUxqYzJmRFU1TGpBMGZESTROaTQxTmc9PSc+CiAgICA8cmVjdCB4PSc1OS4wNCcgeT0nNTkuMDQnIHdpZHRoPSc0ODYuNzInIGhlaWdodD0nMjI3LjUyJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRrdU1EUjhOVFExTGpjMmZEVTVMakEwZkRJNE5pNDFOZz09KSc+CjxsaW5lIHgxPSc4NS45MicgeTE9JzI0MC4yNycgeDI9JzkwLjk3JyB5Mj0nMjMzLjUwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nOTkuOTEnIHkxPScyMjIuMjInIHgyPScxMTMuNDAnIHkyPScyMDYuMTknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScxMjQuNDgnIHkxPScxOTcuNDcnIHgyPScxNTcuMTEnIHkyPScxODEuMjEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScxNzAuMjEnIHkxPScxNzUuMjQnIHgyPScyMDIuNDMnIHkyPScxNjEuODcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScyMTUuOTYnIHkxPScxNTYuOTknIHgyPScyOTMuMjQnIHkyPScxMzMuMjUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPSczMDcuMjEnIHkxPScxMjkuODYnIHgyPSc1MjAuNjUnIHkyPSc5MS40Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nNzcuMDcnIGN5PScyNTUuNDUnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzgxLjYyJyBjeT0nMjQ2LjA0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc5NS4yOCcgY3k9JzIyNy43Mycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nMTE4LjA0JyBjeT0nMjAwLjY4JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PScxNjMuNTYnIGN5PScxNzguMDAnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzIwOS4wOCcgY3k9JzE1OS4xMScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nMzAwLjEyJyBjeT0nMTMxLjE0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc1MjcuNzMnIGN5PSc5MC4xNScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSknPgo8bGluZSB4MT0nNzIuNTEnIHkxPScyODYuNTYnIHgyPSc1MjcuNzMnIHkyPScyODYuNTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNzIuNTEnIHkxPScyODYuNTYnIHgyPSc3Mi41MScgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScxNjMuNTYnIHkxPScyODYuNTYnIHgyPScxNjMuNTYnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMjU0LjYwJyB5MT0nMjg2LjU2JyB4Mj0nMjU0LjYwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM0NS42NScgeTE9JzI4Ni41NicgeDI9JzM0NS42NScgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc0MzYuNjknIHkxPScyODYuNTYnIHgyPSc0MzYuNjknIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTI3LjczJyB5MT0nMjg2LjU2JyB4Mj0nNTI3LjczJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgeD0nNzIuNTEnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MDwvdGV4dD4KPHRleHQgeD0nMTYzLjU2JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4yMDA8L3RleHQ+Cjx0ZXh0IHg9JzI1NC42MCcgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NDAwPC90ZXh0Pgo8dGV4dCB4PSczNDUuNjUnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjYwMDwvdGV4dD4KPHRleHQgeD0nNDM2LjY5JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz44MDA8L3RleHQ+Cjx0ZXh0IHg9JzUyNy43MycgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI2LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTAwMDwvdGV4dD4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjY4LjcyJyB4Mj0nNTkuMDQnIHkyPSc2NS4zNycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI2OC43MicgeDI9JzUxLjg0JyB5Mj0nMjY4LjcyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjM4Ljc0JyB4Mj0nNTEuODQnIHkyPScyMzguNzQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyMTYuMDYnIHgyPSc1MS44NCcgeTI9JzIxNi4wNicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzE5My4zOCcgeDI9JzUxLjg0JyB5Mj0nMTkzLjM4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMTYzLjQwJyB4Mj0nNTEuODQnIHkyPScxNjMuNDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScxNDAuNzInIHgyPSc1MS44NCcgeTI9JzE0MC43Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzExOC4wMycgeDI9JzUxLjg0JyB5Mj0nMTE4LjAzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nODguMDUnIHgyPSc1MS44NCcgeTI9Jzg4LjA1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nNjUuMzcnIHgyPSc1MS44NCcgeTI9JzY1LjM3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjY4LjcyKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuMjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjM4Ljc0KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuNTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTkzLjM4KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjIuMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTYzLjQwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjUuMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTE4LjAzKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy4zNHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjIwLjA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDY1LjM3KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSczMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjEwMC4wPC90ZXh0Pgo8cG9seWdvbiBwb2ludHM9JzU5LjA0LDI4Ni41NiA1NDUuNzYsMjg2LjU2IDU0NS43Niw1OS4wNCA1OS4wNCw1OS4wNCAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB4PSczMDIuNDAnIHk9JzM0LjY3JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxNC40MHB4OyBmb250LXdlaWdodDogYm9sZDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNjcuMTZweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5FeGFjdCB2cyBHcmVlZHkgU2NhbGluZzwvdGV4dD4KPHRleHQgeD0nMzAyLjQwJyB5PSczNDEuMjgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMxLjM2cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+TnVtYmVyIG9mIFByZWRpY3RvcnMgKHApPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMi45NiwxNzIuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE1Ni45NXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPlRpbWUgKG1pbGxpc2Vjb25kcywgbG9nIHNjYWxlKTwvdGV4dD4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BOVGt1TURSOE5UUTFMamMyZkRVNUxqQTBmREk0Tmk0MU5nPT0pJz4KPGxpbmUgeDE9Jzg1LjMzJyB5MT0nMjI2LjYwJyB4Mj0nOTEuNTYnIHkyPScyMTYuMjYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScxMDEuMDgnIHkxPScyMDUuODMnIHgyPScxMTIuMjMnIHkyPScxOTcuNjQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScxMjMuODYnIHkxPScxODkuMTQnIHgyPScxNTcuNzMnIHkyPScxNjQuNTEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScxNjkuNjUnIHkxPScxNTYuNDQnIHgyPScyMDIuOTknIHkyPScxMzUuNDcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScyMTUuOTAnIHkxPScxMjkuMzMnIHgyPScyOTMuMzAnIHkyPScxMDMuMjYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9Jzc3LjA3JyBjeT0nMjM4Ljc0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PSc4MS42MicgY3k9JzIzMi43Nycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nOTUuMjgnIGN5PScyMTAuMDknIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzExOC4wNCcgY3k9JzE5My4zOCcgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nMTYzLjU2JyBjeT0nMTYwLjI4JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PScyMDkuMDgnIGN5PScxMzEuNjMnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzMwMC4xMicgY3k9JzEwMC45Nicgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGxpbmUgeDE9JzMwMC4xMicgeTE9JzI4Ni41NicgeDI9JzMwMC4xMicgeTI9JzU5LjA0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICM3RjdGN0Y7IHN0cm9rZS1kYXNoYXJyYXk6IDQuMDAsNC4wMDsnIC8+Cjx0ZXh0IHg9JzMwNy4zMicgeT0nOTMuMDEnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7ZmlsbDogIzRENEQ0RDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc4OC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0IG1vZGUgbGltaXQ8L3RleHQ+CjxyZWN0IHg9JzU5LjA0JyB5PSc1OS4wNCcgd2lkdGg9JzgwLjM4JyBoZWlnaHQ9JzQzLjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkZGRkZGOycgLz4KPGxpbmUgeDE9JzYyLjI4JyB5MT0nNzMuNDQnIHgyPSc4My44OCcgeTI9JzczLjQ0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nNjIuMjgnIHkxPSc4Ny44NCcgeDI9JzgzLjg4JyB5Mj0nODcuODQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nNzMuNDQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nODcuODQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+Cjx0ZXh0IHg9Jzk0LjY4JyB5PSc3Ny43NCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSczMC4wMHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0PC90ZXh0Pgo8dGV4dCB4PSc5NC42OCcgeT0nOTIuMTQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzkuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5HcmVlZHk8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." /></p>
 <p><strong>Key insight</strong>: The scaling behavior depends heavily on
 correlation structure. For this moderately correlated dataset (ρ =
 0.5^|i-j|), exact mode remains practical up to p ≈ 500, while greedy
@@ -550,8 +551,11 @@ corrselect uses deterministic tie-breaking:</p>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Identical:&quot;</span>, <span class="fu">identical</span>(<span class="fu">names</span>(result1), <span class="fu">names</span>(result2)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; Identical: TRUE</span></span></code></pre></div>
 <p><strong>Tie-breaking rules</strong>: 1. Prefer variables with lower
-<strong>mean absolute correlation</strong> with others 2. If still tied,
-prefer <strong>lexicographically first</strong> (alphabetical)</p>
+<strong>mean absolute correlation</strong> with others</p>
+<ol start="2" style="list-style-type: decimal">
+<li>If still tied, prefer <strong>lexicographically first</strong>
+(alphabetical)</li>
+</ol>
 <p>This ensures reproducibility across runs, machines, and R
 versions.</p>
 <hr />
@@ -602,12 +606,12 @@ conditions, species, sites), grouped pruning computes associations
 <div id="when-to-use" class="section level3">
 <h3>When to Use</h3>
 <ul>
-<li><strong>Multi-site studies</strong>: Correlations may differ across
-locations</li>
-<li><strong>Experimental conditions</strong>: Treatment groups may have
-different correlation structures</li>
-<li><strong>Longitudinal data</strong>: Correlations may change over
-time periods</li>
+<li><p><strong>Multi-site studies</strong>: Correlations may differ
+across locations</p></li>
+<li><p><strong>Experimental conditions</strong>: Treatment groups may
+have different correlation structures</p></li>
+<li><p><strong>Longitudinal data</strong>: Correlations may change over
+time periods</p></li>
 </ul>
 <hr />
 </div>
@@ -624,11 +628,11 @@ framework with <code>modelPrune()</code>, not just base R’s
 <code>lm()</code> or <code>lme4</code>. This enables diagnostic-based
 pruning (VIF or condition number) for:</p>
 <ul>
-<li><strong>Bayesian models</strong> (INLA, brms, Stan)</li>
-<li><strong>Additive models</strong> (mgcv GAMs)</li>
-<li><strong>Survival models</strong> (coxph, flexsurv)</li>
-<li><strong>Custom metrics</strong> (AIC, BIC, posterior
-uncertainty)</li>
+<li><p><strong>Bayesian models</strong> (INLA, brms, Stan)</p></li>
+<li><p><strong>Additive models</strong> (mgcv GAMs)</p></li>
+<li><p><strong>Survival models</strong> (coxph, flexsurv)</p></li>
+<li><p><strong>Custom metrics</strong> (AIC, BIC, posterior
+uncertainty)</p></li>
 </ul>
 </div>
 <div id="built-in-criteria" class="section level3">
@@ -637,10 +641,10 @@ uncertainty)</li>
 <code>lme4</code>, <code>glmmTMB</code>), two criteria are
 available:</p>
 <ul>
-<li><strong><code>vif</code></strong> (default): Variance Inflation
-Factor - classic multicollinearity measure</li>
-<li><strong><code>condition_number</code></strong>: SVD-based condition
-indices - alternative collinearity diagnostic</li>
+<li><p><strong><code>vif</code></strong> (default): Variance Inflation
+Factor - classic multicollinearity measure</p></li>
+<li><p><strong><code>condition_number</code></strong>: SVD-based
+condition indices - alternative collinearity diagnostic</p></li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Using condition number instead of VIF</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>result_cn <span class="ot">&lt;-</span> <span class="fu">modelPrune</span>(mpg <span class="sc">~</span> ., <span class="at">data =</span> mtcars, <span class="at">criterion =</span> <span class="st">&quot;condition_number&quot;</span>, <span class="at">limit =</span> <span class="dv">10</span>)</span>
@@ -652,14 +656,15 @@ indices - alternative collinearity diagnostic</li>
 <p>The <code>modelPrune()</code> algorithm follows this iterative
 process:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Fit</strong> the model with current predictors</li>
-<li><strong>Diagnose</strong> each predictor (compute a “badness”
-metric)</li>
-<li><strong>Identify</strong> the worst predictor (highest diagnostic
-value)</li>
-<li><strong>Remove</strong> if it exceeds the <code>limit</code>
-threshold</li>
-<li><strong>Repeat</strong> until all predictors satisfy the limit</li>
+<li><p><strong>Fit</strong> the model with current predictors</p></li>
+<li><p><strong>Diagnose</strong> each predictor (compute a “badness”
+metric)</p></li>
+<li><p><strong>Identify</strong> the worst predictor (highest diagnostic
+value)</p></li>
+<li><p><strong>Remove</strong> if it exceeds the <code>limit</code>
+threshold</p></li>
+<li><p><strong>Repeat</strong> until all predictors satisfy the
+limit</p></li>
 </ol>
 <p>Your custom engine defines steps 1 and 2; <code>modelPrune()</code>
 handles the iteration logic.</p>
@@ -741,12 +746,12 @@ model.</p>
 <div id="how-it-works" class="section level3">
 <h3>How It Works</h3>
 <ol style="list-style-type: decimal">
-<li><strong>fit</strong>: Calls <code>INLA::inla()</code> to compute
-posterior distributions</li>
-<li><strong>diagnostics</strong>: Extracts posterior standard deviations
-from <code>model$summary.fixed</code></li>
-<li><strong>limit</strong>: Threshold for acceptable uncertainty (e.g.,
-0.5 means remove predictors with posterior SD &gt; 0.5)</li>
+<li><p><strong>fit</strong>: Calls <code>INLA::inla()</code> to compute
+posterior distributions</p></li>
+<li><p><strong>diagnostics</strong>: Extracts posterior standard
+deviations from <code>model$summary.fixed</code></p></li>
+<li><p><strong>limit</strong>: Threshold for acceptable uncertainty
+(e.g., 0.5 means remove predictors with posterior SD &gt; 0.5)</p></li>
 </ol>
 <p><strong>Interpretation</strong>: Variables with high posterior SD
 have coefficients that are uncertain given the data. Removing them
@@ -798,12 +803,12 @@ that model non-linear patterns.</p>
 <div id="how-it-works-1" class="section level3">
 <h3>How It Works</h3>
 <ol style="list-style-type: decimal">
-<li><strong>fit</strong>: Calls <code>mgcv::gam()</code> to fit the
-additive model</li>
-<li><strong>diagnostics</strong>: Extracts p-values for
-<strong>parametric terms only</strong> (not smooth terms)</li>
-<li><strong>limit</strong>: Significance threshold (e.g., 0.05 for
-traditional α = 0.05)</li>
+<li><p><strong>fit</strong>: Calls <code>mgcv::gam()</code> to fit the
+additive model</p></li>
+<li><p><strong>diagnostics</strong>: Extracts p-values for
+<strong>parametric terms only</strong> (not smooth terms)</p></li>
+<li><p><strong>limit</strong>: Significance threshold (e.g., 0.05 for
+traditional α = 0.05)</p></li>
 </ol>
 <p><strong>Important</strong>: <code>modelPrune()</code> only removes
 parametric (linear) terms. Smooth terms specified with <code>s()</code>,
@@ -864,11 +869,11 @@ AIC.</p>
 <div id="how-it-works-2" class="section level3">
 <h3>How It Works</h3>
 <ol style="list-style-type: decimal">
-<li><strong>fit</strong>: Standard linear model</li>
-<li><strong>diagnostics</strong>: For each variable, refit the model
-<strong>without</strong> that variable and compute ΔAIC</li>
-<li><strong>limit</strong>: Threshold for ΔAIC (e.g., -2 means “remove
-if AIC improves by more than 2 points”)</li>
+<li><p><strong>fit</strong>: Standard linear model</p></li>
+<li><p><strong>diagnostics</strong>: For each variable, refit the model
+<strong>without</strong> that variable and compute ΔAIC</p></li>
+<li><p><strong>limit</strong>: Threshold for ΔAIC (e.g., -2 means
+“remove if AIC improves by more than 2 points”)</p></li>
 </ol>
 <p><strong>Key insight</strong>: The score is <strong>negated</strong>
 (multiplied by -1) to maintain the “higher is worse” convention. A
@@ -905,20 +910,20 @@ catch common errors early:</p>
 <h3>Validation Checklist</h3>
 <p>Your custom engine must satisfy these requirements:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Structure</strong>: Named list with <code>fit</code> and
-<code>diagnostics</code> functions</li>
-<li><strong>fit returns model object</strong>: Must return something the
-<code>diagnostics</code> function can consume</li>
-<li><strong>diagnostics returns numeric vector</strong>: No characters,
-factors, or other types</li>
-<li><strong>Correct length</strong>: One diagnostic value per fixed
-effect (excluding intercept)</li>
-<li><strong>Named vector</strong>: Names must match variable names
-exactly</li>
-<li><strong>No missing values</strong>: NA, NaN, or Inf will cause
-errors</li>
-<li><strong>Higher = worse</strong>: Diagnostic values must increase for
-more problematic predictors</li>
+<li><p><strong>Structure</strong>: Named list with <code>fit</code> and
+<code>diagnostics</code> functions</p></li>
+<li><p><strong>fit returns model object</strong>: Must return something
+the <code>diagnostics</code> function can consume</p></li>
+<li><p><strong>diagnostics returns numeric vector</strong>: No
+characters, factors, or other types</p></li>
+<li><p><strong>Correct length</strong>: One diagnostic value per fixed
+effect (excluding intercept)</p></li>
+<li><p><strong>Named vector</strong>: Names must match variable names
+exactly</p></li>
+<li><p><strong>No missing values</strong>: NA, NaN, or Inf will cause
+errors</p></li>
+<li><p><strong>Higher = worse</strong>: Diagnostic values must increase
+for more problematic predictors</p></li>
 </ol>
 </div>
 <div id="debugging-tips" class="section level3">
@@ -1101,16 +1106,16 @@ correlation matrix:</p>
 <span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a>)<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
 <span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a></span>
 <span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Recomputing each time: %.1f ms</span><span class="sc">\n</span><span class="st">&quot;</span>, time1))</span>
-<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="co">#&gt; Recomputing each time: 2.7 ms</span></span>
+<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="co">#&gt; Recomputing each time: 5.1 ms</span></span>
 <span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Precomputed matrix: %.1f ms</span><span class="sc">\n</span><span class="st">&quot;</span>, time2))</span>
-<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a><span class="co">#&gt; Precomputed matrix: 0.7 ms</span></span>
+<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a><span class="co">#&gt; Precomputed matrix: 1.2 ms</span></span>
 <span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Speedup: %.1fx faster</span><span class="sc">\n</span><span class="st">&quot;</span>, time1 <span class="sc">/</span> time2))</span>
-<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a><span class="co">#&gt; Speedup: 3.8x faster</span></span></code></pre></div>
+<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a><span class="co">#&gt; Speedup: 4.4x faster</span></span></code></pre></div>
 <p><strong>Use precomputed matrices when</strong>:</p>
 <ul>
-<li>Testing multiple thresholds</li>
-<li>Cross-validation workflows</li>
-<li>Sensitivity analysis</li>
+<li><p>Testing multiple thresholds</p></li>
+<li><p>Cross-validation workflows</p></li>
+<li><p>Sensitivity analysis</p></li>
 </ul>
 </div>
 <div id="memory-considerations-for-large-data" class="section level2">
@@ -1206,20 +1211,24 @@ it</p>
 <span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Error:&quot;</span>, e<span class="sc">$</span>message, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>})</span>
 <span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a><span class="co">#&gt; Error: No valid subsets found that satisfy the threshold constraint</span></span></code></pre></div>
-<p><strong>Solutions</strong>: 1. Increase threshold 2. Use
-<code>force_in</code> to keep at least one variable 3. Check data for
-near-duplicates</p>
+<p><strong>Solutions</strong>: 1. Increase threshold</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Use <code>force_in</code> to keep at least one variable</p></li>
+<li><p>Check data for near-duplicates</p></li>
+</ol>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Solution 1: Increase threshold</span></span>
 <span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(high_cor_data, <span class="at">threshold =</span> <span class="fl">0.95</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="co">#&gt; Error in corrPrune(high_cor_data, threshold = 0.95): No valid subsets found that satisfy the threshold constraint</span></span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot; &quot;x3&quot;</span></span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="co"># Solution 2: Force keep one variable</span></span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(high_cor_data, <span class="at">threshold =</span> <span class="fl">0.5</span>, <span class="at">force_in =</span> <span class="st">&quot;x1&quot;</span>)</span>
-<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a><span class="co">#&gt; Error in corrPrune(high_cor_data, threshold = 0.5, force_in = &quot;x1&quot;): No valid subsets found that satisfy the threshold constraint</span></span>
-<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
-<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot; &quot;x3&quot;</span></span></code></pre></div>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="co">#&gt; Error in `corrPrune()`:</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co">#&gt; ! No valid subsets found that satisfy the threshold constraint</span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot; &quot;x3&quot;</span></span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="co"># Solution 2: Force keep one variable</span></span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(high_cor_data, <span class="at">threshold =</span> <span class="fl">0.5</span>, <span class="at">force_in =</span> <span class="st">&quot;x1&quot;</span>)</span>
+<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a><span class="co">#&gt; Error in `corrPrune()`:</span></span>
+<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a><span class="co">#&gt; ! No valid subsets found that satisfy the threshold constraint</span></span>
+<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
+<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot; &quot;x3&quot;</span></span></code></pre></div>
 </div>
 <div id="error-force_in-variables-conflict-with-threshold" class="section level3">
 <h3>Error: force_in variables conflict with threshold</h3>
@@ -1374,36 +1383,39 @@ remove perfect collinearity:</p>
 <h3>For corrPrune() (Correlation Threshold)</h3>
 <p><strong>Conservative (strict)</strong>:</p>
 <ul>
-<li>threshold = 0.5: Very low redundancy, may lose information</li>
-<li>Use when: Interpretability is critical, small sample size</li>
+<li><p>threshold = 0.5: Very low redundancy, may lose
+information</p></li>
+<li><p>Use when: Interpretability is critical, small sample
+size</p></li>
 </ul>
 <p><strong>Moderate (recommended)</strong>:</p>
 <ul>
-<li>threshold = 0.7: Balances redundancy and information retention</li>
-<li>Use when: Standard regression, general analysis</li>
+<li><p>threshold = 0.7: Balances redundancy and information
+retention</p></li>
+<li><p>Use when: Standard regression, general analysis</p></li>
 </ul>
 <p><strong>Lenient</strong>:</p>
 <ul>
-<li>threshold = 0.9: Only removes near-duplicates</li>
-<li>Use when: Large sample size, prediction focus</li>
+<li><p>threshold = 0.9: Only removes near-duplicates</p></li>
+<li><p>Use when: Large sample size, prediction focus</p></li>
 </ul>
 </div>
 <div id="for-modelprune-vif-limit" class="section level3">
 <h3>For modelPrune() (VIF Limit)</h3>
 <p><strong>Strict</strong>:</p>
 <ul>
-<li>limit = 2: Very low multicollinearity, may over-prune</li>
-<li>Use when: Small sample size, interpretability critical</li>
+<li><p>limit = 2: Very low multicollinearity, may over-prune</p></li>
+<li><p>Use when: Small sample size, interpretability critical</p></li>
 </ul>
 <p><strong>Moderate (recommended)</strong>:</p>
 <ul>
-<li>limit = 5: Standard threshold in literature</li>
-<li>Use when: General regression analysis</li>
+<li><p>limit = 5: Standard threshold in literature</p></li>
+<li><p>Use when: General regression analysis</p></li>
 </ul>
 <p><strong>Lenient</strong>:</p>
 <ul>
-<li>limit = 10: Tolerates more multicollinearity</li>
-<li>Use when: Large sample size, prediction focus</li>
+<li><p>limit = 10: Tolerates more multicollinearity</p></li>
+<li><p>Use when: Large sample size, prediction focus</p></li>
 </ul>
 </div>
 <div id="empirical-approach-visualize-first" class="section level3">
@@ -1576,36 +1588,37 @@ plateau.</p>
 <div id="algorithms" class="section level3">
 <h3>Algorithms</h3>
 <ul>
-<li>Use <strong>exact mode</strong> for p ≤ 20 (optimal,
-reproducible)</li>
-<li>Use <strong>greedy mode</strong> for p &gt; 20 (fast,
-near-optimal)</li>
-<li>Use <strong>auto mode</strong> to let corrselect decide</li>
+<li><p>Use <strong>exact mode</strong> for p ≤ 20 (optimal,
+reproducible)</p></li>
+<li><p>Use <strong>greedy mode</strong> for p &gt; 20 (fast,
+near-optimal)</p></li>
+<li><p>Use <strong>auto mode</strong> to let corrselect decide</p></li>
 </ul>
 </div>
 <div id="custom-engines" class="section level3">
 <h3>Custom Engines</h3>
 <ul>
-<li>Integrate any modeling package (INLA, mgcv, brms)</li>
-<li>Define custom pruning criteria (AIC, BIC, p-values)</li>
-<li>Two required functions: <code>fit</code> and
-<code>diagnostics</code></li>
+<li><p>Integrate any modeling package (INLA, mgcv, brms)</p></li>
+<li><p>Define custom pruning criteria (AIC, BIC, p-values)</p></li>
+<li><p>Two required functions: <code>fit</code> and
+<code>diagnostics</code></p></li>
 </ul>
 </div>
 <div id="optimization" class="section level3">
 <h3>Optimization</h3>
 <ul>
-<li>Precompute correlation matrices for multiple thresholds</li>
-<li>Use greedy mode for large p</li>
-<li>Parallelize across analyses, not within</li>
+<li><p>Precompute correlation matrices for multiple thresholds</p></li>
+<li><p>Use greedy mode for large p</p></li>
+<li><p>Parallelize across analyses, not within</p></li>
 </ul>
 </div>
 <div id="troubleshooting-1" class="section level3">
 <h3>Troubleshooting</h3>
 <ul>
-<li>Visualize correlation distribution before choosing threshold</li>
-<li>Use <code>force_in</code> to protect important variables</li>
-<li>Two-step pruning (corrPrune → modelPrune) for robustness</li>
+<li><p>Visualize correlation distribution before choosing
+threshold</p></li>
+<li><p>Use <code>force_in</code> to protect important variables</p></li>
+<li><p>Two-step pruning (corrPrune → modelPrune) for robustness</p></li>
 </ul>
 <hr />
 </div>
@@ -1615,41 +1628,43 @@ near-optimal)</li>
 <h1>8. References</h1>
 <p><strong>Algorithms</strong>:</p>
 <ul>
-<li>Eppstein, D., Löffler, M., &amp; Strash, D. (2010). Listing all
+<li><p>Eppstein, D., Löffler, M., &amp; Strash, D. (2010). Listing all
 maximal cliques in sparse graphs in near-optimal time. <em>Symposium on
-Algorithms and Computation</em>.</li>
-<li>Bron, C., &amp; Kerbosch, J. (1973). Algorithm 457: Finding all
+Algorithms and Computation</em>.</p></li>
+<li><p>Bron, C., &amp; Kerbosch, J. (1973). Algorithm 457: Finding all
 cliques of an undirected graph. <em>Communications of the ACM</em>,
-16(9), 575-577.</li>
+16(9), 575-577.</p></li>
 </ul>
 <p><strong>Multicollinearity</strong>:</p>
 <ul>
-<li>O’Brien, R. M. (2007). A caution regarding rules of thumb for
+<li><p>O’Brien, R. M. (2007). A caution regarding rules of thumb for
 variance inflation factors. <em>Quality &amp; Quantity</em>, 41(5),
-673-690.</li>
-<li>Belsley, D. A., Kuh, E., &amp; Welsch, R. E. (1980). <em>Regression
-Diagnostics</em>. Wiley.</li>
+673-690.</p></li>
+<li><p>Belsley, D. A., Kuh, E., &amp; Welsch, R. E. (1980).
+<em>Regression Diagnostics</em>. Wiley.</p></li>
 </ul>
 <p><strong>Software</strong>:</p>
 <ul>
-<li>INLA: Rue, H., Martino, S., &amp; Chopin, N. (2009). Approximate
+<li><p>INLA: Rue, H., Martino, S., &amp; Chopin, N. (2009). Approximate
 Bayesian inference for latent Gaussian models. <em>Journal of the Royal
-Statistical Society: Series B</em>, 71(2), 319-392.</li>
-<li>mgcv: Wood, S. N. (2017). <em>Generalized Additive Models: An
-Introduction with R</em> (2nd ed.). Chapman and Hall/CRC.</li>
+Statistical Society: Series B</em>, 71(2), 319-392.</p></li>
+<li><p>mgcv: Wood, S. N. (2017). <em>Generalized Additive Models: An
+Introduction with R</em> (2nd ed.). Chapman and Hall/CRC.</p></li>
 </ul>
 <hr />
 <div id="see-also" class="section level2">
 <h2>See Also</h2>
 <ul>
-<li><code>vignette(&quot;quickstart&quot;)</code> - 5-minute introduction</li>
-<li><code>vignette(&quot;workflows&quot;)</code> - Real-world examples</li>
-<li><code>vignette(&quot;comparison&quot;)</code> - vs caret, Boruta, glmnet</li>
-<li><code>vignette(&quot;corrselect_vignette&quot;)</code> - Original exact
-methods vignette</li>
-<li><code>?corrPrune</code> - Association-based pruning</li>
-<li><code>?modelPrune</code> - Model-based pruning</li>
-<li><code>?corrSelect</code> - Exact subset enumeration</li>
+<li><p><code>vignette(&quot;quickstart&quot;)</code> - 5-minute
+introduction</p></li>
+<li><p><code>vignette(&quot;workflows&quot;)</code> - Real-world examples</p></li>
+<li><p><code>vignette(&quot;comparison&quot;)</code> - vs caret, Boruta,
+glmnet</p></li>
+<li><p><code>vignette(&quot;corrselect_vignette&quot;)</code> - Original exact
+methods vignette</p></li>
+<li><p><code>?corrPrune</code> - Association-based pruning</p></li>
+<li><p><code>?modelPrune</code> - Model-based pruning</p></li>
+<li><p><code>?corrSelect</code> - Exact subset enumeration</p></li>
 </ul>
 </div>
 <div id="session-info" class="section level2">
@@ -1663,28 +1678,27 @@ methods vignette</li>
 <span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
 <span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
-<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
-<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
-<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
-<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
-<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=en_US.UTF-8  LC_CTYPE=en_US.UTF-8    LC_MONETARY=en_US.UTF-8</span></span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C            LC_TIME=en_US.UTF-8    </span></span>
+<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
+<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
 <span id="cb36-15"><a href="#cb36-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-16"><a href="#cb36-16" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
-<span id="cb36-17"><a href="#cb36-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb36-16"><a href="#cb36-16" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb36-17"><a href="#cb36-17" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span id="cb36-18"><a href="#cb36-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-19"><a href="#cb36-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
-<span id="cb36-20"><a href="#cb36-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb36-19"><a href="#cb36-19" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb36-20"><a href="#cb36-20" tabindex="-1"></a><span class="co">#&gt; [1] microbenchmark_1.5.0 corrselect_3.2.1    </span></span>
 <span id="cb36-21"><a href="#cb36-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-22"><a href="#cb36-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
-<span id="cb36-23"><a href="#cb36-23" tabindex="-1"></a><span class="co">#&gt; [1] microbenchmark_1.5.0 corrselect_3.1.0    </span></span>
-<span id="cb36-24"><a href="#cb36-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-25"><a href="#cb36-25" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span id="cb36-26"><a href="#cb36-26" tabindex="-1"></a><span class="co">#&gt;  [1] digest_0.6.37     R6_2.6.1          fastmap_1.2.0     xfun_0.53        </span></span>
-<span id="cb36-27"><a href="#cb36-27" tabindex="-1"></a><span class="co">#&gt;  [5] cachem_1.1.0      knitr_1.50        htmltools_0.5.8.1 rmarkdown_2.30   </span></span>
-<span id="cb36-28"><a href="#cb36-28" tabindex="-1"></a><span class="co">#&gt;  [9] lifecycle_1.0.4   cli_3.6.5         svglite_2.2.2     sass_0.4.10      </span></span>
-<span id="cb36-29"><a href="#cb36-29" tabindex="-1"></a><span class="co">#&gt; [13] textshaping_1.0.3 jquerylib_0.1.4   systemfonts_1.3.1 compiler_4.5.2   </span></span>
-<span id="cb36-30"><a href="#cb36-30" tabindex="-1"></a><span class="co">#&gt; [17] tools_4.5.2       evaluate_1.0.5    bslib_0.9.0       Rcpp_1.1.0       </span></span>
-<span id="cb36-31"><a href="#cb36-31" tabindex="-1"></a><span class="co">#&gt; [21] yaml_2.3.10       rlang_1.1.6       jsonlite_2.0.0    MASS_7.3-65</span></span></code></pre></div>
+<span id="cb36-22"><a href="#cb36-22" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb36-23"><a href="#cb36-23" tabindex="-1"></a><span class="co">#&gt;  [1] vctrs_0.7.1       svglite_2.2.2     cli_3.6.5         knitr_1.51       </span></span>
+<span id="cb36-24"><a href="#cb36-24" tabindex="-1"></a><span class="co">#&gt;  [5] rlang_1.1.7       xfun_0.55         otel_0.2.0        textshaping_1.0.4</span></span>
+<span id="cb36-25"><a href="#cb36-25" tabindex="-1"></a><span class="co">#&gt;  [9] S7_0.2.1          jsonlite_2.0.0    glue_1.8.0        htmltools_0.5.9  </span></span>
+<span id="cb36-26"><a href="#cb36-26" tabindex="-1"></a><span class="co">#&gt; [13] sass_0.4.10       rmarkdown_2.30    evaluate_1.0.5    jquerylib_0.1.4  </span></span>
+<span id="cb36-27"><a href="#cb36-27" tabindex="-1"></a><span class="co">#&gt; [17] MASS_7.3-65       fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.5  </span></span>
+<span id="cb36-28"><a href="#cb36-28" tabindex="-1"></a><span class="co">#&gt; [21] compiler_4.5.2    Rcpp_1.1.1        systemfonts_1.3.1 digest_0.6.39    </span></span>
+<span id="cb36-29"><a href="#cb36-29" tabindex="-1"></a><span class="co">#&gt; [25] R6_2.6.1          pillar_1.11.1     bslib_0.9.0       tools_4.5.2      </span></span>
+<span id="cb36-30"><a href="#cb36-30" tabindex="-1"></a><span class="co">#&gt; [29] cachem_1.1.0</span></span></code></pre></div>
 </div>
 </div>
 
