@@ -9,17 +9,23 @@ NULL
 #'
 #' @param mat A numeric, symmetric matrix with 1s on the diagonal (e.g. correlation matrix).
 #'        Column names (if present) are used to label output variables.
-#' @param threshold A numeric scalar in (0, 1). Maximum allowed absolute pairwise value.
+#' @param threshold A numeric scalar in (0, 1]. Maximum allowed absolute pairwise value.
 #'        Defaults to \code{0.7}.
 #' @param method Character. Selection algorithm to use. One of \code{"els"} or
 #'        \code{"bron-kerbosch"}. If not specified, the function chooses automatically:
 #'        \code{"els"} when \code{force_in} is provided, otherwise \code{"bron-kerbosch"}.
 #' @param force_in Optional integer vector of 1-based column indices to force into every subset.
+#'        If the forced variables are themselves mutually correlated beyond \code{threshold},
+#'        \code{MatSelect()} warns (naming the offending pair) but still forces them into every
+#'        returned subset -- unlike \code{\link{corrPrune}()}, which treats this condition as
+#'        infeasible and errors instead.
 #' @param ... Additional arguments passed to the backend, e.g., \code{use_pivot} (logical)
 #'        for enabling pivoting in Bron–Kerbosch (ignored by ELS).
 #'
 #' @return An object of class \code{\link{CorrCombo}}, containing all valid subsets and their
-#' correlation statistics.
+#' correlation statistics. If every variable is pairwise correlated above \code{threshold},
+#' the only valid maximal subsets are single variables; these are returned with
+#' \code{min_corr}/\code{max_corr} set to \code{NA} (there is no pair to summarize).
 #'
 #' @examples
 #' set.seed(42)
@@ -36,8 +42,9 @@ NULL
 #' # Bron–Kerbosch with pivoting
 #' res3 <- MatSelect(cmat, threshold = 0.5, method = "bron-kerbosch", use_pivot = TRUE)
 #'
-#' # Force variable 1 into every subset (with warning if too correlated)
-#' res4 <- MatSelect(cmat, threshold = 0.5, force_in = 1)
+#' # Force variables 1 and 2 into every subset (warns if they are mutually
+#' # correlated beyond the threshold; both are still forced in regardless)
+#' res4 <- MatSelect(cmat, threshold = 0.5, force_in = c(1, 2))
 #'
 #' @export
 MatSelect <- function(mat,
@@ -60,11 +67,17 @@ MatSelect <- function(mat,
       force_in <- match(force_in, colnames(mat))
     }
     
-    # Now: must be valid 1-based indices
+    # Now: must be valid 1-based indices. Whole-number-ness is checked
+    # explicitly -- as.integer() truncates rather than rounds, so a
+    # non-integer index (e.g. from floating-point drift) would otherwise
+    # silently resolve to a different, valid column instead of erroring.
     if (!is.numeric(force_in) || anyNA(force_in) ||
+        any(force_in != as.integer(force_in)) ||
         any(force_in < 1) || any(force_in > ncol(mat))) {
       stop("`force_in` must be valid 1-based column indices or names.")
     }
+
+    force_in <- unique(force_in)
   } else {
     force_in <- integer(0)
   }
@@ -84,6 +97,13 @@ MatSelect <- function(mat,
   if (nrow(mat) != ncol(mat)) {
     stop("`mat` must be square.")
   }
+  if (ncol(mat) < 2) {
+    stop("`mat` must have at least two columns.")
+  }
+  if (anyDuplicated(colnames(mat))) {
+    stop("`mat` has duplicate column names: ",
+         paste(unique(colnames(mat)[duplicated(colnames(mat))]), collapse = ", "))
+  }
   if (anyNA(mat)) {
     stop("`mat` must not contain NA.")
   }
@@ -101,29 +121,47 @@ MatSelect <- function(mat,
   }
   n <- ncol(mat)
 
-  ## ---- force_in validation ----
-  if (!is.null(force_in)) {
-    if (!is.numeric(force_in) ||
-        any(force_in < 1) ||
-        any(force_in > n)) {
-      stop("`force_in` must be valid 1-based column indices.")
-    }
-  }
-
   ## ---- prepare names ----
   varnames   <- colnames(mat)
   if (is.null(varnames)) varnames <- paste0("V", seq_len(n))
   force_names <- if (!is.null(force_in)) varnames[force_in] else character()
 
   ## ---- warn if forced_in vars are too correlated internally ----
+  # MatSelect() honors an explicit force_in request even when it is
+  # internally incompatible with `threshold` -- unlike corrPrune(), which
+  # treats the same condition as infeasible and stop()s (see #98). This
+  # divergence is intentional: MatSelect() is the low-level enumeration
+  # primitive and force_in is a direct instruction, while corrPrune()
+  # promises a single subset that satisfies threshold. Naming the specific
+  # offending pair (rather than a generic message) still lets a caller who
+  # didn't intend this find out which variables and by how much.
   if (length(force_names) > 1) {
     submat <- abs(mat[force_in, force_in, drop = FALSE])
-    cors   <- submat[upper.tri(submat)]
-    if (any(cors > threshold, na.rm = TRUE)) {
-      warning(
-        "Variables in `force_in` are mutually correlated beyond the threshold. ",
-        "They will still be forced into all subsets."
-      )
+    bad <- which(upper.tri(submat) & submat > threshold, arr.ind = TRUE)
+    if (nrow(bad) > 0) {
+      var1 <- force_names[bad[1, 1]]
+      var2 <- force_names[bad[1, 2]]
+      bad_val <- submat[bad[1, 1], bad[1, 2]]
+      warning(sprintf(
+        "Variables in `force_in` are mutually correlated beyond the threshold. Example: '%s' and '%s' have association %.3f > %.3f. They will still be forced into all subsets.",
+        var1, var2, bad_val, threshold
+      ))
+    }
+  }
+
+  ## ---- warn about possible combinatorial blowup ----
+  # Exhaustive maximal-subset enumeration is worst-case exponential in the
+  # number of variables. Only warn when that's actually plausible: a large
+  # variable count *and* a permissive-enough threshold that a large share of
+  # pairs are compatible (a strict threshold keeps the compatibility graph
+  # sparse, where blowup isn't a practical risk).
+  if (n > 100) {
+    compat_density <- mean(abs(mat[upper.tri(mat)]) <= threshold)
+    if (compat_density > 0.3) {
+      warning(sprintf(
+        "%d variables with %.0f%% of pairs at or below the threshold: exhaustive maximal-subset enumeration can be exponential in the worst case. Consider corrPrune(mode = \"greedy\") for large variable counts.",
+        n, 100 * compat_density
+      ))
     }
   }
 
@@ -131,12 +169,18 @@ MatSelect <- function(mat,
   dots      <- list(...)
   use_pivot <- TRUE
   if ("use_pivot" %in% names(dots)) {
-    tmp <- as.logical(dots$use_pivot)
-    if (length(tmp) > 0 && !is.na(tmp[1])) use_pivot <- tmp[1]
+    tmp <- suppressWarnings(as.logical(dots$use_pivot))
+    if (length(tmp) != 1 || is.na(tmp)) {
+      stop("`use_pivot` must be a single TRUE/FALSE value.")
+    }
+    use_pivot <- tmp
+    if (method == "els") {
+      warning("`use_pivot` has no effect when method = \"els\" (ELS always uses pivoting internally); the supplied value is ignored.")
+    }
   }
 
   ## ---- dispatch to C/C++ backend ----
-  raw_out <- findAllMaxSets(
+  raw_out <- .findAllMaxSetsR(
     corMatrix = mat,
     threshold = threshold,
     method    = method,
@@ -145,24 +189,22 @@ MatSelect <- function(mat,
   )
 
   ## ---- extract combos & avg_corr ----
-  if (is.list(raw_out) &&
-      length(raw_out) > 0 &&
-      is.list(raw_out[[1]]) &&
-      all(c("combo", "avg_corr") %in% names(raw_out[[1]]))) {
-    combos <- lapply(raw_out, `[[`, "combo")
-    avg    <- vapply(raw_out, `[[`, numeric(1), "avg_corr")
-  } else if (is.list(raw_out) && all(vapply(raw_out, is.integer, logical(1)))) {
-    combos <- raw_out
-    avg    <- rep(NA_real_, length(combos))
-  } else {
+  # findAllMaxSets() (src/corrselect_main.cpp) always returns either an empty
+  # list or a list of list(combo=, avg_corr=) elements -- there is no other
+  # shape to guard against. An unexpected shape here means the C++ contract
+  # changed without this extraction being updated to match.
+  if (length(raw_out) == 0L) {
     combos <- list()
     avg    <- numeric()
+  } else if (is.list(raw_out) &&
+             is.list(raw_out[[1]]) &&
+             all(c("combo", "avg_corr") %in% names(raw_out[[1]]))) {
+    combos <- lapply(raw_out, `[[`, "combo")
+    avg    <- vapply(raw_out, `[[`, numeric(1), "avg_corr")
+  } else {
+    stop("Internal error: unexpected return shape from findAllMaxSets(). ",
+         "Expected a list of list(combo=, avg_corr=) elements.")
   }
-
-  ## ---- drop singletons ----
-  keep <- vapply(combos, length, integer(1)) > 1L
-  combos <- combos[keep]
-  avg    <- avg[keep]
 
   ## ---- empty-result early return ----
   if (length(combos) == 0L) {
@@ -175,7 +217,7 @@ MatSelect <- function(mat,
                threshold   = threshold,
                forced_in   = force_names,
                search_type = method,
-               n_rows_used = as.integer(n)))
+               n_rows_used = NA_integer_))
   }
 
   ## ---- map indices to names ----
@@ -183,6 +225,10 @@ MatSelect <- function(mat,
 
   ## ---- compute min/max correlations ----
   get_minmax <- function(idx) {
+    # A size-1 subset has no pairwise correlation to report.
+    if (length(idx) < 2L) {
+      return(c(NA_real_, NA_real_))
+    }
     sub <- abs(mat[idx, idx])
     cors <- sub[lower.tri(sub)]
     c(min(cors, na.rm = TRUE), max(cors, na.rm = TRUE))
@@ -199,7 +245,7 @@ MatSelect <- function(mat,
                 threshold   = threshold,
                 forced_in   = force_names,
                 search_type = method,
-                n_rows_used = as.integer(n))
+                n_rows_used = NA_integer_)
 
   if (method == "bron-kerbosch") {
     attr(result, "use_pivot") <- use_pivot

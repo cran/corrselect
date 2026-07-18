@@ -3,6 +3,8 @@
 \name{CorrCombo}
 \alias{CorrCombo}
 \alias{print.CorrCombo}
+\alias{summary.CorrCombo}
+\alias{print.summary.CorrCombo}
 \title{CorrCombo Class}
 \usage{
 CorrCombo(
@@ -19,6 +21,10 @@ CorrCombo(
 )
 
 \method{print}{CorrCombo}(x, ...)
+
+\method{summary}{CorrCombo}(object, ...)
+
+\method{print}{summary.CorrCombo}(x, ...)
 }
 \arguments{
 \item{subset_list}{A list of character vectors. Each vector is a valid subset (variable names).}
@@ -39,11 +45,13 @@ CorrCombo(
 
 \item{cor_method}{Character string. Correlation method or \code{"mixed"}. Defaults to \code{character()}.}
 
-\item{n_rows_used}{Integer. Number of rows used for computing the correlation matrix.}
+\item{n_rows_used}{Integer. Number of rows used for computing the correlation matrix. \code{NA} for matrix input.}
 
-\item{x}{A \code{CorrCombo} object to be printed.}
+\item{x}{A \code{summary.CorrCombo} object to be printed.}
 
 \item{...}{Additional arguments (ignored).}
+
+\item{object}{A \code{CorrCombo} object to summarize.}
 }
 \description{
 Holds the result of \code{\link{corrSelect}} or \code{\link{MatSelect}}: a list of valid variable combinations
@@ -65,7 +73,7 @@ Properties:
 \item{forced_in}{Character vector. Variable names that were forced into each subset.}
 \item{search_type}{Character string. One of \code{"els"} or \code{"bron-kerbosch"}.}
 \item{cor_method}{Character string. Either a single method (e.g. "pearson") or "mixed" if multiple methods used.}
-\item{n_rows_used}{Integer. Number of rows used for computing the correlation matrix (after removing missing values).}
+\item{n_rows_used}{Integer. Number of rows used for computing the correlation matrix (after removing missing values). \code{NA} when constructed from a matrix directly (e.g. via \code{\link{MatSelect}}), since a matrix input has no associated row count.}
 }
 }
 \examples{

@@ -60,6 +60,48 @@ test_that("show() prints use_pivot when set for bron-kerbosch", {
   expect_output(print(combo), "bron-kerbosch")
 })
 
+test_that("summary() reports aggregate stats across all subsets, distinct from print() (#57)", {
+  combo <- CorrCombo(
+               subset_list = list(c("X1", "X2", "X3"), c("X1", "X2"), c("X3", "X4")),
+               avg_corr = c(0.1, 0.2, 0.3),
+               min_corr = c(0.05, 0.15, 0.25),
+               max_corr = c(0.2, 0.25, 0.35),
+               var_names = paste0("X", 1:4),
+               threshold = 0.4,
+               forced_in = "X1",
+               search_type = "els",
+               cor_method = "pearson",
+               n_rows_used = 50L)
+
+  s <- summary(combo)
+  expect_s3_class(s, "summary.CorrCombo")
+  expect_equal(s$n_subsets, 3L)
+  expect_equal(s$size_range, c(2L, 3L))
+  expect_equal(s$size_median, 2)
+  expect_equal(s$avg_corr_range, c(0.1, 0.3))
+  expect_equal(s$n_max_size, 1L)
+
+  expect_output(print(s), "CorrCombo summary")
+  expect_output(print(s), "min 2, median 2.0, max 3")
+})
+
+test_that("summary() handles an empty CorrCombo", {
+  combo <- CorrCombo(
+               subset_list = list(),
+               avg_corr = numeric(),
+               min_corr = numeric(),
+               max_corr = numeric(),
+               var_names = letters[1:5],
+               threshold = 0.4,
+               forced_in = character(),
+               search_type = "els",
+               n_rows_used = 5L)
+
+  s <- summary(combo)
+  expect_equal(s$n_subsets, 0L)
+  expect_output(print(s), "0 maximal subsets")
+})
+
 test_that("as.data.frame() returns a padded data frame", {
   combo <- CorrCombo(
                subset_list = list(c("A", "B"), c("C", "D", "E")),
@@ -136,6 +178,35 @@ test_that("show() truncates long variable strings gracefully", {
                search_type = "els",
                n_rows_used = 20L)
   expect_output(print(combo), "...")
+})
+
+test_that("show() truncates the post-abbreviation string past 32 characters (#82)", {
+  # With short names ("V1, V2, ..."), the >6-variables abbreviation alone
+  # already fits under 32 characters, so this exercises a different branch:
+  # long names push the abbreviated 6-variable string itself past 32
+  # characters, requiring the second substr()-based truncation.
+  vars <- paste0("LongVariableName", sprintf("%02d", 1:10))
+  abbreviated <- paste(c(vars[1:6], "..."), collapse = ", ")
+  expect_true(nchar(abbreviated) > 32)
+
+  combo <- CorrCombo(
+               subset_list = list(vars),
+               avg_corr = 0.5,
+               min_corr = 0.1,
+               max_corr = 0.9,
+               var_names = vars,
+               threshold = 0.5,
+               forced_in = character(),
+               search_type = "els",
+               n_rows_used = 20L)
+
+  output <- capture.output(print(combo))
+  combo_line <- output[grepl("^\\s*\\[ ?1\\]", output)]
+  expect_length(combo_line, 1)
+  # 6-variable abbreviation (123 chars) truncated a second time to
+  # substr(., 1, 29) + "..." (32 chars), not the full abbreviated string.
+  expect_match(combo_line, "LongVariableName01, LongVaria\\.\\.\\.", fixed = FALSE)
+  expect_false(grepl("LongVariableName06", combo_line, fixed = TRUE))
 })
 
 test_that("CorrCombo construction fails with mismatched property lengths", {

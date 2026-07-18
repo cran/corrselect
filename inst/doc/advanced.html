@@ -12,7 +12,7 @@
 
 <meta name="author" content="Gilles Colling" />
 
-<meta name="date" content="2026-03-23" />
+<meta name="date" content="2026-07-18" />
 
 <title>Advanced Topics</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Advanced Topics</h1>
 <h4 class="author">Gilles Colling</h4>
-<h4 class="date">2026-03-23</h4>
+<h4 class="date">2026-07-18</h4>
 
 
 
@@ -375,9 +375,11 @@ programming and statistical methods</p>
 <div id="exact-mode-graph-theoretic" class="section level3">
 <h3>Exact Mode (Graph-Theoretic)</h3>
 <p><strong>Algorithm</strong>: Eppstein–Löffler–Strash (ELS) or
-Bron–Kerbosch <strong>Complexity</strong>: O(2^p) - exponential in
-number of predictors <strong>Guarantee</strong>: Finds the
-<strong>largest</strong> maximal independent set</p>
+Bron–Kerbosch <strong>Complexity</strong>: O(3^(p/3)) for Bron-Kerbosch,
+O(d * 3^(d/3)) for ELS (d = degeneracy) - exponential in number of
+predictors, tighter than the naive O(2^p) enumeration bound
+<strong>Guarantee</strong>: Finds the <strong>largest</strong> maximal
+independent set</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(mtcars)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Exact mode: guaranteed optimal</span></span>
@@ -386,7 +388,8 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; Exact mode kept: 5 variables</span></span></code></pre></div>
 <p><strong>Use exact mode when</strong>:</p>
 <ul>
-<li><p>p ≤ 20 (feasible runtime)</p></li>
+<li><p>p &lt;= 100 (feasible runtime; this is <code>corrPrune()</code>’s
+default <code>max_exact_p</code>)</p></li>
 <li><p>You need guaranteed optimal solution</p></li>
 <li><p>Reproducibility is critical</p></li>
 <li><p>You’re writing a paper (justify optimality)</p></li>
@@ -403,16 +406,18 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Greedy mode kept: 5 variables</span></span></code></pre></div>
 <p><strong>Use greedy mode when</strong>:</p>
 <ul>
-<li><p>p &gt; 20 (exact becomes slow)</p></li>
+<li><p>p &gt; 100 (exact becomes slow; raise <code>max_exact_p</code> to
+push this boundary higher)</p></li>
 <li><p>Speed is priority</p></li>
 <li><p>Near-optimal is acceptable</p></li>
-<li><p>High-dimensional data (p &gt; 100)</p></li>
+<li><p>High-dimensional data (several hundred variables or
+more)</p></li>
 </ul>
 </div>
 <div id="auto-mode-recommended" class="section level3">
 <h3>Auto Mode (Recommended)</h3>
 <p>Automatically selects based on p:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Auto mode: smart switching (exact if p ≤ 20, greedy otherwise)</span></span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Auto mode: smart switching (exact if p &lt;= max_exact_p [default 100], greedy otherwise)</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>auto_result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(mtcars, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">mode =</span> <span class="st">&quot;auto&quot;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Auto mode kept:&quot;</span>, <span class="fu">ncol</span>(auto_result), <span class="st">&quot;variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; Auto mode kept: 5 variables</span></span></code></pre></div>
@@ -422,62 +427,95 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <h2>1.2 Complexity Analysis with Benchmarks</h2>
 <p>Let’s measure runtime scaling:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Generate datasets with increasing p</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">library</span>(microbenchmark)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>benchmark_corrPrune <span class="ot">&lt;-</span> <span class="cf">function</span>(p_values) {</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">p =</span> <span class="fu">integer</span>(),</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">exact_time_ms =</span> <span class="fu">numeric</span>(),</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    <span class="at">greedy_time_ms =</span> <span class="fu">numeric</span>()</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  )</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="cf">for</span> (p <span class="cf">in</span> p_values) {</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="co"># Generate correlated data</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    cor_mat <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">^</span><span class="fu">abs</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;-&quot;</span>))</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>    data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mu =</span> <span class="fu">rep</span>(<span class="dv">0</span>, p), <span class="at">Sigma =</span> cor_mat))</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    <span class="co"># Exact mode (skip if p too large)</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    exact_time_ms <span class="ot">&lt;-</span> <span class="cf">if</span> (p <span class="sc">&lt;=</span> <span class="dv">500</span>) {</span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>      <span class="fu">median</span>(<span class="fu">microbenchmark</span>(</span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>        <span class="fu">corrPrune</span>(data, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">mode =</span> <span class="st">&quot;exact&quot;</span>),</span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>        <span class="at">times =</span> <span class="dv">3</span>,  <span class="co"># Few iterations for speed</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>        <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>      )<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>      <span class="cn">NA</span></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>    }</span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a></span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>    <span class="co"># Greedy mode</span></span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>    greedy_time_ms <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">microbenchmark</span>(</span>
-<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>      <span class="fu">corrPrune</span>(data, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">mode =</span> <span class="st">&quot;greedy&quot;</span>),</span>
-<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>      <span class="at">times =</span> <span class="dv">3</span>,  <span class="co"># Few iterations for speed</span></span>
-<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>      <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span></span>
-<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>    )<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
-<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a></span>
-<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(results, <span class="fu">data.frame</span>(</span>
-<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>      <span class="at">p =</span> p,</span>
-<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>      <span class="at">exact_time_ms =</span> <span class="fu">round</span>(exact_time_ms, <span class="dv">1</span>),</span>
-<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>      <span class="at">greedy_time_ms =</span> <span class="fu">round</span>(greedy_time_ms, <span class="dv">1</span>)</span>
-<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>    ))</span>
-<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a>  }</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>benchmark_corrPrune <span class="ot">&lt;-</span> <span class="cf">function</span>(p_values) {</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">p =</span> <span class="fu">integer</span>(),</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">exact_time_ms =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">greedy_time_ms =</span> <span class="fu">numeric</span>()</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  )</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="cf">for</span> (p <span class="cf">in</span> p_values) {</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    <span class="co"># Generate correlated data</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    cor_mat <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">^</span><span class="fu">abs</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;-&quot;</span>))</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mu =</span> <span class="fu">rep</span>(<span class="dv">0</span>, p), <span class="at">Sigma =</span> cor_mat))</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>    <span class="co"># Exact mode (skip if p too large), median of 3 runs</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    exact_time_ms <span class="ot">&lt;-</span> <span class="cf">if</span> (p <span class="sc">&lt;=</span> <span class="dv">500</span>) {</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>      times <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(i) {</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>        <span class="fu">system.time</span>(<span class="fu">corrPrune</span>(data, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">mode =</span> <span class="st">&quot;exact&quot;</span>))[<span class="st">&quot;elapsed&quot;</span>]</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>      })</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>      <span class="fu">median</span>(times) <span class="sc">*</span> <span class="dv">1000</span>  <span class="co"># seconds -&gt; milliseconds</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>      <span class="cn">NA</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>    }</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>    <span class="co"># Greedy mode, median of 3 runs</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>    greedy_times_ms <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(i) {</span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>      <span class="fu">system.time</span>(<span class="fu">corrPrune</span>(data, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">mode =</span> <span class="st">&quot;greedy&quot;</span>))[<span class="st">&quot;elapsed&quot;</span>]</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>    })</span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>    greedy_time_ms <span class="ot">&lt;-</span> <span class="fu">median</span>(greedy_times_ms) <span class="sc">*</span> <span class="dv">1000</span>  <span class="co"># seconds -&gt; milliseconds</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(results, <span class="fu">data.frame</span>(</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>      <span class="at">p =</span> p,</span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>      <span class="at">exact_time_ms =</span> <span class="fu">round</span>(exact_time_ms, <span class="dv">1</span>),</span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>      <span class="at">greedy_time_ms =</span> <span class="fu">round</span>(greedy_time_ms, <span class="dv">1</span>)</span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>    ))</span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>  }</span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>  results</span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a>}</span>
 <span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a></span>
-<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>  results</span>
-<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>}</span>
-<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a></span>
-<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a><span class="co"># Benchmark (extended range to show comprehensive scaling behavior)</span></span>
-<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">500</span>, <span class="dv">1000</span>)</span>
-<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>benchmark <span class="ot">&lt;-</span> <span class="fu">benchmark_corrPrune</span>(p_values)</span>
-<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="fu">print</span>(benchmark)</span>
-<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt;      p exact_time_ms greedy_time_ms</span></span>
-<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; 1   10           0.5            0.3</span></span>
-<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; 2   20           0.6            0.4</span></span>
-<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; 3   50           1.2            0.7</span></span>
-<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; 4  100           2.0            1.6</span></span>
-<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; 5  200           5.5            3.2</span></span>
-<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; 6  300          13.2            5.7</span></span>
-<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; 7  500          33.7           13.4</span></span>
-<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; 8 1000            NA           46.9</span></span></code></pre></div>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a><span class="co"># Benchmark (extended range to show comprehensive scaling behavior)</span></span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">500</span>, <span class="dv">1000</span>)</span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>benchmark <span class="ot">&lt;-</span> <span class="fu">benchmark_corrPrune</span>(p_values)</span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 200</span></span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 200</span></span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 200</span></span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 300</span></span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 300</span></span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 300</span></span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 500</span></span>
+<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 500</span></span>
+<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-76"><a href="#cb4-76" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-77"><a href="#cb4-77" tabindex="-1"></a><span class="co">#&gt; Warning in MatSelect(mat = A_eff, threshold = threshold, method = NULL, : 500</span></span>
+<span id="cb4-78"><a href="#cb4-78" tabindex="-1"></a><span class="co">#&gt; variables with 100% of pairs at or below the threshold: exhaustive</span></span>
+<span id="cb4-79"><a href="#cb4-79" tabindex="-1"></a><span class="co">#&gt; maximal-subset enumeration can be exponential in the worst case. Consider</span></span>
+<span id="cb4-80"><a href="#cb4-80" tabindex="-1"></a><span class="co">#&gt; corrPrune(mode = &quot;greedy&quot;) for large variable counts.</span></span>
+<span id="cb4-81"><a href="#cb4-81" tabindex="-1"></a><span class="fu">print</span>(benchmark)</span>
+<span id="cb4-82"><a href="#cb4-82" tabindex="-1"></a><span class="co">#&gt;      p exact_time_ms greedy_time_ms</span></span>
+<span id="cb4-83"><a href="#cb4-83" tabindex="-1"></a><span class="co">#&gt; 1   10             0              0</span></span>
+<span id="cb4-84"><a href="#cb4-84" tabindex="-1"></a><span class="co">#&gt; 2   20             0              0</span></span>
+<span id="cb4-85"><a href="#cb4-85" tabindex="-1"></a><span class="co">#&gt; 3   50             0              0</span></span>
+<span id="cb4-86"><a href="#cb4-86" tabindex="-1"></a><span class="co">#&gt; 4  100             0             10</span></span>
+<span id="cb4-87"><a href="#cb4-87" tabindex="-1"></a><span class="co">#&gt; 5  200            10              0</span></span>
+<span id="cb4-88"><a href="#cb4-88" tabindex="-1"></a><span class="co">#&gt; 6  300            30             10</span></span>
+<span id="cb4-89"><a href="#cb4-89" tabindex="-1"></a><span class="co">#&gt; 7  500           110             30</span></span>
+<span id="cb4-90"><a href="#cb4-90" tabindex="-1"></a><span class="co">#&gt; 8 1000            NA             90</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Visualize scaling</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Separate data for exact mode (only where available) and greedy mode (all points)</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>exact_valid <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(benchmark<span class="sc">$</span>exact_time_ms) <span class="sc">&amp;</span> benchmark<span class="sc">$</span>exact_time_ms <span class="sc">&gt;</span> <span class="dv">0</span></span>
@@ -518,7 +556,7 @@ number of predictors <strong>Guarantee</strong>: Finds the
 <span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="dv">2</span>,</span>
 <span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;o&quot;</span>,</span>
 <span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>       <span class="at">bg =</span> <span class="st">&quot;white&quot;</span>)</span></code></pre></div>
-<p><img role="img" aria-label="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE5Ua3VNRFI4TlRRMUxqYzJmRFU1TGpBMGZESTROaTQxTmc9PSc+CiAgICA8cmVjdCB4PSc1OS4wNCcgeT0nNTkuMDQnIHdpZHRoPSc0ODYuNzInIGhlaWdodD0nMjI3LjUyJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRrdU1EUjhOVFExTGpjMmZEVTVMakEwZkRJNE5pNDFOZz09KSc+CjxsaW5lIHgxPSc4NS45MicgeTE9JzI0MC4yNycgeDI9JzkwLjk3JyB5Mj0nMjMzLjUwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7JyAvPgo8bGluZSB4MT0nOTkuOTEnIHkxPScyMjIuMjInIHgyPScxMTMuNDAnIHkyPScyMDYuMTknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScxMjQuNDgnIHkxPScxOTcuNDcnIHgyPScxNTcuMTEnIHkyPScxODEuMjEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScxNzAuMjEnIHkxPScxNzUuMjQnIHgyPScyMDIuNDMnIHkyPScxNjEuODcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScyMTUuOTYnIHkxPScxNTYuOTknIHgyPScyOTMuMjQnIHkyPScxMzMuMjUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPSczMDcuMjEnIHkxPScxMjkuODYnIHgyPSc1MjAuNjUnIHkyPSc5MS40Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nNzcuMDcnIGN5PScyNTUuNDUnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzgxLjYyJyBjeT0nMjQ2LjA0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc5NS4yOCcgY3k9JzIyNy43Mycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nMTE4LjA0JyBjeT0nMjAwLjY4JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PScxNjMuNTYnIGN5PScxNzguMDAnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzIwOS4wOCcgY3k9JzE1OS4xMScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nMzAwLjEyJyBjeT0nMTMxLjE0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSc1MjcuNzMnIGN5PSc5MC4xNScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSknPgo8bGluZSB4MT0nNzIuNTEnIHkxPScyODYuNTYnIHgyPSc1MjcuNzMnIHkyPScyODYuNTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNzIuNTEnIHkxPScyODYuNTYnIHgyPSc3Mi41MScgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScxNjMuNTYnIHkxPScyODYuNTYnIHgyPScxNjMuNTYnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMjU0LjYwJyB5MT0nMjg2LjU2JyB4Mj0nMjU0LjYwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM0NS42NScgeTE9JzI4Ni41NicgeDI9JzM0NS42NScgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc0MzYuNjknIHkxPScyODYuNTYnIHgyPSc0MzYuNjknIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTI3LjczJyB5MT0nMjg2LjU2JyB4Mj0nNTI3LjczJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgeD0nNzIuNTEnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MDwvdGV4dD4KPHRleHQgeD0nMTYzLjU2JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4yMDA8L3RleHQ+Cjx0ZXh0IHg9JzI1NC42MCcgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NDAwPC90ZXh0Pgo8dGV4dCB4PSczNDUuNjUnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjYwMDwvdGV4dD4KPHRleHQgeD0nNDM2LjY5JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz44MDA8L3RleHQ+Cjx0ZXh0IHg9JzUyNy43MycgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI2LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTAwMDwvdGV4dD4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjY4LjcyJyB4Mj0nNTkuMDQnIHkyPSc2NS4zNycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI2OC43MicgeDI9JzUxLjg0JyB5Mj0nMjY4LjcyJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjM4Ljc0JyB4Mj0nNTEuODQnIHkyPScyMzguNzQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyMTYuMDYnIHgyPSc1MS44NCcgeTI9JzIxNi4wNicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzE5My4zOCcgeDI9JzUxLjg0JyB5Mj0nMTkzLjM4JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMTYzLjQwJyB4Mj0nNTEuODQnIHkyPScxNjMuNDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScxNDAuNzInIHgyPSc1MS44NCcgeTI9JzE0MC43Micgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzExOC4wMycgeDI9JzUxLjg0JyB5Mj0nMTE4LjAzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nODguMDUnIHgyPSc1MS44NCcgeTI9Jzg4LjA1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nNjUuMzcnIHgyPSc1MS44NCcgeTI9JzY1LjM3JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjY4LjcyKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuMjwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMjM4Ljc0KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjAuNTwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTkzLjM4KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjIuMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTYzLjQwKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNi42N3B4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjUuMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTE4LjAzKSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMy4zNHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjIwLjA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDY1LjM3KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSczMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjEwMC4wPC90ZXh0Pgo8cG9seWdvbiBwb2ludHM9JzU5LjA0LDI4Ni41NiA1NDUuNzYsMjg2LjU2IDU0NS43Niw1OS4wNCA1OS4wNCw1OS4wNCAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB4PSczMDIuNDAnIHk9JzM0LjY3JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxNC40MHB4OyBmb250LXdlaWdodDogYm9sZDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxNjcuMTZweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5FeGFjdCB2cyBHcmVlZHkgU2NhbGluZzwvdGV4dD4KPHRleHQgeD0nMzAyLjQwJyB5PSczNDEuMjgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMxLjM2cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+TnVtYmVyIG9mIFByZWRpY3RvcnMgKHApPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSgxMi45NiwxNzIuODApIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE1Ni45NXB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPlRpbWUgKG1pbGxpc2Vjb25kcywgbG9nIHNjYWxlKTwvdGV4dD4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BOVGt1TURSOE5UUTFMamMyZkRVNUxqQTBmREk0Tmk0MU5nPT0pJz4KPGxpbmUgeDE9Jzg1LjMzJyB5MT0nMjI2LjYwJyB4Mj0nOTEuNTYnIHkyPScyMTYuMjYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScxMDEuMDgnIHkxPScyMDUuODMnIHgyPScxMTIuMjMnIHkyPScxOTcuNjQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScxMjMuODYnIHkxPScxODkuMTQnIHgyPScxNTcuNzMnIHkyPScxNjQuNTEnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScxNjkuNjUnIHkxPScxNTYuNDQnIHgyPScyMDIuOTknIHkyPScxMzUuNDcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxsaW5lIHgxPScyMTUuOTAnIHkxPScxMjkuMzMnIHgyPScyOTMuMzAnIHkyPScxMDMuMjYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9Jzc3LjA3JyBjeT0nMjM4Ljc0JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PSc4MS42MicgY3k9JzIzMi43Nycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nOTUuMjgnIGN5PScyMTAuMDknIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzExOC4wNCcgY3k9JzE5My4zOCcgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nMTYzLjU2JyBjeT0nMTYwLjI4JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PScyMDkuMDgnIGN5PScxMzEuNjMnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzMwMC4xMicgY3k9JzEwMC45Nicgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGxpbmUgeDE9JzMwMC4xMicgeTE9JzI4Ni41NicgeDI9JzMwMC4xMicgeTI9JzU5LjA0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBzdHJva2U6ICM3RjdGN0Y7IHN0cm9rZS1kYXNoYXJyYXk6IDQuMDAsNC4wMDsnIC8+Cjx0ZXh0IHg9JzMwNy4zMicgeT0nOTMuMDEnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7ZmlsbDogIzRENEQ0RDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc4OC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0IG1vZGUgbGltaXQ8L3RleHQ+CjxyZWN0IHg9JzU5LjA0JyB5PSc1OS4wNCcgd2lkdGg9JzgwLjM4JyBoZWlnaHQ9JzQzLjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkZGRkZGOycgLz4KPGxpbmUgeDE9JzYyLjI4JyB5MT0nNzMuNDQnIHgyPSc4My44OCcgeTI9JzczLjQ0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nNjIuMjgnIHkxPSc4Ny44NCcgeDI9JzgzLjg4JyB5Mj0nODcuODQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nNzMuNDQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nODcuODQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+Cjx0ZXh0IHg9Jzk0LjY4JyB5PSc3Ny43NCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSczMC4wMHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0PC90ZXh0Pgo8dGV4dCB4PSc5NC42OCcgeT0nOTIuMTQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzkuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5HcmVlZHk8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." /></p>
+<p><img role="img" aria-label="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnID8+CjxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzU3Ni4wMHB0JyBoZWlnaHQ9JzM2MC4wMHB0JyB2aWV3Qm94PScwIDAgNTc2LjAwIDM2MC4wMCc+CjxnIGNsYXNzPSdzdmdsaXRlJz4KPGRlZnM+CiAgPHN0eWxlIHR5cGU9J3RleHQvY3NzJz48IVtDREFUQVsKICAgIC5zdmdsaXRlIGxpbmUsIC5zdmdsaXRlIHBvbHlsaW5lLCAuc3ZnbGl0ZSBwb2x5Z29uLCAuc3ZnbGl0ZSBwYXRoLCAuc3ZnbGl0ZSByZWN0LCAuc3ZnbGl0ZSBjaXJjbGUgewogICAgICBmaWxsOiBub25lOwogICAgICBzdHJva2U6ICMwMDAwMDA7CiAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsKICAgICAgc3Ryb2tlLW1pdGVybGltaXQ6IDEwLjAwOwogICAgfQogICAgLnN2Z2xpdGUgdGV4dCB7CiAgICAgIHdoaXRlLXNwYWNlOiBwcmU7CiAgICB9CiAgICAuc3ZnbGl0ZSBnLmdseXBoZ3JvdXAgcGF0aCB7CiAgICAgIGZpbGw6IGluaGVyaXQ7CiAgICAgIHN0cm9rZTogbm9uZTsKICAgIH0KICBdXT48L3N0eWxlPgo8L2RlZnM+CjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHN0eWxlPSdzdHJva2U6IG5vbmU7IGZpbGw6ICNGRkZGRkY7Jy8+CjxkZWZzPgogIDxjbGlwUGF0aCBpZD0nY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSc+CiAgICA8cmVjdCB4PScwLjAwJyB5PScwLjAwJyB3aWR0aD0nNTc2LjAwJyBoZWlnaHQ9JzM2MC4wMCcgLz4KICA8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE1DNHdNSHcxTnpZdU1EQjhNQzR3TUh3ek5qQXVNREE9KSc+CjwvZz4KPGRlZnM+CiAgPGNsaXBQYXRoIGlkPSdjcE5Ua3VNRFI4TlRRMUxqYzJmRFU1TGpBMGZESTROaTQxTmc9PSc+CiAgICA8cmVjdCB4PSc1OS4wNCcgeT0nNTkuMDQnIHdpZHRoPSc0ODYuNzInIGhlaWdodD0nMjI3LjUyJyAvPgogIDwvY2xpcFBhdGg+CjwvZGVmcz4KPGcgY2xpcC1wYXRoPSd1cmwoI2NwTlRrdU1EUjhOVFExTGpjMmZEVTVMakEwZkRJNE5pNDFOZz09KSc+CjxsaW5lIHgxPScxMjUuMjQnIHkxPScyMzkuNTUnIHgyPScyMDEuODgnIHkyPScyMzkuNTUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPScyMTUuMDYnIHkxPScyMzUuNTMnIHgyPScyOTQuMTUnIHkyPScxODIuNDAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxsaW5lIHgxPSczMDcuMDgnIHkxPScxNzYuNTInIHgyPSc1MjAuNzgnIHkyPScxMTkuMDknIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzExOC4wNCcgY3k9JzIzOS41NScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPGNpcmNsZSBjeD0nMjA5LjA4JyBjeT0nMjM5LjU1JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICMzMzgwQ0M7IGZpbGw6ICMzMzgwQ0M7JyAvPgo8Y2lyY2xlIGN4PSczMDAuMTInIGN5PScxNzguMzknIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzUyNy43MycgY3k9JzExNy4yMycgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjMzM4MENDOyBmaWxsOiAjMzM4MENDOycgLz4KPC9nPgo8ZyBjbGlwLXBhdGg9J3VybCgjY3BNQzR3TUh3MU56WXVNREI4TUM0d01Id3pOakF1TURBPSknPgo8bGluZSB4MT0nNzIuNTEnIHkxPScyODYuNTYnIHgyPSc1MjcuNzMnIHkyPScyODYuNTYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNzIuNTEnIHkxPScyODYuNTYnIHgyPSc3Mi41MScgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPScxNjMuNTYnIHkxPScyODYuNTYnIHgyPScxNjMuNTYnIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nMjU0LjYwJyB5MT0nMjg2LjU2JyB4Mj0nMjU0LjYwJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzM0NS42NScgeTE9JzI4Ni41NicgeDI9JzM0NS42NScgeTI9JzI5My43Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc0MzYuNjknIHkxPScyODYuNTYnIHgyPSc0MzYuNjknIHkyPScyOTMuNzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTI3LjczJyB5MT0nMjg2LjU2JyB4Mj0nNTI3LjczJyB5Mj0nMjkzLjc2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPHRleHQgeD0nNzIuNTEnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc2LjY3cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MDwvdGV4dD4KPHRleHQgeD0nMTYzLjU2JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4yMDA8L3RleHQ+Cjx0ZXh0IHg9JzI1NC42MCcgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+NDAwPC90ZXh0Pgo8dGV4dCB4PSczNDUuNjUnIHk9JzMxMi40OCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScyMC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjYwMDwvdGV4dD4KPHRleHQgeD0nNDM2LjY5JyB5PSczMTIuNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz44MDA8L3RleHQ+Cjx0ZXh0IHg9JzUyNy43MycgeT0nMzEyLjQ4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzI2LjY5cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTAwMDwvdGV4dD4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjc4LjEzJyB4Mj0nNTkuMDQnIHkyPSc3Mi43Nycgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzI3OC4xMycgeDI9JzUxLjg0JyB5Mj0nMjc4LjEzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMjM5LjU1JyB4Mj0nNTEuODQnIHkyPScyMzkuNTUnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPScyMDAuOTYnIHgyPSc1MS44NCcgeTI9JzIwMC45Nicgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+CjxsaW5lIHgxPSc1OS4wNCcgeTE9JzE0OS45NScgeDI9JzUxLjg0JyB5Mj0nMTQ5Ljk1JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OycgLz4KPGxpbmUgeDE9JzU5LjA0JyB5MT0nMTExLjM2JyB4Mj0nNTEuODQnIHkyPScxMTEuMzYnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8bGluZSB4MT0nNTkuMDQnIHkxPSc3Mi43NycgeDI9JzUxLjg0JyB5Mj0nNzIuNzcnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7JyAvPgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyNzguMTMpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzYuNjdweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz41PC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwyMzkuNTUpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzEzLjM0cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTA8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQxLjc2LDIwMC45Nikgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTMuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4yMDwvdGV4dD4KPHRleHQgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNDEuNzYsMTQ5Ljk1KSByb3RhdGUoLTkwKScgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxMy4zNHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPjUwPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43NiwxMTEuMzYpIHJvdGF0ZSgtOTApJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBzdHlsZT0nZm9udC1zaXplOiAxMi4wMHB4OyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzIwLjAycHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+MTAwPC90ZXh0Pgo8dGV4dCB0cmFuc2Zvcm09J3RyYW5zbGF0ZSg0MS43Niw3Mi43Nykgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMjAuMDJweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz4yMDA8L3RleHQ+Cjxwb2x5Z29uIHBvaW50cz0nNTkuMDQsMjg2LjU2IDU0NS43NiwyODYuNTYgNTQ1Ljc2LDU5LjA0IDU5LjA0LDU5LjA0ICcgc3R5bGU9J3N0cm9rZS13aWR0aDogMC43NTsnIC8+Cjx0ZXh0IHg9JzMwMi40MCcgeT0nMzQuNjcnIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDE0LjQwcHg7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LWZhbWlseTogIkFyaWFsIjsnIHRleHRMZW5ndGg9JzE2Ny4xNnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0IHZzIEdyZWVkeSBTY2FsaW5nPC90ZXh0Pgo8dGV4dCB4PSczMDIuNDAnIHk9JzM0MS4yOCcgdGV4dC1hbmNob3I9J21pZGRsZScgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPScxMzEuMzZweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5OdW1iZXIgb2YgUHJlZGljdG9ycyAocCk8L3RleHQ+Cjx0ZXh0IHRyYW5zZm9ybT0ndHJhbnNsYXRlKDEyLjk2LDE3Mi44MCkgcm90YXRlKC05MCknIHRleHQtYW5jaG9yPSdtaWRkbGUnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMTU2Ljk1cHgnIGxlbmd0aEFkanVzdD0nc3BhY2luZ0FuZEdseXBocyc+VGltZSAobWlsbGlzZWNvbmRzLCBsb2cgc2NhbGUpPC90ZXh0Pgo8L2c+CjxnIGNsaXAtcGF0aD0ndXJsKCNjcE5Ua3VNRFI4TlRRMUxqYzJmRFU1TGpBMGZESTROaTQxTmc9PSknPgo8bGluZSB4MT0nMTY3Ljg2JyB5MT0nMjMzLjc3JyB4Mj0nMjA0Ljc4JyB5Mj0nMTg0LjE2JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nMjE0LjcyJyB5MT0nMTczLjkxJyB4Mj0nMjk0LjQ5JyB5Mj0nMTEwLjUzJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8Y2lyY2xlIGN4PScxNjMuNTYnIGN5PScyMzkuNTUnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzIwOS4wOCcgY3k9JzE3OC4zOScgcj0nMi43MCcgc3R5bGU9J3N0cm9rZS13aWR0aDogMS41MDsgc3Ryb2tlOiAjQ0MzMzMzOyBmaWxsOiAjQ0MzMzMzOycgLz4KPGNpcmNsZSBjeD0nMzAwLjEyJyBjeT0nMTA2LjA1JyByPScyLjcwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7IGZpbGw6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nMzAwLjEyJyB5MT0nMjg2LjU2JyB4Mj0nMzAwLjEyJyB5Mj0nNTkuMDQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDAuNzU7IHN0cm9rZTogIzdGN0Y3Rjsgc3Ryb2tlLWRhc2hhcnJheTogNC4wMCw0LjAwOycgLz4KPHRleHQgeD0nMzA3LjMyJyB5PScxMDguOTInIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7ZmlsbDogIzRENEQ0RDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSc4OC4wMnB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0IG1vZGUgbGltaXQ8L3RleHQ+CjxyZWN0IHg9JzU5LjA0JyB5PSc1OS4wNCcgd2lkdGg9JzgwLjM4JyBoZWlnaHQ9JzQzLjIwJyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAwLjc1OyBmaWxsOiAjRkZGRkZGOycgLz4KPGxpbmUgeDE9JzYyLjI4JyB5MT0nNzMuNDQnIHgyPSc4My44OCcgeTI9JzczLjQ0JyBzdHlsZT0nc3Ryb2tlLXdpZHRoOiAxLjUwOyBzdHJva2U6ICNDQzMzMzM7JyAvPgo8bGluZSB4MT0nNjIuMjgnIHkxPSc4Ny44NCcgeDI9JzgzLjg4JyB5Mj0nODcuODQnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nNzMuNDQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogI0NDMzMzMzsgZmlsbDogI0NDMzMzMzsnIC8+CjxjaXJjbGUgY3g9JzczLjA4JyBjeT0nODcuODQnIHI9JzIuNzAnIHN0eWxlPSdzdHJva2Utd2lkdGg6IDEuNTA7IHN0cm9rZTogIzMzODBDQzsgZmlsbDogIzMzODBDQzsnIC8+Cjx0ZXh0IHg9Jzk0LjY4JyB5PSc3Ny43NCcgc3R5bGU9J2ZvbnQtc2l6ZTogMTIuMDBweDsgZm9udC1mYW1pbHk6ICJBcmlhbCI7JyB0ZXh0TGVuZ3RoPSczMC4wMHB4JyBsZW5ndGhBZGp1c3Q9J3NwYWNpbmdBbmRHbHlwaHMnPkV4YWN0PC90ZXh0Pgo8dGV4dCB4PSc5NC42OCcgeT0nOTIuMTQnIHN0eWxlPSdmb250LXNpemU6IDEyLjAwcHg7IGZvbnQtZmFtaWx5OiAiQXJpYWwiOycgdGV4dExlbmd0aD0nMzkuMzRweCcgbGVuZ3RoQWRqdXN0PSdzcGFjaW5nQW5kR2x5cGhzJz5HcmVlZHk8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4K" alt="Log-scale plot showing runtime (milliseconds) versus number of predictors for exact mode (red line) and greedy mode (blue line). Exact mode shows exponential growth with runtime increasing sharply after p=100, becoming impractical beyond p=500 (marked by vertical gray dashed line). Greedy mode shows linear scaling, remaining fast even at p=1000, demonstrating orders-of-magnitude performance advantage for high-dimensional data." /></p>
 <p><strong>Key insight</strong>: The scaling behavior depends heavily on
 correlation structure. For this moderately correlated dataset (ρ =
 0.5^|i-j|), exact mode remains practical up to p ≈ 500, while greedy
@@ -550,12 +588,21 @@ corrselect uses deterministic tie-breaking:</p>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; Run 2 selected: x2 x4</span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Identical:&quot;</span>, <span class="fu">identical</span>(<span class="fu">names</span>(result1), <span class="fu">names</span>(result2)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; Identical: TRUE</span></span></code></pre></div>
-<p><strong>Tie-breaking rules</strong>: 1. Prefer variables with lower
-<strong>mean absolute correlation</strong> with others</p>
-<ol start="2" style="list-style-type: decimal">
-<li>If still tied, prefer <strong>lexicographically first</strong>
-(alphabetical)</li>
+<p>This example uses the default <code>mode = &quot;auto&quot;</code>, which
+resolves to exact search for this small <code>p</code>. Exact mode’s
+tie-breaking rules, applied when multiple maximal subsets exist:</p>
+<ol style="list-style-type: decimal">
+<li><p>Prefer the <strong>largest subset size</strong></p></li>
+<li><p>If still tied, prefer the <strong>lowest average absolute
+correlation</strong></p></li>
+<li><p>If still tied, prefer <strong>lexicographically first</strong>
+variable names</p></li>
 </ol>
+<p>(Greedy mode, selected via <code>mode = &quot;greedy&quot;</code>, breaks ties
+differently: it removes the variable with the most threshold violations
+first, then the highest max association, then the highest average
+association, then the lowest column index – see the Theory vignette for
+details.)</p>
 <p>This ensures reproducibility across runs, machines, and R
 versions.</p>
 <hr />
@@ -1082,35 +1129,33 @@ correlation matrix:</p>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>large_data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="dv">50</span>), <span class="at">ncol =</span> <span class="dv">50</span>))</span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co"># Benchmark: Recompute correlation every time</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>time1 <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">microbenchmark</span>(</span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>  {</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co"># Benchmark: Recompute correlation every time (median of 3 runs)</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>time1_runs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(i) {</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>  <span class="fu">system.time</span>({</span>
 <span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>    result1 <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(large_data, <span class="at">threshold =</span> <span class="fl">0.7</span>)</span>
 <span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>    result2 <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(large_data, <span class="at">threshold =</span> <span class="fl">0.8</span>)</span>
 <span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>    result3 <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(large_data, <span class="at">threshold =</span> <span class="fl">0.9</span>)</span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>  },</span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">3</span>,</span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>  <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>)<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a></span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="co"># Benchmark: Compute correlation once, reuse</span></span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(large_data)</span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a>time2 <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">microbenchmark</span>(</span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a>  {</span>
-<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a>    result1 <span class="ot">&lt;-</span> <span class="fu">MatSelect</span>(cor_matrix, <span class="at">threshold =</span> <span class="fl">0.7</span>)</span>
-<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a>    result2 <span class="ot">&lt;-</span> <span class="fu">MatSelect</span>(cor_matrix, <span class="at">threshold =</span> <span class="fl">0.8</span>)</span>
-<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a>    result3 <span class="ot">&lt;-</span> <span class="fu">MatSelect</span>(cor_matrix, <span class="at">threshold =</span> <span class="fl">0.9</span>)</span>
-<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a>  },</span>
-<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">3</span>,</span>
-<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a>  <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span></span>
-<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a>)<span class="sc">$</span>time) <span class="sc">/</span> <span class="fl">1e6</span>  <span class="co"># Convert nanoseconds to milliseconds</span></span>
-<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a></span>
-<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Recomputing each time: %.1f ms</span><span class="sc">\n</span><span class="st">&quot;</span>, time1))</span>
-<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="co">#&gt; Recomputing each time: 5.1 ms</span></span>
-<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Precomputed matrix: %.1f ms</span><span class="sc">\n</span><span class="st">&quot;</span>, time2))</span>
-<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a><span class="co">#&gt; Precomputed matrix: 1.2 ms</span></span>
-<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Speedup: %.1fx faster</span><span class="sc">\n</span><span class="st">&quot;</span>, time1 <span class="sc">/</span> time2))</span>
-<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a><span class="co">#&gt; Speedup: 4.4x faster</span></span></code></pre></div>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>  })[<span class="st">&quot;elapsed&quot;</span>]</span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>})</span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>time1 <span class="ot">&lt;-</span> <span class="fu">median</span>(time1_runs) <span class="sc">*</span> <span class="dv">1000</span>  <span class="co"># seconds -&gt; milliseconds</span></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a><span class="co"># Benchmark: Compute correlation once, reuse (median of 3 runs)</span></span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(large_data)</span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>time2_runs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(i) {</span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a>  <span class="fu">system.time</span>({</span>
+<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a>    result1 <span class="ot">&lt;-</span> <span class="fu">MatSelect</span>(cor_matrix, <span class="at">threshold =</span> <span class="fl">0.7</span>)</span>
+<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a>    result2 <span class="ot">&lt;-</span> <span class="fu">MatSelect</span>(cor_matrix, <span class="at">threshold =</span> <span class="fl">0.8</span>)</span>
+<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a>    result3 <span class="ot">&lt;-</span> <span class="fu">MatSelect</span>(cor_matrix, <span class="at">threshold =</span> <span class="fl">0.9</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a>  })[<span class="st">&quot;elapsed&quot;</span>]</span>
+<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a>})</span>
+<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>time2 <span class="ot">&lt;-</span> <span class="fu">median</span>(time2_runs) <span class="sc">*</span> <span class="dv">1000</span>  <span class="co"># seconds -&gt; milliseconds</span></span>
+<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a></span>
+<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Recomputing each time: %.1f ms</span><span class="sc">\n</span><span class="st">&quot;</span>, time1))</span>
+<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a><span class="co">#&gt; Recomputing each time: 20.0 ms</span></span>
+<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Precomputed matrix: %.1f ms</span><span class="sc">\n</span><span class="st">&quot;</span>, time2))</span>
+<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="co">#&gt; Precomputed matrix: 0.0 ms</span></span>
+<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Speedup: %.1fx faster</span><span class="sc">\n</span><span class="st">&quot;</span>, time1 <span class="sc">/</span> time2))</span>
+<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a><span class="co">#&gt; Speedup: Infx faster</span></span></code></pre></div>
 <p><strong>Use precomputed matrices when</strong>:</p>
 <ul>
 <li><p>Testing multiple thresholds</p></li>
@@ -1181,10 +1226,8 @@ internally (for reproducibility), but you can parallelize
 <div id="choosing-the-right-mode" class="section level2">
 <h2>4.4 Choosing the Right Mode</h2>
 <p>Decision tree for mode selection:</p>
-<pre><code>p ≤ 15:  Use &quot;exact&quot; (fast enough, guaranteed optimal)
-15 &lt; p ≤ 25:  Use &quot;exact&quot; if time permits, &quot;greedy&quot; if speed critical
-p &gt; 25:  Use &quot;greedy&quot; or &quot;auto&quot;
-p &gt; 100: Always use &quot;greedy&quot;</code></pre>
+<pre><code>p &lt;= max_exact_p (default 100):  Use &quot;exact&quot; (guaranteed optimal; practical up to p ~ 500)
+p &gt; max_exact_p:  Use &quot;greedy&quot; (exact becomes slow; raise max_exact_p to push this boundary higher)</code></pre>
 <hr />
 </div>
 </div>
@@ -1210,7 +1253,107 @@ it</p>
 <span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>}, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
 <span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Error:&quot;</span>, e<span class="sc">$</span>message, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>})</span>
-<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a><span class="co">#&gt; Error: No valid subsets found that satisfy the threshold constraint</span></span></code></pre></div>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a><span class="co">#&gt;               x1</span></span>
+<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a><span class="co">#&gt; 1   -0.560475647</span></span>
+<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a><span class="co">#&gt; 2   -0.230177489</span></span>
+<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a><span class="co">#&gt; 3    1.558708314</span></span>
+<span id="cb24-19"><a href="#cb24-19" tabindex="-1"></a><span class="co">#&gt; 4    0.070508391</span></span>
+<span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a><span class="co">#&gt; 5    0.129287735</span></span>
+<span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a><span class="co">#&gt; 6    1.715064987</span></span>
+<span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a><span class="co">#&gt; 7    0.460916206</span></span>
+<span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a><span class="co">#&gt; 8   -1.265061235</span></span>
+<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a><span class="co">#&gt; 9   -0.686852852</span></span>
+<span id="cb24-25"><a href="#cb24-25" tabindex="-1"></a><span class="co">#&gt; 10  -0.445661970</span></span>
+<span id="cb24-26"><a href="#cb24-26" tabindex="-1"></a><span class="co">#&gt; 11   1.224081797</span></span>
+<span id="cb24-27"><a href="#cb24-27" tabindex="-1"></a><span class="co">#&gt; 12   0.359813827</span></span>
+<span id="cb24-28"><a href="#cb24-28" tabindex="-1"></a><span class="co">#&gt; 13   0.400771451</span></span>
+<span id="cb24-29"><a href="#cb24-29" tabindex="-1"></a><span class="co">#&gt; 14   0.110682716</span></span>
+<span id="cb24-30"><a href="#cb24-30" tabindex="-1"></a><span class="co">#&gt; 15  -0.555841135</span></span>
+<span id="cb24-31"><a href="#cb24-31" tabindex="-1"></a><span class="co">#&gt; 16   1.786913137</span></span>
+<span id="cb24-32"><a href="#cb24-32" tabindex="-1"></a><span class="co">#&gt; 17   0.497850478</span></span>
+<span id="cb24-33"><a href="#cb24-33" tabindex="-1"></a><span class="co">#&gt; 18  -1.966617157</span></span>
+<span id="cb24-34"><a href="#cb24-34" tabindex="-1"></a><span class="co">#&gt; 19   0.701355902</span></span>
+<span id="cb24-35"><a href="#cb24-35" tabindex="-1"></a><span class="co">#&gt; 20  -0.472791408</span></span>
+<span id="cb24-36"><a href="#cb24-36" tabindex="-1"></a><span class="co">#&gt; 21  -1.067823706</span></span>
+<span id="cb24-37"><a href="#cb24-37" tabindex="-1"></a><span class="co">#&gt; 22  -0.217974915</span></span>
+<span id="cb24-38"><a href="#cb24-38" tabindex="-1"></a><span class="co">#&gt; 23  -1.026004448</span></span>
+<span id="cb24-39"><a href="#cb24-39" tabindex="-1"></a><span class="co">#&gt; 24  -0.728891229</span></span>
+<span id="cb24-40"><a href="#cb24-40" tabindex="-1"></a><span class="co">#&gt; 25  -0.625039268</span></span>
+<span id="cb24-41"><a href="#cb24-41" tabindex="-1"></a><span class="co">#&gt; 26  -1.686693311</span></span>
+<span id="cb24-42"><a href="#cb24-42" tabindex="-1"></a><span class="co">#&gt; 27   0.837787044</span></span>
+<span id="cb24-43"><a href="#cb24-43" tabindex="-1"></a><span class="co">#&gt; 28   0.153373118</span></span>
+<span id="cb24-44"><a href="#cb24-44" tabindex="-1"></a><span class="co">#&gt; 29  -1.138136937</span></span>
+<span id="cb24-45"><a href="#cb24-45" tabindex="-1"></a><span class="co">#&gt; 30   1.253814921</span></span>
+<span id="cb24-46"><a href="#cb24-46" tabindex="-1"></a><span class="co">#&gt; 31   0.426464221</span></span>
+<span id="cb24-47"><a href="#cb24-47" tabindex="-1"></a><span class="co">#&gt; 32  -0.295071483</span></span>
+<span id="cb24-48"><a href="#cb24-48" tabindex="-1"></a><span class="co">#&gt; 33   0.895125661</span></span>
+<span id="cb24-49"><a href="#cb24-49" tabindex="-1"></a><span class="co">#&gt; 34   0.878133488</span></span>
+<span id="cb24-50"><a href="#cb24-50" tabindex="-1"></a><span class="co">#&gt; 35   0.821581082</span></span>
+<span id="cb24-51"><a href="#cb24-51" tabindex="-1"></a><span class="co">#&gt; 36   0.688640254</span></span>
+<span id="cb24-52"><a href="#cb24-52" tabindex="-1"></a><span class="co">#&gt; 37   0.553917654</span></span>
+<span id="cb24-53"><a href="#cb24-53" tabindex="-1"></a><span class="co">#&gt; 38  -0.061911711</span></span>
+<span id="cb24-54"><a href="#cb24-54" tabindex="-1"></a><span class="co">#&gt; 39  -0.305962664</span></span>
+<span id="cb24-55"><a href="#cb24-55" tabindex="-1"></a><span class="co">#&gt; 40  -0.380471001</span></span>
+<span id="cb24-56"><a href="#cb24-56" tabindex="-1"></a><span class="co">#&gt; 41  -0.694706979</span></span>
+<span id="cb24-57"><a href="#cb24-57" tabindex="-1"></a><span class="co">#&gt; 42  -0.207917278</span></span>
+<span id="cb24-58"><a href="#cb24-58" tabindex="-1"></a><span class="co">#&gt; 43  -1.265396352</span></span>
+<span id="cb24-59"><a href="#cb24-59" tabindex="-1"></a><span class="co">#&gt; 44   2.168955965</span></span>
+<span id="cb24-60"><a href="#cb24-60" tabindex="-1"></a><span class="co">#&gt; 45   1.207961998</span></span>
+<span id="cb24-61"><a href="#cb24-61" tabindex="-1"></a><span class="co">#&gt; 46  -1.123108583</span></span>
+<span id="cb24-62"><a href="#cb24-62" tabindex="-1"></a><span class="co">#&gt; 47  -0.402884835</span></span>
+<span id="cb24-63"><a href="#cb24-63" tabindex="-1"></a><span class="co">#&gt; 48  -0.466655354</span></span>
+<span id="cb24-64"><a href="#cb24-64" tabindex="-1"></a><span class="co">#&gt; 49   0.779965118</span></span>
+<span id="cb24-65"><a href="#cb24-65" tabindex="-1"></a><span class="co">#&gt; 50  -0.083369066</span></span>
+<span id="cb24-66"><a href="#cb24-66" tabindex="-1"></a><span class="co">#&gt; 51   0.253318514</span></span>
+<span id="cb24-67"><a href="#cb24-67" tabindex="-1"></a><span class="co">#&gt; 52  -0.028546755</span></span>
+<span id="cb24-68"><a href="#cb24-68" tabindex="-1"></a><span class="co">#&gt; 53  -0.042870457</span></span>
+<span id="cb24-69"><a href="#cb24-69" tabindex="-1"></a><span class="co">#&gt; 54   1.368602284</span></span>
+<span id="cb24-70"><a href="#cb24-70" tabindex="-1"></a><span class="co">#&gt; 55  -0.225770986</span></span>
+<span id="cb24-71"><a href="#cb24-71" tabindex="-1"></a><span class="co">#&gt; 56   1.516470604</span></span>
+<span id="cb24-72"><a href="#cb24-72" tabindex="-1"></a><span class="co">#&gt; 57  -1.548752804</span></span>
+<span id="cb24-73"><a href="#cb24-73" tabindex="-1"></a><span class="co">#&gt; 58   0.584613750</span></span>
+<span id="cb24-74"><a href="#cb24-74" tabindex="-1"></a><span class="co">#&gt; 59   0.123854244</span></span>
+<span id="cb24-75"><a href="#cb24-75" tabindex="-1"></a><span class="co">#&gt; 60   0.215941569</span></span>
+<span id="cb24-76"><a href="#cb24-76" tabindex="-1"></a><span class="co">#&gt; 61   0.379639483</span></span>
+<span id="cb24-77"><a href="#cb24-77" tabindex="-1"></a><span class="co">#&gt; 62  -0.502323453</span></span>
+<span id="cb24-78"><a href="#cb24-78" tabindex="-1"></a><span class="co">#&gt; 63  -0.333207384</span></span>
+<span id="cb24-79"><a href="#cb24-79" tabindex="-1"></a><span class="co">#&gt; 64  -1.018575383</span></span>
+<span id="cb24-80"><a href="#cb24-80" tabindex="-1"></a><span class="co">#&gt; 65  -1.071791226</span></span>
+<span id="cb24-81"><a href="#cb24-81" tabindex="-1"></a><span class="co">#&gt; 66   0.303528641</span></span>
+<span id="cb24-82"><a href="#cb24-82" tabindex="-1"></a><span class="co">#&gt; 67   0.448209779</span></span>
+<span id="cb24-83"><a href="#cb24-83" tabindex="-1"></a><span class="co">#&gt; 68   0.053004227</span></span>
+<span id="cb24-84"><a href="#cb24-84" tabindex="-1"></a><span class="co">#&gt; 69   0.922267468</span></span>
+<span id="cb24-85"><a href="#cb24-85" tabindex="-1"></a><span class="co">#&gt; 70   2.050084686</span></span>
+<span id="cb24-86"><a href="#cb24-86" tabindex="-1"></a><span class="co">#&gt; 71  -0.491031166</span></span>
+<span id="cb24-87"><a href="#cb24-87" tabindex="-1"></a><span class="co">#&gt; 72  -2.309168876</span></span>
+<span id="cb24-88"><a href="#cb24-88" tabindex="-1"></a><span class="co">#&gt; 73   1.005738524</span></span>
+<span id="cb24-89"><a href="#cb24-89" tabindex="-1"></a><span class="co">#&gt; 74  -0.709200763</span></span>
+<span id="cb24-90"><a href="#cb24-90" tabindex="-1"></a><span class="co">#&gt; 75  -0.688008616</span></span>
+<span id="cb24-91"><a href="#cb24-91" tabindex="-1"></a><span class="co">#&gt; 76   1.025571370</span></span>
+<span id="cb24-92"><a href="#cb24-92" tabindex="-1"></a><span class="co">#&gt; 77  -0.284773007</span></span>
+<span id="cb24-93"><a href="#cb24-93" tabindex="-1"></a><span class="co">#&gt; 78  -1.220717712</span></span>
+<span id="cb24-94"><a href="#cb24-94" tabindex="-1"></a><span class="co">#&gt; 79   0.181303480</span></span>
+<span id="cb24-95"><a href="#cb24-95" tabindex="-1"></a><span class="co">#&gt; 80  -0.138891362</span></span>
+<span id="cb24-96"><a href="#cb24-96" tabindex="-1"></a><span class="co">#&gt; 81   0.005764186</span></span>
+<span id="cb24-97"><a href="#cb24-97" tabindex="-1"></a><span class="co">#&gt; 82   0.385280401</span></span>
+<span id="cb24-98"><a href="#cb24-98" tabindex="-1"></a><span class="co">#&gt; 83  -0.370660032</span></span>
+<span id="cb24-99"><a href="#cb24-99" tabindex="-1"></a><span class="co">#&gt; 84   0.644376549</span></span>
+<span id="cb24-100"><a href="#cb24-100" tabindex="-1"></a><span class="co">#&gt; 85  -0.220486562</span></span>
+<span id="cb24-101"><a href="#cb24-101" tabindex="-1"></a><span class="co">#&gt; 86   0.331781964</span></span>
+<span id="cb24-102"><a href="#cb24-102" tabindex="-1"></a><span class="co">#&gt; 87   1.096839013</span></span>
+<span id="cb24-103"><a href="#cb24-103" tabindex="-1"></a><span class="co">#&gt; 88   0.435181491</span></span>
+<span id="cb24-104"><a href="#cb24-104" tabindex="-1"></a><span class="co">#&gt; 89  -0.325931586</span></span>
+<span id="cb24-105"><a href="#cb24-105" tabindex="-1"></a><span class="co">#&gt; 90   1.148807618</span></span>
+<span id="cb24-106"><a href="#cb24-106" tabindex="-1"></a><span class="co">#&gt; 91   0.993503856</span></span>
+<span id="cb24-107"><a href="#cb24-107" tabindex="-1"></a><span class="co">#&gt; 92   0.548396960</span></span>
+<span id="cb24-108"><a href="#cb24-108" tabindex="-1"></a><span class="co">#&gt; 93   0.238731735</span></span>
+<span id="cb24-109"><a href="#cb24-109" tabindex="-1"></a><span class="co">#&gt; 94  -0.627906076</span></span>
+<span id="cb24-110"><a href="#cb24-110" tabindex="-1"></a><span class="co">#&gt; 95   1.360652449</span></span>
+<span id="cb24-111"><a href="#cb24-111" tabindex="-1"></a><span class="co">#&gt; 96  -0.600259587</span></span>
+<span id="cb24-112"><a href="#cb24-112" tabindex="-1"></a><span class="co">#&gt; 97   2.187332993</span></span>
+<span id="cb24-113"><a href="#cb24-113" tabindex="-1"></a><span class="co">#&gt; 98   1.532610626</span></span>
+<span id="cb24-114"><a href="#cb24-114" tabindex="-1"></a><span class="co">#&gt; 99  -0.235700359</span></span>
+<span id="cb24-115"><a href="#cb24-115" tabindex="-1"></a><span class="co">#&gt; 100 -1.026420900</span></span></code></pre></div>
 <p><strong>Solutions</strong>: 1. Increase threshold</p>
 <ol start="2" style="list-style-type: decimal">
 <li><p>Use <code>force_in</code> to keep at least one variable</p></li>
@@ -1218,17 +1361,13 @@ it</p>
 </ol>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Solution 1: Increase threshold</span></span>
 <span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(high_cor_data, <span class="at">threshold =</span> <span class="fl">0.95</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="co">#&gt; Error in `corrPrune()`:</span></span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co">#&gt; ! No valid subsets found that satisfy the threshold constraint</span></span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot; &quot;x3&quot;</span></span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a></span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="co"># Solution 2: Force keep one variable</span></span>
-<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(high_cor_data, <span class="at">threshold =</span> <span class="fl">0.5</span>, <span class="at">force_in =</span> <span class="st">&quot;x1&quot;</span>)</span>
-<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a><span class="co">#&gt; Error in `corrPrune()`:</span></span>
-<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a><span class="co">#&gt; ! No valid subsets found that satisfy the threshold constraint</span></span>
-<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
-<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot; &quot;x3&quot;</span></span></code></pre></div>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot;</span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="co"># Solution 2: Force keep one variable</span></span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(high_cor_data, <span class="at">threshold =</span> <span class="fl">0.5</span>, <span class="at">force_in =</span> <span class="st">&quot;x1&quot;</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(result))</span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot;</span></span></code></pre></div>
 </div>
 <div id="error-force_in-variables-conflict-with-threshold" class="section level3">
 <h3>Error: force_in variables conflict with threshold</h3>
@@ -1260,121 +1399,115 @@ it</p>
 <span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>}, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
 <span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Error:&quot;</span>, e<span class="sc">$</span>message, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a>})</span>
-<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a><span class="co">#&gt; Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable</span></span>
-<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a><span class="co">#&gt; Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable</span></span>
-<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a><span class="co">#&gt; Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable</span></span>
-<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a><span class="co">#&gt;               y          x1          x2</span></span>
-<span id="cb27-18"><a href="#cb27-18" tabindex="-1"></a><span class="co">#&gt; 1   -0.71524219 -0.07355602 -0.60189285</span></span>
-<span id="cb27-19"><a href="#cb27-19" tabindex="-1"></a><span class="co">#&gt; 2   -0.75268897 -1.16865142 -0.99369859</span></span>
-<span id="cb27-20"><a href="#cb27-20" tabindex="-1"></a><span class="co">#&gt; 3   -0.93853870 -0.63474826  1.02678506</span></span>
-<span id="cb27-21"><a href="#cb27-21" tabindex="-1"></a><span class="co">#&gt; 4   -1.05251328 -0.02884155  0.75106130</span></span>
-<span id="cb27-22"><a href="#cb27-22" tabindex="-1"></a><span class="co">#&gt; 5   -0.43715953  0.67069597 -1.50916654</span></span>
-<span id="cb27-23"><a href="#cb27-23" tabindex="-1"></a><span class="co">#&gt; 6    0.33117917 -1.65054654 -0.09514745</span></span>
-<span id="cb27-24"><a href="#cb27-24" tabindex="-1"></a><span class="co">#&gt; 7   -2.01421050 -0.34975424 -0.89594782</span></span>
-<span id="cb27-25"><a href="#cb27-25" tabindex="-1"></a><span class="co">#&gt; 8    0.21198043  0.75640644 -2.07075107</span></span>
-<span id="cb27-26"><a href="#cb27-26" tabindex="-1"></a><span class="co">#&gt; 9    1.23667505 -0.53880916  0.15012013</span></span>
-<span id="cb27-27"><a href="#cb27-27" tabindex="-1"></a><span class="co">#&gt; 10   2.03757402  0.22729192 -0.07921171</span></span>
-<span id="cb27-28"><a href="#cb27-28" tabindex="-1"></a><span class="co">#&gt; 11   1.30117599  0.49222857 -0.09736927</span></span>
-<span id="cb27-29"><a href="#cb27-29" tabindex="-1"></a><span class="co">#&gt; 12   0.75677476  0.26783502  0.21615254</span></span>
-<span id="cb27-30"><a href="#cb27-30" tabindex="-1"></a><span class="co">#&gt; 13  -1.72673040  0.65325768  0.88246516</span></span>
-<span id="cb27-31"><a href="#cb27-31" tabindex="-1"></a><span class="co">#&gt; 14  -0.60150671 -0.12270866  0.20559750</span></span>
-<span id="cb27-32"><a href="#cb27-32" tabindex="-1"></a><span class="co">#&gt; 15  -0.35204646 -0.41367651 -0.61643584</span></span>
-<span id="cb27-33"><a href="#cb27-33" tabindex="-1"></a><span class="co">#&gt; 16   0.70352390 -2.64314895 -0.73479925</span></span>
-<span id="cb27-34"><a href="#cb27-34" tabindex="-1"></a><span class="co">#&gt; 17  -0.10567133 -0.09294102 -0.13180279</span></span>
-<span id="cb27-35"><a href="#cb27-35" tabindex="-1"></a><span class="co">#&gt; 18  -1.25864863  0.43028470  0.31001699</span></span>
-<span id="cb27-36"><a href="#cb27-36" tabindex="-1"></a><span class="co">#&gt; 19   1.68443571  0.53539884 -1.03968035</span></span>
-<span id="cb27-37"><a href="#cb27-37" tabindex="-1"></a><span class="co">#&gt; 20   0.91139129 -0.55527835 -0.18430887</span></span>
-<span id="cb27-38"><a href="#cb27-38" tabindex="-1"></a><span class="co">#&gt; 21   0.23743027  1.77950291  0.96726726</span></span>
-<span id="cb27-39"><a href="#cb27-39" tabindex="-1"></a><span class="co">#&gt; 22   1.21810861  0.28642442 -0.10828009</span></span>
-<span id="cb27-40"><a href="#cb27-40" tabindex="-1"></a><span class="co">#&gt; 23  -1.33877429  0.12631586 -0.69842067</span></span>
-<span id="cb27-41"><a href="#cb27-41" tabindex="-1"></a><span class="co">#&gt; 24   0.66082030  1.27226678 -0.27594517</span></span>
-<span id="cb27-42"><a href="#cb27-42" tabindex="-1"></a><span class="co">#&gt; 25  -0.52291238 -0.71846622  1.11464855</span></span>
-<span id="cb27-43"><a href="#cb27-43" tabindex="-1"></a><span class="co">#&gt; 26   0.68374552 -0.45033862  0.55004396</span></span>
-<span id="cb27-44"><a href="#cb27-44" tabindex="-1"></a><span class="co">#&gt; 27  -0.06082195  2.39745248  1.23667580</span></span>
-<span id="cb27-45"><a href="#cb27-45" tabindex="-1"></a><span class="co">#&gt; 28   0.63296071  0.01112919  0.13909786</span></span>
-<span id="cb27-46"><a href="#cb27-46" tabindex="-1"></a><span class="co">#&gt; 29   1.33551762  1.63356842  0.41027510</span></span>
-<span id="cb27-47"><a href="#cb27-47" tabindex="-1"></a><span class="co">#&gt; 30   0.00729009 -1.43850664 -0.55845691</span></span>
-<span id="cb27-48"><a href="#cb27-48" tabindex="-1"></a><span class="co">#&gt; 31   1.01755864 -0.19051680  0.60537067</span></span>
-<span id="cb27-49"><a href="#cb27-49" tabindex="-1"></a><span class="co">#&gt; 32  -1.18843404  0.37842390 -0.50633354</span></span>
-<span id="cb27-50"><a href="#cb27-50" tabindex="-1"></a><span class="co">#&gt; 33  -0.72160444  0.30003855 -1.42056550</span></span>
-<span id="cb27-51"><a href="#cb27-51" tabindex="-1"></a><span class="co">#&gt; 34   1.51921771 -1.00563626  0.12799297</span></span>
-<span id="cb27-52"><a href="#cb27-52" tabindex="-1"></a><span class="co">#&gt; 35   0.37738797  0.01925927  1.94585122</span></span>
-<span id="cb27-53"><a href="#cb27-53" tabindex="-1"></a><span class="co">#&gt; 36  -2.05222282 -1.07742065  0.80091434</span></span>
-<span id="cb27-54"><a href="#cb27-54" tabindex="-1"></a><span class="co">#&gt; 37  -1.36403745  0.71270333  1.16525339</span></span>
-<span id="cb27-55"><a href="#cb27-55" tabindex="-1"></a><span class="co">#&gt; 38  -0.20078102  1.08477509  0.35885572</span></span>
-<span id="cb27-56"><a href="#cb27-56" tabindex="-1"></a><span class="co">#&gt; 39   0.86577940 -2.22498770 -0.60855718</span></span>
-<span id="cb27-57"><a href="#cb27-57" tabindex="-1"></a><span class="co">#&gt; 40  -0.10188326  1.23569346 -0.20224086</span></span>
-<span id="cb27-58"><a href="#cb27-58" tabindex="-1"></a><span class="co">#&gt; 41   0.62418747 -1.24104450 -0.27324811</span></span>
-<span id="cb27-59"><a href="#cb27-59" tabindex="-1"></a><span class="co">#&gt; 42   0.95900538  0.45476927 -0.46869978</span></span>
-<span id="cb27-60"><a href="#cb27-60" tabindex="-1"></a><span class="co">#&gt; 43   1.67105483  0.65990264  0.70416728</span></span>
-<span id="cb27-61"><a href="#cb27-61" tabindex="-1"></a><span class="co">#&gt; 44   0.05601673 -0.19988983 -1.19736350</span></span>
-<span id="cb27-62"><a href="#cb27-62" tabindex="-1"></a><span class="co">#&gt; 45  -0.05198191 -0.64511396  0.86636613</span></span>
-<span id="cb27-63"><a href="#cb27-63" tabindex="-1"></a><span class="co">#&gt; 46  -1.75323736  0.16532102  0.86415249</span></span>
-<span id="cb27-64"><a href="#cb27-64" tabindex="-1"></a><span class="co">#&gt; 47   0.09932759  0.43881870 -1.19862236</span></span>
-<span id="cb27-65"><a href="#cb27-65" tabindex="-1"></a><span class="co">#&gt; 48  -0.57185006  0.88330282  0.63949200</span></span>
-<span id="cb27-66"><a href="#cb27-66" tabindex="-1"></a><span class="co">#&gt; 49  -0.97400958 -2.05233698  2.43022665</span></span>
-<span id="cb27-67"><a href="#cb27-67" tabindex="-1"></a><span class="co">#&gt; 50  -0.17990623 -1.63637927 -0.55721548</span></span>
-<span id="cb27-68"><a href="#cb27-68" tabindex="-1"></a><span class="co">#&gt; 51   1.01494317  1.43040234  0.84490424</span></span>
-<span id="cb27-69"><a href="#cb27-69" tabindex="-1"></a><span class="co">#&gt; 52  -1.99274849  1.04662885 -0.78220185</span></span>
-<span id="cb27-70"><a href="#cb27-70" tabindex="-1"></a><span class="co">#&gt; 53  -0.42727929  0.43528895  1.11071142</span></span>
-<span id="cb27-71"><a href="#cb27-71" tabindex="-1"></a><span class="co">#&gt; 54   0.11663728  0.71517841  0.24982472</span></span>
-<span id="cb27-72"><a href="#cb27-72" tabindex="-1"></a><span class="co">#&gt; 55  -0.89320757  0.91717492  1.65191539</span></span>
-<span id="cb27-73"><a href="#cb27-73" tabindex="-1"></a><span class="co">#&gt; 56   0.33390294 -2.66092280 -1.45897073</span></span>
-<span id="cb27-74"><a href="#cb27-74" tabindex="-1"></a><span class="co">#&gt; 57   0.41142992  1.11027710 -0.05129789</span></span>
-<span id="cb27-75"><a href="#cb27-75" tabindex="-1"></a><span class="co">#&gt; 58  -0.03303616 -0.48498760 -0.52692518</span></span>
-<span id="cb27-76"><a href="#cb27-76" tabindex="-1"></a><span class="co">#&gt; 59  -2.46589819  0.23061683 -0.19726487</span></span>
-<span id="cb27-77"><a href="#cb27-77" tabindex="-1"></a><span class="co">#&gt; 60   2.57145815 -0.29515780 -0.62957874</span></span>
-<span id="cb27-78"><a href="#cb27-78" tabindex="-1"></a><span class="co">#&gt; 61  -0.20529926  0.87196495 -0.83384358</span></span>
-<span id="cb27-79"><a href="#cb27-79" tabindex="-1"></a><span class="co">#&gt; 62   0.65119328 -0.34847245  0.57872237</span></span>
-<span id="cb27-80"><a href="#cb27-80" tabindex="-1"></a><span class="co">#&gt; 63   0.27376649  0.51850377 -1.08758071</span></span>
-<span id="cb27-81"><a href="#cb27-81" tabindex="-1"></a><span class="co">#&gt; 64   1.02467323 -0.39068498  1.48403093</span></span>
-<span id="cb27-82"><a href="#cb27-82" tabindex="-1"></a><span class="co">#&gt; 65   0.81765945 -1.09278721 -1.18620659</span></span>
-<span id="cb27-83"><a href="#cb27-83" tabindex="-1"></a><span class="co">#&gt; 66  -0.20979317  1.21001051  0.10107915</span></span>
-<span id="cb27-84"><a href="#cb27-84" tabindex="-1"></a><span class="co">#&gt; 67   0.37816777  0.74090001  0.53298929</span></span>
-<span id="cb27-85"><a href="#cb27-85" tabindex="-1"></a><span class="co">#&gt; 68  -0.94540883  1.72426224  0.58673534</span></span>
-<span id="cb27-86"><a href="#cb27-86" tabindex="-1"></a><span class="co">#&gt; 69   0.85692301  0.06515393 -0.30174666</span></span>
-<span id="cb27-87"><a href="#cb27-87" tabindex="-1"></a><span class="co">#&gt; 70  -0.46103834  1.12500275  0.07950200</span></span>
-<span id="cb27-88"><a href="#cb27-88" tabindex="-1"></a><span class="co">#&gt; 71   2.41677335  1.97541905  0.96126415</span></span>
-<span id="cb27-89"><a href="#cb27-89" tabindex="-1"></a><span class="co">#&gt; 72  -1.65104890 -0.28148212 -1.45646592</span></span>
-<span id="cb27-90"><a href="#cb27-90" tabindex="-1"></a><span class="co">#&gt; 73  -0.46398724 -1.32295111 -0.78173971</span></span>
-<span id="cb27-91"><a href="#cb27-91" tabindex="-1"></a><span class="co">#&gt; 74   0.82537986 -0.23935157  0.32040231</span></span>
-<span id="cb27-92"><a href="#cb27-92" tabindex="-1"></a><span class="co">#&gt; 75   0.51013255 -0.21404124 -0.44478198</span></span>
-<span id="cb27-93"><a href="#cb27-93" tabindex="-1"></a><span class="co">#&gt; 76  -0.58948104  0.15168050  1.37000399</span></span>
-<span id="cb27-94"><a href="#cb27-94" tabindex="-1"></a><span class="co">#&gt; 77  -0.99678074  1.71230498  0.67325386</span></span>
-<span id="cb27-95"><a href="#cb27-95" tabindex="-1"></a><span class="co">#&gt; 78   0.14447570 -0.32614389  0.07216675</span></span>
-<span id="cb27-96"><a href="#cb27-96" tabindex="-1"></a><span class="co">#&gt; 79  -0.01430741  0.37300466 -1.50775732</span></span>
-<span id="cb27-97"><a href="#cb27-97" tabindex="-1"></a><span class="co">#&gt; 80  -1.79028124 -0.22768406  0.02610023</span></span>
-<span id="cb27-98"><a href="#cb27-98" tabindex="-1"></a><span class="co">#&gt; 81   0.03455107  0.02045071 -0.31641587</span></span>
-<span id="cb27-99"><a href="#cb27-99" tabindex="-1"></a><span class="co">#&gt; 82   0.19023032  0.31405766 -0.10234651</span></span>
-<span id="cb27-100"><a href="#cb27-100" tabindex="-1"></a><span class="co">#&gt; 83   0.17472640  1.32821470 -1.18155923</span></span>
-<span id="cb27-101"><a href="#cb27-101" tabindex="-1"></a><span class="co">#&gt; 84  -1.05501704  0.12131838  0.49865804</span></span>
-<span id="cb27-102"><a href="#cb27-102" tabindex="-1"></a><span class="co">#&gt; 85   0.47613328  0.71284232 -1.03895644</span></span>
-<span id="cb27-103"><a href="#cb27-103" tabindex="-1"></a><span class="co">#&gt; 86   1.37857014  0.77886003 -0.22622198</span></span>
-<span id="cb27-104"><a href="#cb27-104" tabindex="-1"></a><span class="co">#&gt; 87   0.45623640  0.91477327  0.38142583</span></span>
-<span id="cb27-105"><a href="#cb27-105" tabindex="-1"></a><span class="co">#&gt; 88  -1.13558847 -0.57439455 -0.78351579</span></span>
-<span id="cb27-106"><a href="#cb27-106" tabindex="-1"></a><span class="co">#&gt; 89  -0.43564547  1.62688121  0.58299141</span></span>
-<span id="cb27-107"><a href="#cb27-107" tabindex="-1"></a><span class="co">#&gt; 90   0.34610362 -0.38095674 -1.31651040</span></span>
-<span id="cb27-108"><a href="#cb27-108" tabindex="-1"></a><span class="co">#&gt; 91  -0.64704563 -0.10578417 -2.80977468</span></span>
-<span id="cb27-109"><a href="#cb27-109" tabindex="-1"></a><span class="co">#&gt; 92  -2.15764634  1.40405027  0.46496799</span></span>
-<span id="cb27-110"><a href="#cb27-110" tabindex="-1"></a><span class="co">#&gt; 93   0.88425082  1.29408391  0.84053983</span></span>
-<span id="cb27-111"><a href="#cb27-111" tabindex="-1"></a><span class="co">#&gt; 94  -0.82947761 -1.08999187 -0.28584542</span></span>
-<span id="cb27-112"><a href="#cb27-112" tabindex="-1"></a><span class="co">#&gt; 95  -0.57356027 -0.87307100  0.50412625</span></span>
-<span id="cb27-113"><a href="#cb27-113" tabindex="-1"></a><span class="co">#&gt; 96   1.50390061 -1.35807906 -1.15591653</span></span>
-<span id="cb27-114"><a href="#cb27-114" tabindex="-1"></a><span class="co">#&gt; 97  -0.77414493  0.18184719 -0.12714861</span></span>
-<span id="cb27-115"><a href="#cb27-115" tabindex="-1"></a><span class="co">#&gt; 98   0.84573154  0.16484087 -1.94151838</span></span>
-<span id="cb27-116"><a href="#cb27-116" tabindex="-1"></a><span class="co">#&gt; 99  -1.26068288  0.36411469  1.18118089</span></span>
-<span id="cb27-117"><a href="#cb27-117" tabindex="-1"></a><span class="co">#&gt; 100 -0.35454240  0.55215771  1.85991086</span></span></code></pre></div>
+<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a><span class="co">#&gt;               y          x1          x2</span></span>
+<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a><span class="co">#&gt; 1   -0.71524219 -0.07355602 -0.60189285</span></span>
+<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a><span class="co">#&gt; 2   -0.75268897 -1.16865142 -0.99369859</span></span>
+<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a><span class="co">#&gt; 3   -0.93853870 -0.63474826  1.02678506</span></span>
+<span id="cb27-18"><a href="#cb27-18" tabindex="-1"></a><span class="co">#&gt; 4   -1.05251328 -0.02884155  0.75106130</span></span>
+<span id="cb27-19"><a href="#cb27-19" tabindex="-1"></a><span class="co">#&gt; 5   -0.43715953  0.67069597 -1.50916654</span></span>
+<span id="cb27-20"><a href="#cb27-20" tabindex="-1"></a><span class="co">#&gt; 6    0.33117917 -1.65054654 -0.09514745</span></span>
+<span id="cb27-21"><a href="#cb27-21" tabindex="-1"></a><span class="co">#&gt; 7   -2.01421050 -0.34975424 -0.89594782</span></span>
+<span id="cb27-22"><a href="#cb27-22" tabindex="-1"></a><span class="co">#&gt; 8    0.21198043  0.75640644 -2.07075107</span></span>
+<span id="cb27-23"><a href="#cb27-23" tabindex="-1"></a><span class="co">#&gt; 9    1.23667505 -0.53880916  0.15012013</span></span>
+<span id="cb27-24"><a href="#cb27-24" tabindex="-1"></a><span class="co">#&gt; 10   2.03757402  0.22729192 -0.07921171</span></span>
+<span id="cb27-25"><a href="#cb27-25" tabindex="-1"></a><span class="co">#&gt; 11   1.30117599  0.49222857 -0.09736927</span></span>
+<span id="cb27-26"><a href="#cb27-26" tabindex="-1"></a><span class="co">#&gt; 12   0.75677476  0.26783502  0.21615254</span></span>
+<span id="cb27-27"><a href="#cb27-27" tabindex="-1"></a><span class="co">#&gt; 13  -1.72673040  0.65325768  0.88246516</span></span>
+<span id="cb27-28"><a href="#cb27-28" tabindex="-1"></a><span class="co">#&gt; 14  -0.60150671 -0.12270866  0.20559750</span></span>
+<span id="cb27-29"><a href="#cb27-29" tabindex="-1"></a><span class="co">#&gt; 15  -0.35204646 -0.41367651 -0.61643584</span></span>
+<span id="cb27-30"><a href="#cb27-30" tabindex="-1"></a><span class="co">#&gt; 16   0.70352390 -2.64314895 -0.73479925</span></span>
+<span id="cb27-31"><a href="#cb27-31" tabindex="-1"></a><span class="co">#&gt; 17  -0.10567133 -0.09294102 -0.13180279</span></span>
+<span id="cb27-32"><a href="#cb27-32" tabindex="-1"></a><span class="co">#&gt; 18  -1.25864863  0.43028470  0.31001699</span></span>
+<span id="cb27-33"><a href="#cb27-33" tabindex="-1"></a><span class="co">#&gt; 19   1.68443571  0.53539884 -1.03968035</span></span>
+<span id="cb27-34"><a href="#cb27-34" tabindex="-1"></a><span class="co">#&gt; 20   0.91139129 -0.55527835 -0.18430887</span></span>
+<span id="cb27-35"><a href="#cb27-35" tabindex="-1"></a><span class="co">#&gt; 21   0.23743027  1.77950291  0.96726726</span></span>
+<span id="cb27-36"><a href="#cb27-36" tabindex="-1"></a><span class="co">#&gt; 22   1.21810861  0.28642442 -0.10828009</span></span>
+<span id="cb27-37"><a href="#cb27-37" tabindex="-1"></a><span class="co">#&gt; 23  -1.33877429  0.12631586 -0.69842067</span></span>
+<span id="cb27-38"><a href="#cb27-38" tabindex="-1"></a><span class="co">#&gt; 24   0.66082030  1.27226678 -0.27594517</span></span>
+<span id="cb27-39"><a href="#cb27-39" tabindex="-1"></a><span class="co">#&gt; 25  -0.52291238 -0.71846622  1.11464855</span></span>
+<span id="cb27-40"><a href="#cb27-40" tabindex="-1"></a><span class="co">#&gt; 26   0.68374552 -0.45033862  0.55004396</span></span>
+<span id="cb27-41"><a href="#cb27-41" tabindex="-1"></a><span class="co">#&gt; 27  -0.06082195  2.39745248  1.23667580</span></span>
+<span id="cb27-42"><a href="#cb27-42" tabindex="-1"></a><span class="co">#&gt; 28   0.63296071  0.01112919  0.13909786</span></span>
+<span id="cb27-43"><a href="#cb27-43" tabindex="-1"></a><span class="co">#&gt; 29   1.33551762  1.63356842  0.41027510</span></span>
+<span id="cb27-44"><a href="#cb27-44" tabindex="-1"></a><span class="co">#&gt; 30   0.00729009 -1.43850664 -0.55845691</span></span>
+<span id="cb27-45"><a href="#cb27-45" tabindex="-1"></a><span class="co">#&gt; 31   1.01755864 -0.19051680  0.60537067</span></span>
+<span id="cb27-46"><a href="#cb27-46" tabindex="-1"></a><span class="co">#&gt; 32  -1.18843404  0.37842390 -0.50633354</span></span>
+<span id="cb27-47"><a href="#cb27-47" tabindex="-1"></a><span class="co">#&gt; 33  -0.72160444  0.30003855 -1.42056550</span></span>
+<span id="cb27-48"><a href="#cb27-48" tabindex="-1"></a><span class="co">#&gt; 34   1.51921771 -1.00563626  0.12799297</span></span>
+<span id="cb27-49"><a href="#cb27-49" tabindex="-1"></a><span class="co">#&gt; 35   0.37738797  0.01925927  1.94585122</span></span>
+<span id="cb27-50"><a href="#cb27-50" tabindex="-1"></a><span class="co">#&gt; 36  -2.05222282 -1.07742065  0.80091434</span></span>
+<span id="cb27-51"><a href="#cb27-51" tabindex="-1"></a><span class="co">#&gt; 37  -1.36403745  0.71270333  1.16525339</span></span>
+<span id="cb27-52"><a href="#cb27-52" tabindex="-1"></a><span class="co">#&gt; 38  -0.20078102  1.08477509  0.35885572</span></span>
+<span id="cb27-53"><a href="#cb27-53" tabindex="-1"></a><span class="co">#&gt; 39   0.86577940 -2.22498770 -0.60855718</span></span>
+<span id="cb27-54"><a href="#cb27-54" tabindex="-1"></a><span class="co">#&gt; 40  -0.10188326  1.23569346 -0.20224086</span></span>
+<span id="cb27-55"><a href="#cb27-55" tabindex="-1"></a><span class="co">#&gt; 41   0.62418747 -1.24104450 -0.27324811</span></span>
+<span id="cb27-56"><a href="#cb27-56" tabindex="-1"></a><span class="co">#&gt; 42   0.95900538  0.45476927 -0.46869978</span></span>
+<span id="cb27-57"><a href="#cb27-57" tabindex="-1"></a><span class="co">#&gt; 43   1.67105483  0.65990264  0.70416728</span></span>
+<span id="cb27-58"><a href="#cb27-58" tabindex="-1"></a><span class="co">#&gt; 44   0.05601673 -0.19988983 -1.19736350</span></span>
+<span id="cb27-59"><a href="#cb27-59" tabindex="-1"></a><span class="co">#&gt; 45  -0.05198191 -0.64511396  0.86636613</span></span>
+<span id="cb27-60"><a href="#cb27-60" tabindex="-1"></a><span class="co">#&gt; 46  -1.75323736  0.16532102  0.86415249</span></span>
+<span id="cb27-61"><a href="#cb27-61" tabindex="-1"></a><span class="co">#&gt; 47   0.09932759  0.43881870 -1.19862236</span></span>
+<span id="cb27-62"><a href="#cb27-62" tabindex="-1"></a><span class="co">#&gt; 48  -0.57185006  0.88330282  0.63949200</span></span>
+<span id="cb27-63"><a href="#cb27-63" tabindex="-1"></a><span class="co">#&gt; 49  -0.97400958 -2.05233698  2.43022665</span></span>
+<span id="cb27-64"><a href="#cb27-64" tabindex="-1"></a><span class="co">#&gt; 50  -0.17990623 -1.63637927 -0.55721548</span></span>
+<span id="cb27-65"><a href="#cb27-65" tabindex="-1"></a><span class="co">#&gt; 51   1.01494317  1.43040234  0.84490424</span></span>
+<span id="cb27-66"><a href="#cb27-66" tabindex="-1"></a><span class="co">#&gt; 52  -1.99274849  1.04662885 -0.78220185</span></span>
+<span id="cb27-67"><a href="#cb27-67" tabindex="-1"></a><span class="co">#&gt; 53  -0.42727929  0.43528895  1.11071142</span></span>
+<span id="cb27-68"><a href="#cb27-68" tabindex="-1"></a><span class="co">#&gt; 54   0.11663728  0.71517841  0.24982472</span></span>
+<span id="cb27-69"><a href="#cb27-69" tabindex="-1"></a><span class="co">#&gt; 55  -0.89320757  0.91717492  1.65191539</span></span>
+<span id="cb27-70"><a href="#cb27-70" tabindex="-1"></a><span class="co">#&gt; 56   0.33390294 -2.66092280 -1.45897073</span></span>
+<span id="cb27-71"><a href="#cb27-71" tabindex="-1"></a><span class="co">#&gt; 57   0.41142992  1.11027710 -0.05129789</span></span>
+<span id="cb27-72"><a href="#cb27-72" tabindex="-1"></a><span class="co">#&gt; 58  -0.03303616 -0.48498760 -0.52692518</span></span>
+<span id="cb27-73"><a href="#cb27-73" tabindex="-1"></a><span class="co">#&gt; 59  -2.46589819  0.23061683 -0.19726487</span></span>
+<span id="cb27-74"><a href="#cb27-74" tabindex="-1"></a><span class="co">#&gt; 60   2.57145815 -0.29515780 -0.62957874</span></span>
+<span id="cb27-75"><a href="#cb27-75" tabindex="-1"></a><span class="co">#&gt; 61  -0.20529926  0.87196495 -0.83384358</span></span>
+<span id="cb27-76"><a href="#cb27-76" tabindex="-1"></a><span class="co">#&gt; 62   0.65119328 -0.34847245  0.57872237</span></span>
+<span id="cb27-77"><a href="#cb27-77" tabindex="-1"></a><span class="co">#&gt; 63   0.27376649  0.51850377 -1.08758071</span></span>
+<span id="cb27-78"><a href="#cb27-78" tabindex="-1"></a><span class="co">#&gt; 64   1.02467323 -0.39068498  1.48403093</span></span>
+<span id="cb27-79"><a href="#cb27-79" tabindex="-1"></a><span class="co">#&gt; 65   0.81765945 -1.09278721 -1.18620659</span></span>
+<span id="cb27-80"><a href="#cb27-80" tabindex="-1"></a><span class="co">#&gt; 66  -0.20979317  1.21001051  0.10107915</span></span>
+<span id="cb27-81"><a href="#cb27-81" tabindex="-1"></a><span class="co">#&gt; 67   0.37816777  0.74090001  0.53298929</span></span>
+<span id="cb27-82"><a href="#cb27-82" tabindex="-1"></a><span class="co">#&gt; 68  -0.94540883  1.72426224  0.58673534</span></span>
+<span id="cb27-83"><a href="#cb27-83" tabindex="-1"></a><span class="co">#&gt; 69   0.85692301  0.06515393 -0.30174666</span></span>
+<span id="cb27-84"><a href="#cb27-84" tabindex="-1"></a><span class="co">#&gt; 70  -0.46103834  1.12500275  0.07950200</span></span>
+<span id="cb27-85"><a href="#cb27-85" tabindex="-1"></a><span class="co">#&gt; 71   2.41677335  1.97541905  0.96126415</span></span>
+<span id="cb27-86"><a href="#cb27-86" tabindex="-1"></a><span class="co">#&gt; 72  -1.65104890 -0.28148212 -1.45646592</span></span>
+<span id="cb27-87"><a href="#cb27-87" tabindex="-1"></a><span class="co">#&gt; 73  -0.46398724 -1.32295111 -0.78173971</span></span>
+<span id="cb27-88"><a href="#cb27-88" tabindex="-1"></a><span class="co">#&gt; 74   0.82537986 -0.23935157  0.32040231</span></span>
+<span id="cb27-89"><a href="#cb27-89" tabindex="-1"></a><span class="co">#&gt; 75   0.51013255 -0.21404124 -0.44478198</span></span>
+<span id="cb27-90"><a href="#cb27-90" tabindex="-1"></a><span class="co">#&gt; 76  -0.58948104  0.15168050  1.37000399</span></span>
+<span id="cb27-91"><a href="#cb27-91" tabindex="-1"></a><span class="co">#&gt; 77  -0.99678074  1.71230498  0.67325386</span></span>
+<span id="cb27-92"><a href="#cb27-92" tabindex="-1"></a><span class="co">#&gt; 78   0.14447570 -0.32614389  0.07216675</span></span>
+<span id="cb27-93"><a href="#cb27-93" tabindex="-1"></a><span class="co">#&gt; 79  -0.01430741  0.37300466 -1.50775732</span></span>
+<span id="cb27-94"><a href="#cb27-94" tabindex="-1"></a><span class="co">#&gt; 80  -1.79028124 -0.22768406  0.02610023</span></span>
+<span id="cb27-95"><a href="#cb27-95" tabindex="-1"></a><span class="co">#&gt; 81   0.03455107  0.02045071 -0.31641587</span></span>
+<span id="cb27-96"><a href="#cb27-96" tabindex="-1"></a><span class="co">#&gt; 82   0.19023032  0.31405766 -0.10234651</span></span>
+<span id="cb27-97"><a href="#cb27-97" tabindex="-1"></a><span class="co">#&gt; 83   0.17472640  1.32821470 -1.18155923</span></span>
+<span id="cb27-98"><a href="#cb27-98" tabindex="-1"></a><span class="co">#&gt; 84  -1.05501704  0.12131838  0.49865804</span></span>
+<span id="cb27-99"><a href="#cb27-99" tabindex="-1"></a><span class="co">#&gt; 85   0.47613328  0.71284232 -1.03895644</span></span>
+<span id="cb27-100"><a href="#cb27-100" tabindex="-1"></a><span class="co">#&gt; 86   1.37857014  0.77886003 -0.22622198</span></span>
+<span id="cb27-101"><a href="#cb27-101" tabindex="-1"></a><span class="co">#&gt; 87   0.45623640  0.91477327  0.38142583</span></span>
+<span id="cb27-102"><a href="#cb27-102" tabindex="-1"></a><span class="co">#&gt; 88  -1.13558847 -0.57439455 -0.78351579</span></span>
+<span id="cb27-103"><a href="#cb27-103" tabindex="-1"></a><span class="co">#&gt; 89  -0.43564547  1.62688121  0.58299141</span></span>
+<span id="cb27-104"><a href="#cb27-104" tabindex="-1"></a><span class="co">#&gt; 90   0.34610362 -0.38095674 -1.31651040</span></span>
+<span id="cb27-105"><a href="#cb27-105" tabindex="-1"></a><span class="co">#&gt; 91  -0.64704563 -0.10578417 -2.80977468</span></span>
+<span id="cb27-106"><a href="#cb27-106" tabindex="-1"></a><span class="co">#&gt; 92  -2.15764634  1.40405027  0.46496799</span></span>
+<span id="cb27-107"><a href="#cb27-107" tabindex="-1"></a><span class="co">#&gt; 93   0.88425082  1.29408391  0.84053983</span></span>
+<span id="cb27-108"><a href="#cb27-108" tabindex="-1"></a><span class="co">#&gt; 94  -0.82947761 -1.08999187 -0.28584542</span></span>
+<span id="cb27-109"><a href="#cb27-109" tabindex="-1"></a><span class="co">#&gt; 95  -0.57356027 -0.87307100  0.50412625</span></span>
+<span id="cb27-110"><a href="#cb27-110" tabindex="-1"></a><span class="co">#&gt; 96   1.50390061 -1.35807906 -1.15591653</span></span>
+<span id="cb27-111"><a href="#cb27-111" tabindex="-1"></a><span class="co">#&gt; 97  -0.77414493  0.18184719 -0.12714861</span></span>
+<span id="cb27-112"><a href="#cb27-112" tabindex="-1"></a><span class="co">#&gt; 98   0.84573154  0.16484087 -1.94151838</span></span>
+<span id="cb27-113"><a href="#cb27-113" tabindex="-1"></a><span class="co">#&gt; 99  -1.26068288  0.36411469  1.18118089</span></span>
+<span id="cb27-114"><a href="#cb27-114" tabindex="-1"></a><span class="co">#&gt; 100 -0.35454240  0.55215771  1.85991086</span></span></code></pre></div>
 <p><strong>Solution</strong>: Use <code>corrPrune()</code> first to
 remove perfect collinearity:</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># Two-step approach</span></span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>step1 <span class="ot">&lt;-</span> <span class="fu">corrPrune</span>(perfect_data[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">threshold =</span> <span class="fl">0.99</span>)</span>
 <span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>step2_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> perfect_data<span class="sc">$</span>y, step1)</span>
 <span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">modelPrune</span>(y <span class="sc">~</span> ., <span class="at">data =</span> step2_data, <span class="at">limit =</span> <span class="dv">5</span>)</span>
-<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="co">#&gt; Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable</span></span>
-<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="co">#&gt; Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable</span></span>
-<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="co">#&gt; Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable</span></span>
-<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">attr</span>(result, <span class="st">&quot;selected_vars&quot;</span>))</span>
-<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot;</span></span></code></pre></div>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">attr</span>(result, <span class="st">&quot;selected_vars&quot;</span>))</span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot; &quot;x2&quot;</span></span></code></pre></div>
 </div>
 </div>
 <div id="threshold-selection-guidance" class="section level2">
@@ -1483,7 +1616,39 @@ plateau.</p>
 <span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>}, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
 <span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Error:&quot;</span>, e<span class="sc">$</span>message, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
 <span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a>})</span>
-<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a><span class="co">#&gt; Error: `threshold` must be in the range (0, 1].</span></span></code></pre></div>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a><span class="co">#&gt;                     carb</span></span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a><span class="co">#&gt; Mazda RX4              4</span></span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a><span class="co">#&gt; Mazda RX4 Wag          4</span></span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a><span class="co">#&gt; Datsun 710             1</span></span>
+<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a><span class="co">#&gt; Hornet 4 Drive         1</span></span>
+<span id="cb31-12"><a href="#cb31-12" tabindex="-1"></a><span class="co">#&gt; Hornet Sportabout      2</span></span>
+<span id="cb31-13"><a href="#cb31-13" tabindex="-1"></a><span class="co">#&gt; Valiant                1</span></span>
+<span id="cb31-14"><a href="#cb31-14" tabindex="-1"></a><span class="co">#&gt; Duster 360             4</span></span>
+<span id="cb31-15"><a href="#cb31-15" tabindex="-1"></a><span class="co">#&gt; Merc 240D              2</span></span>
+<span id="cb31-16"><a href="#cb31-16" tabindex="-1"></a><span class="co">#&gt; Merc 230               2</span></span>
+<span id="cb31-17"><a href="#cb31-17" tabindex="-1"></a><span class="co">#&gt; Merc 280               4</span></span>
+<span id="cb31-18"><a href="#cb31-18" tabindex="-1"></a><span class="co">#&gt; Merc 280C              4</span></span>
+<span id="cb31-19"><a href="#cb31-19" tabindex="-1"></a><span class="co">#&gt; Merc 450SE             3</span></span>
+<span id="cb31-20"><a href="#cb31-20" tabindex="-1"></a><span class="co">#&gt; Merc 450SL             3</span></span>
+<span id="cb31-21"><a href="#cb31-21" tabindex="-1"></a><span class="co">#&gt; Merc 450SLC            3</span></span>
+<span id="cb31-22"><a href="#cb31-22" tabindex="-1"></a><span class="co">#&gt; Cadillac Fleetwood     4</span></span>
+<span id="cb31-23"><a href="#cb31-23" tabindex="-1"></a><span class="co">#&gt; Lincoln Continental    4</span></span>
+<span id="cb31-24"><a href="#cb31-24" tabindex="-1"></a><span class="co">#&gt; Chrysler Imperial      4</span></span>
+<span id="cb31-25"><a href="#cb31-25" tabindex="-1"></a><span class="co">#&gt; Fiat 128               1</span></span>
+<span id="cb31-26"><a href="#cb31-26" tabindex="-1"></a><span class="co">#&gt; Honda Civic            2</span></span>
+<span id="cb31-27"><a href="#cb31-27" tabindex="-1"></a><span class="co">#&gt; Toyota Corolla         1</span></span>
+<span id="cb31-28"><a href="#cb31-28" tabindex="-1"></a><span class="co">#&gt; Toyota Corona          1</span></span>
+<span id="cb31-29"><a href="#cb31-29" tabindex="-1"></a><span class="co">#&gt; Dodge Challenger       2</span></span>
+<span id="cb31-30"><a href="#cb31-30" tabindex="-1"></a><span class="co">#&gt; AMC Javelin            2</span></span>
+<span id="cb31-31"><a href="#cb31-31" tabindex="-1"></a><span class="co">#&gt; Camaro Z28             4</span></span>
+<span id="cb31-32"><a href="#cb31-32" tabindex="-1"></a><span class="co">#&gt; Pontiac Firebird       2</span></span>
+<span id="cb31-33"><a href="#cb31-33" tabindex="-1"></a><span class="co">#&gt; Fiat X1-9              1</span></span>
+<span id="cb31-34"><a href="#cb31-34" tabindex="-1"></a><span class="co">#&gt; Porsche 914-2          2</span></span>
+<span id="cb31-35"><a href="#cb31-35" tabindex="-1"></a><span class="co">#&gt; Lotus Europa           2</span></span>
+<span id="cb31-36"><a href="#cb31-36" tabindex="-1"></a><span class="co">#&gt; Ford Pantera L         4</span></span>
+<span id="cb31-37"><a href="#cb31-37" tabindex="-1"></a><span class="co">#&gt; Ferrari Dino           6</span></span>
+<span id="cb31-38"><a href="#cb31-38" tabindex="-1"></a><span class="co">#&gt; Maserati Bora          8</span></span>
+<span id="cb31-39"><a href="#cb31-39" tabindex="-1"></a><span class="co">#&gt; Volvo 142E             2</span></span></code></pre></div>
 </div>
 <div id="mixed-type-data" class="section level3">
 <h3>Mixed-Type Data</h3>
@@ -1502,19 +1667,19 @@ plateau.</p>
 <span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a><span class="co">#&gt;   AssocMethod: numeric_factor = eta, numeric_numeric = pearson, factor_numeric</span></span>
 <span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a><span class="co">#&gt;                = eta, factor_factor = cramersv</span></span>
 <span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a><span class="co">#&gt;   Threshold:   0.600</span></span>
-<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a><span class="co">#&gt;   Subsets:     20 maximal subsets</span></span>
+<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a><span class="co">#&gt;   Subsets:     19 maximal subsets</span></span>
 <span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a><span class="co">#&gt;   Data Rows:   32 used in correlation</span></span>
 <span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a><span class="co">#&gt;   Pivot:       TRUE</span></span>
 <span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a><span class="co">#&gt; Top combinations:</span></span>
 <span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a><span class="co">#&gt;   No.  Variables                          Avg    Max    Size</span></span>
 <span id="cb32-22"><a href="#cb32-22" tabindex="-1"></a><span class="co">#&gt;   ------------------------------------------------------------</span></span>
-<span id="cb32-23"><a href="#cb32-23" tabindex="-1"></a><span class="co">#&gt;   [ 1] wt, vs, gear, carb                0.436  0.583     4</span></span>
-<span id="cb32-24"><a href="#cb32-24" tabindex="-1"></a><span class="co">#&gt;   [ 2] vs, am, carb                      0.265  0.570     3</span></span>
-<span id="cb32-25"><a href="#cb32-25" tabindex="-1"></a><span class="co">#&gt;   [ 3] wt, qsec, gear                    0.324  0.583     3</span></span>
-<span id="cb32-26"><a href="#cb32-26" tabindex="-1"></a><span class="co">#&gt;   [ 4] disp, carb, am                    0.348  0.591     3</span></span>
-<span id="cb32-27"><a href="#cb32-27" tabindex="-1"></a><span class="co">#&gt;   [ 5] drat, vs, carb                    0.367  0.570     3</span></span>
-<span id="cb32-28"><a href="#cb32-28" tabindex="-1"></a><span class="co">#&gt;   ... (15 more combinations)</span></span></code></pre></div>
+<span id="cb32-23"><a href="#cb32-23" tabindex="-1"></a><span class="co">#&gt;   [ 1] drat, vs, am, carb                0.273  0.570     4</span></span>
+<span id="cb32-24"><a href="#cb32-24" tabindex="-1"></a><span class="co">#&gt;   [ 2] cyl, drat, am, carb               0.325  0.523     4</span></span>
+<span id="cb32-25"><a href="#cb32-25" tabindex="-1"></a><span class="co">#&gt;   [ 3] cyl, drat, qsec, am               0.336  0.523     4</span></span>
+<span id="cb32-26"><a href="#cb32-26" tabindex="-1"></a><span class="co">#&gt;   [ 4] wt, vs, am, carb                  0.344  0.570     4</span></span>
+<span id="cb32-27"><a href="#cb32-27" tabindex="-1"></a><span class="co">#&gt;   [ 5] wt, vs, gear, carb                0.436  0.583     4</span></span>
+<span id="cb32-28"><a href="#cb32-28" tabindex="-1"></a><span class="co">#&gt;   ... (14 more combinations)</span></span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -1588,9 +1753,9 @@ plateau.</p>
 <div id="algorithms" class="section level3">
 <h3>Algorithms</h3>
 <ul>
-<li><p>Use <strong>exact mode</strong> for p ≤ 20 (optimal,
-reproducible)</p></li>
-<li><p>Use <strong>greedy mode</strong> for p &gt; 20 (fast,
+<li><p>Use <strong>exact mode</strong> for p &lt;= 100 (optimal,
+reproducible; the default <code>max_exact_p</code>)</p></li>
+<li><p>Use <strong>greedy mode</strong> for p &gt; 100 (fast,
 near-optimal)</p></li>
 <li><p>Use <strong>auto mode</strong> to let corrselect decide</p></li>
 </ul>
@@ -1660,8 +1825,8 @@ introduction</p></li>
 <li><p><code>vignette(&quot;workflows&quot;)</code> - Real-world examples</p></li>
 <li><p><code>vignette(&quot;comparison&quot;)</code> - vs caret, Boruta,
 glmnet</p></li>
-<li><p><code>vignette(&quot;corrselect_vignette&quot;)</code> - Original exact
-methods vignette</p></li>
+<li><p><code>vignette(&quot;theory&quot;)</code> - Formal problem statement and
+exact methods</p></li>
 <li><p><code>?corrPrune</code> - Association-based pruning</p></li>
 <li><p><code>?modelPrune</code> - Model-based pruning</p></li>
 <li><p><code>?corrSelect</code> - Exact subset enumeration</p></li>
@@ -1670,7 +1835,7 @@ methods vignette</p></li>
 <div id="session-info" class="section level2">
 <h2>Session Info</h2>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="co">#&gt; R version 4.5.2 (2025-10-31 ucrt)</span></span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="co">#&gt; R version 4.6.0 (2026-04-24 ucrt)</span></span>
 <span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
 <span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 11 x64 (build 26200)</span></span>
 <span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1678,27 +1843,29 @@ methods vignette</p></li>
 <span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
 <span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
-<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=en_US.UTF-8  LC_CTYPE=en_US.UTF-8    LC_MONETARY=en_US.UTF-8</span></span>
-<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C            LC_TIME=en_US.UTF-8    </span></span>
-<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
-<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
+<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
+<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
+<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
 <span id="cb36-15"><a href="#cb36-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-16"><a href="#cb36-16" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
-<span id="cb36-17"><a href="#cb36-17" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb36-16"><a href="#cb36-16" tabindex="-1"></a><span class="co">#&gt; time zone: Europe/Luxembourg</span></span>
+<span id="cb36-17"><a href="#cb36-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
 <span id="cb36-18"><a href="#cb36-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-19"><a href="#cb36-19" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
-<span id="cb36-20"><a href="#cb36-20" tabindex="-1"></a><span class="co">#&gt; [1] microbenchmark_1.5.0 corrselect_3.2.1    </span></span>
+<span id="cb36-19"><a href="#cb36-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb36-20"><a href="#cb36-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span id="cb36-21"><a href="#cb36-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb36-22"><a href="#cb36-22" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span id="cb36-23"><a href="#cb36-23" tabindex="-1"></a><span class="co">#&gt;  [1] vctrs_0.7.1       svglite_2.2.2     cli_3.6.5         knitr_1.51       </span></span>
-<span id="cb36-24"><a href="#cb36-24" tabindex="-1"></a><span class="co">#&gt;  [5] rlang_1.1.7       xfun_0.55         otel_0.2.0        textshaping_1.0.4</span></span>
-<span id="cb36-25"><a href="#cb36-25" tabindex="-1"></a><span class="co">#&gt;  [9] S7_0.2.1          jsonlite_2.0.0    glue_1.8.0        htmltools_0.5.9  </span></span>
-<span id="cb36-26"><a href="#cb36-26" tabindex="-1"></a><span class="co">#&gt; [13] sass_0.4.10       rmarkdown_2.30    evaluate_1.0.5    jquerylib_0.1.4  </span></span>
-<span id="cb36-27"><a href="#cb36-27" tabindex="-1"></a><span class="co">#&gt; [17] MASS_7.3-65       fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.5  </span></span>
-<span id="cb36-28"><a href="#cb36-28" tabindex="-1"></a><span class="co">#&gt; [21] compiler_4.5.2    Rcpp_1.1.1        systemfonts_1.3.1 digest_0.6.39    </span></span>
-<span id="cb36-29"><a href="#cb36-29" tabindex="-1"></a><span class="co">#&gt; [25] R6_2.6.1          pillar_1.11.1     bslib_0.9.0       tools_4.5.2      </span></span>
-<span id="cb36-30"><a href="#cb36-30" tabindex="-1"></a><span class="co">#&gt; [29] cachem_1.1.0</span></span></code></pre></div>
+<span id="cb36-22"><a href="#cb36-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb36-23"><a href="#cb36-23" tabindex="-1"></a><span class="co">#&gt; [1] corrselect_3.2.3</span></span>
+<span id="cb36-24"><a href="#cb36-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-25"><a href="#cb36-25" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb36-26"><a href="#cb36-26" tabindex="-1"></a><span class="co">#&gt;  [1] digest_0.6.39     R6_2.6.1          fastmap_1.2.0     xfun_0.57        </span></span>
+<span id="cb36-27"><a href="#cb36-27" tabindex="-1"></a><span class="co">#&gt;  [5] cachem_1.1.0      knitr_1.51        htmltools_0.5.9   rmarkdown_2.31   </span></span>
+<span id="cb36-28"><a href="#cb36-28" tabindex="-1"></a><span class="co">#&gt;  [9] lifecycle_1.0.5   cli_3.6.6         S7_0.2.2          svglite_2.2.2    </span></span>
+<span id="cb36-29"><a href="#cb36-29" tabindex="-1"></a><span class="co">#&gt; [13] sass_0.4.10       textshaping_1.0.5 jquerylib_0.1.4   systemfonts_1.3.2</span></span>
+<span id="cb36-30"><a href="#cb36-30" tabindex="-1"></a><span class="co">#&gt; [17] compiler_4.6.0    tools_4.6.0       evaluate_1.0.5    bslib_0.11.0     </span></span>
+<span id="cb36-31"><a href="#cb36-31" tabindex="-1"></a><span class="co">#&gt; [21] Rcpp_1.1.1-1.1    yaml_2.3.12       otel_0.2.0        rlang_1.2.0      </span></span>
+<span id="cb36-32"><a href="#cb36-32" tabindex="-1"></a><span class="co">#&gt; [25] jsonlite_2.0.0    MASS_7.3-65</span></span></code></pre></div>
 </div>
 </div>
 

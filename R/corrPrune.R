@@ -7,17 +7,28 @@
 #'
 #' @param data A data.frame containing candidate predictors.
 #' @param threshold Numeric scalar. Maximum allowed pairwise association
-#'   (default: 0.7). Must be non-negative.
-#' @param measure Character string specifying the association measure to use.
-#'   Options: `"auto"` (default), `"pearson"`, `"spearman"`, `"kendall"`,
-#'   `"cramersv"`, `"eta"`, etc. When `"auto"`, Pearson correlation is used
-#'   for all-numeric data, and appropriate measures are selected for mixed-type
-#'   data.
+#'   (default: 0.7). Must be in `[0, 1]` -- every supported association
+#'   measure is bounded in `[0, 1]` (in absolute value), so this range is
+#'   enforced the same way regardless of `mode` (`threshold = 0` is valid
+#'   only in `mode = "greedy"`; see Mode Selection below).
+#' @param measure Character string specifying the numeric-numeric association
+#'   measure to use. One of `"auto"` (default, Pearson), `"pearson"`,
+#'   `"spearman"`, `"kendall"`, `"bicor"`, `"distance"`, or `"maximal"`. This
+#'   only customizes numeric-numeric pairs; every other pair-type combination
+#'   is fixed and not affected by `measure`: eta-squared for
+#'   numeric-categorical pairs, Cramer's V for categorical-categorical pairs,
+#'   and Spearman for numeric-ordered and ordered-ordered pairs. The measure
+#'   actually used for each pair-type combination is reported in the
+#'   `assoc_methods_used` attribute of the result.
 #' @param mode Character string specifying the search algorithm. Options:
-#'   - `"auto"` (default): uses exact search if number of predictors <= `max_exact_p`,
-#'     otherwise uses greedy search
-#'   - `"exact"`: exhaustive search for maximal subsets (may be slow for large p)
-#'   - `"greedy"`: fast approximate search using iterative removal
+#'   - `"auto"` (default): uses exact search if number of predictors <= `max_exact_p`
+#'     and there are at least 2 predictors with `threshold > 0`, otherwise uses
+#'     greedy search (exact search requires both, since it routes through
+#'     \code{\link{MatSelect}()})
+#'   - `"exact"`: exhaustive search for maximal subsets (may be slow for large p);
+#'     requires at least 2 predictors and `threshold > 0`
+#'   - `"greedy"`: fast approximate search using iterative removal; supports a
+#'     single predictor and `threshold = 0`
 #' @param force_in Character vector of variable names that must be retained in
 #'   the final subset. Default: NULL.
 #' @param by Character vector naming one or more grouping variables. If provided,
@@ -30,14 +41,19 @@
 #'   mode is used when `mode = "auto"`. Default: 100.
 #' @param ... Additional arguments (reserved for future use).
 #'
-#' @return A data.frame containing the pruned subset of predictors. The result
+#' @return A data.frame containing the pruned subset of predictors, with the
+#'   selected columns unchanged from `data` (same types and values --
+#'   character/logical/integer columns are converted internally only for
+#'   association computation, never in the returned data). The result
 #'   has the following attributes:
 #'   \describe{
 #'     \item{selected_vars}{Character vector of retained variable names}
 #'     \item{removed_vars}{Character vector of removed variable names}
 #'     \item{mode}{Character string indicating which mode was used ("exact" or "greedy")}
-#'     \item{measure}{Character string indicating which association measure was used}
+#'     \item{measure}{Character string indicating which measure was used for numeric-numeric pairs}
+#'     \item{assoc_methods_used}{Named list mapping each pair-type combination (e.g. "numeric_numeric", "numeric_factor") to the association method actually used}
 #'     \item{threshold}{The threshold value used}
+#'     \item{n_rows_used}{Number of complete-case rows used to compute associations (see Details); the returned data itself is not row-filtered}
 #'   }
 #'
 #' @details
@@ -93,7 +109,7 @@
 #' # Use greedy mode for faster computation
 #' pruned <- corrPrune(mtcars, threshold = 0.7, mode = "greedy")
 #'
-#' @importFrom stats cor complete.cases quantile
+#' @importFrom stats complete.cases quantile
 #' @export
 corrPrune <- function(
   data,
@@ -125,8 +141,8 @@ corrPrune <- function(
   if (!is.numeric(threshold) || length(threshold) != 1L) {
     stop("'threshold' must be a single numeric value")
   }
-  if (is.na(threshold) || threshold < 0) {
-    stop("'threshold' must be non-negative and non-missing")
+  if (is.na(threshold) || threshold < 0 || threshold > 1) {
+    stop("'threshold' must be in the range [0, 1] and non-missing")
   }
 
   # Check measure
@@ -142,11 +158,19 @@ corrPrune <- function(
     stop("'mode' must be one of: 'auto', 'exact', 'greedy'")
   }
 
+  # Check for duplicate column names up front: downstream name-based matching
+  # (force_in, by) would otherwise silently resolve to only the first match.
+  if (anyDuplicated(names(data))) {
+    stop("'data' has duplicate column names: ",
+         paste(unique(names(data)[duplicated(names(data))]), collapse = ", "))
+  }
+
   # Check force_in
   if (!is.null(force_in)) {
     if (!is.character(force_in)) {
       stop("'force_in' must be a character vector of variable names")
     }
+    force_in <- unique(force_in)
     missing_vars <- setdiff(force_in, names(data))
     if (length(missing_vars) > 0L) {
       stop(sprintf(
@@ -167,6 +191,15 @@ corrPrune <- function(
         "'by' variable(s) not found in data: %s",
         paste(missing_by, collapse = ", ")
       ))
+    }
+    if (!is.null(force_in)) {
+      overlap <- intersect(force_in, by)
+      if (length(overlap) > 0L) {
+        stop(sprintf(
+          "'force_in' cannot include grouping variable(s) named in 'by': %s",
+          paste(overlap, collapse = ", ")
+        ))
+      }
     }
   }
 
@@ -195,6 +228,9 @@ corrPrune <- function(
 
   # Remove grouping variables from predictor set if present
   predictor_cols <- setdiff(names(data), by)
+  if (length(predictor_cols) == 0L) {
+    stop("'by' names every column in 'data'; no predictor columns remain to prune.")
+  }
   data <- data[, predictor_cols, drop = FALSE]
 
   # Auto-convert and classify variable types (following assocSelect pattern)
@@ -223,18 +259,49 @@ corrPrune <- function(
     ))
   }
 
-  # Check if all numeric (for measure auto-resolution)
-  all_numeric <- all(types == "numeric")
-
   # ===========================================================================
   # Step 3 — Resolve association measure
   # ===========================================================================
 
-  # Auto-resolve measure
+  # `measure` customizes the numeric-numeric sub-measure only; other pair-type
+  # combinations always use eta-squared (numeric-categorical) or Cramer's V
+  # (categorical-categorical), mirroring assocSelect()'s fixed dispatch table.
+  # This applies whether or not the data is all-numeric, so a mixed-type call
+  # can still request e.g. measure = "kendall" for its numeric-numeric pairs.
+  numeric_measure_choices <- c("pearson", "spearman", "kendall", "bicor", "distance", "maximal")
   if (measure == "auto") {
-    measure_used <- if (all_numeric) "pearson" else "cramersv"
-  } else {
+    measure_used <- "pearson"
+  } else if (measure %in% numeric_measure_choices) {
     measure_used <- measure
+  } else {
+    stop(sprintf(
+      "'measure' must be one of: %s. It customizes numeric-numeric associations only; other pair types always use eta-squared or Cramer's V.",
+      paste(c("auto", numeric_measure_choices), collapse = ", ")
+    ))
+  }
+
+  # Real per-pair-type association-method metadata (mirrors assocSelect()'s
+  # `assoc_methods_used` attribute). Determined purely by the static variable
+  # types and the resolved numeric-numeric measure, so it is valid whether or
+  # not `by`-grouping is used. Reuses .full_assoc_method_map() -- the same
+  # type-pair -> method table .compute_single_assoc_matrix() dispatches
+  # through below -- rather than re-deriving an independent copy that could
+  # drift from it (see #59).
+  assoc_methods_used <- list()
+  if (length(types) >= 2) {
+    if (all(types == "numeric")) {
+      assoc_methods_used <- list(numeric_numeric = measure_used)
+    } else {
+      full_assoc_methods <- .full_assoc_method_map(measure_used)
+      for (.i in seq_len(length(types) - 1)) {
+        for (.j in (.i + 1):length(types)) {
+          .key <- paste(types[.i], types[.j], sep = "_")
+          if (is.null(assoc_methods_used[[.key]])) {
+            assoc_methods_used[[.key]] <- full_assoc_methods[[.key]]
+          }
+        }
+      }
+    }
   }
 
   # ===========================================================================
@@ -243,123 +310,49 @@ corrPrune <- function(
 
   # Helper function to compute association matrix for a single data frame
   .compute_single_assoc_matrix <- function(df_input, meas, var_types) {
-    p <- ncol(df_input)
-    mat <- diag(1, p)
-    colnames(mat) <- rownames(mat) <- names(df_input)
-
-    # If all numeric, use correlation-based approach
-    if (all(var_types == "numeric")) {
-      # Handle missing values
-      dropped <- sum(!complete.cases(df_input))
-      if (dropped > 0) {
-        df_clean <- df_input[complete.cases(df_input), ]
-        if (dropped == nrow(df_input)) {
-          stop("All rows contain missing values")
-        }
-        warning(sprintf(
-          "Removed %d row%s with missing values.",
-          dropped, if (dropped == 1) "" else "s"
-        ))
-      } else {
-        df_clean <- df_input
+    # Handle missing values (shared by both branches below): listwise
+    # deletion up front, so every pair-type computation sees the same
+    # complete-case data rather than each pair applying its own ad hoc NA
+    # policy.
+    dropped <- sum(!complete.cases(df_input))
+    if (dropped > 0) {
+      df_clean <- df_input[complete.cases(df_input), ]
+      if (dropped == nrow(df_input)) {
+        stop("All rows contain missing values")
       }
-
-      # Compute correlation matrix based on measure
-      if (meas %in% c("pearson", "spearman", "kendall")) {
-        mat <- abs(cor(df_clean, method = meas))
-      } else if (meas == "bicor") {
-        if (!requireNamespace("WGCNA", quietly = TRUE)) {
-          stop("Install the 'WGCNA' package for bicor.")
-        }
-        mat <- abs(WGCNA::bicor(df_clean))
-      } else if (meas == "distance") {
-        if (!requireNamespace("energy", quietly = TRUE)) {
-          stop("Install the 'energy' package for distance correlation.")
-        }
-        # Compute pairwise distance correlations
-        mat <- diag(1, p)
-        for (i in seq_len(p - 1)) {
-          for (j in (i + 1):p) {
-            mat[i, j] <- mat[j, i] <- energy::dcor(df_clean[[i]], df_clean[[j]])
-          }
-        }
-        colnames(mat) <- rownames(mat) <- names(df_clean)
-      } else if (meas == "maximal") {
-        if (!requireNamespace("minerva", quietly = TRUE)) {
-          stop("Install the 'minerva' package for maximal information coefficient.")
-        }
-        # Compute pairwise MIC
-        mat <- diag(1, p)
-        for (i in seq_len(p - 1)) {
-          for (j in (i + 1):p) {
-            mat[i, j] <- mat[j, i] <- minerva::mine(df_clean[[i]], df_clean[[j]])$MIC
-          }
-        }
-        colnames(mat) <- rownames(mat) <- names(df_clean)
-      } else {
-        stop(sprintf("Measure '%s' is not supported. Use one of: pearson, spearman, kendall, bicor, distance, maximal", meas))
-      }
+      warning(sprintf(
+        "Removed %d row%s with missing values when computing associations (rows are not removed from the returned data).",
+        dropped, if (dropped == 1) "" else "s"
+      ))
     } else {
-      # Mixed-type: compute pairwise associations using appropriate measures
-
-      # Compute pairwise associations
-      for (i in seq_len(p - 1)) {
-        for (j in (i + 1):p) {
-          xi <- df_input[[i]]
-          xj <- df_input[[j]]
-          ti <- var_types[i]
-          tj <- var_types[j]
-
-          # Determine association measure based on types
-          if (ti == "numeric" && tj == "numeric") {
-            # Use the specified numeric measure
-            assoc_val <- abs(cor(xi, xj, method = "pearson", use = "complete.obs"))
-          } else if ((ti == "numeric" && tj == "ordered") || (ti == "ordered" && tj == "numeric")) {
-            # Numeric-Ordered: use Spearman
-            assoc_val <- abs(cor(as.numeric(xi), as.numeric(xj), method = "spearman", use = "complete.obs"))
-          } else if ((ti == "numeric" && tj == "factor") || (ti == "factor" && tj == "numeric")) {
-            # Numeric-Factor: use eta-squared
-            cat_var <- if (ti == "factor") xi else xj
-            num_var <- if (ti == "numeric") xi else xj
-            if (length(unique(cat_var)) < 2) {
-              assoc_val <- 0
-            } else {
-              ss_tot <- sum((num_var - mean(num_var, na.rm = TRUE))^2, na.rm = TRUE)
-              if (ss_tot == 0) {
-                assoc_val <- 0
-              } else {
-                ss_bet <- sum(tapply(num_var, cat_var, function(z) {
-                  length(z) * (mean(z, na.rm = TRUE) - mean(num_var, na.rm = TRUE))^2
-                }), na.rm = TRUE)
-                assoc_val <- sqrt(ss_bet / ss_tot)
-              }
-            }
-          } else if (ti == "ordered" && tj == "ordered") {
-            # Ordered-Ordered: use Spearman
-            assoc_val <- abs(cor(as.numeric(xi), as.numeric(xj), method = "spearman", use = "complete.obs"))
-          } else {
-            # Factor-Factor or Factor-Ordered: use Cramer's V
-            tbl <- table(xi, xj)
-            if (min(dim(tbl)) < 2 || any(rowSums(tbl) == 0) || any(colSums(tbl) == 0)) {
-              assoc_val <- NA_real_
-            } else {
-              suppressWarnings({
-                chi2 <- suppressWarnings(chisq.test(tbl, correct = FALSE)$statistic)
-              })
-              if (length(chi2) == 0 || is.na(chi2)) {
-                assoc_val <- NA_real_
-              } else {
-                assoc_val <- sqrt(chi2 / (sum(tbl) * (min(dim(tbl)) - 1)))
-              }
-            }
-          }
-
-          mat[i, j] <- mat[j, i] <- assoc_val
-        }
-      }
+      df_clean <- df_input
     }
 
-    mat
+    # A single remaining row makes sd()/cor() degenerate (NA, not 0/FALSE),
+    # which would otherwise surface here as an opaque "missing value where
+    # TRUE/FALSE needed" from .numeric_assoc_matrix()'s constant-column check
+    # rather than a clear, corrPrune-specific message (matching
+    # corrSelect()/assocSelect()'s equivalent guard).
+    if (nrow(df_clean) < 2) {
+      stop("Fewer than two complete-case rows remain after removing missing values: ",
+           "cannot compute associations.")
+    }
+
+    # If all numeric, use the shared vectorized correlation-based builder
+    # (constant columns get association 0, not NA -- see .numeric_assoc_matrix()).
+    if (all(var_types == "numeric")) {
+      if (!meas %in% c("pearson", "spearman", "kendall", "bicor", "distance", "maximal")) {
+        stop(sprintf("Measure '%s' is not supported. Use one of: pearson, spearman, kendall, bicor, distance, maximal", meas))
+      }
+      .numeric_assoc_matrix(df_clean, meas)
+    } else {
+      # Mixed-type: shared pairwise builder (also used by assocSelect()).
+      # corrPrune() only exposes a configurable measure for numeric-numeric
+      # pairs; every other pair-type combination uses the fixed dispatch
+      # documented in ?corrPrune (spearman / eta / cramersv).
+      full_assoc_methods <- .full_assoc_method_map(meas)
+      .mixed_type_assoc_matrix(df_clean, var_types, full_assoc_methods)$mat
+    }
   }
 
   # Compute effective association matrix
@@ -371,6 +364,19 @@ corrPrune <- function(
     # Case B: Grouped association
     # Split data by grouping variable(s)
     group_var <- interaction(data_orig[, by, drop = FALSE], drop = TRUE)
+
+    # Rows with a missing grouping value produce NA here (interaction() has
+    # no "NA" level of its own) and would otherwise be silently excluded from
+    # every group with no warning at all -- unlike every other NA-driven row
+    # drop in this package.
+    n_na_by <- sum(is.na(group_var))
+    if (n_na_by > 0) {
+      warning(sprintf(
+        "%d row%s with missing values in the grouping variable(s) ('%s') were excluded from every group.",
+        n_na_by, if (n_na_by == 1) "" else "s", paste(by, collapse = "', '")
+      ))
+    }
+
     group_levels <- levels(group_var)
     n_groups <- length(group_levels)
 
@@ -398,23 +404,89 @@ corrPrune <- function(
           next
         }
 
-        # Compute association matrix for this group
-        suppressWarnings({
+        # Compute association matrix for this group. Only the informative
+        # "Removed N row(s)..." warning from .compute_single_assoc_matrix()
+        # itself is allowed through; anything else (e.g. a stats::cor()
+        # zero-variance warning on a small group) is muffled, same as before.
+        withCallingHandlers({
           assoc_arrays[, , g] <- .compute_single_assoc_matrix(grp_data, measure_used, types)
+        }, warning = function(w) {
+          if (!grepl("^Removed \\d+ row", conditionMessage(w))) {
+            invokeRestart("muffleWarning")
+          }
         })
       }
 
-      # Aggregate across groups using group_q quantile
+      # A group counts as "computed" only if it had enough complete rows to
+      # actually be run through .compute_single_assoc_matrix() above (as
+      # opposed to a skipped group, already warned about individually).
+      group_computed <- rows_per_group >= 2
+
+      # A cell is genuinely undefined if some *computed* group still
+      # produced NA for that specific pair -- e.g. a factor level that
+      # happens to be unused within that one group, or a degenerate
+      # contingency table -- as distinct from a skipped group's NA, which is
+      # a deliberate, already-warned exclusion. Silently dropping the former
+      # from the group_q quantile (as the aggregation below does for the
+      # latter) would let group_q = 1's "holds in every group" guarantee
+      # pass without that group's association ever actually being checked.
+      undefined_cells <- apply(assoc_arrays, c(1, 2), function(vals) {
+        any(is.na(vals) & group_computed)
+      })
+      diag(undefined_cells) <- FALSE
+      if (any(undefined_cells)) {
+        bad_idx <- which(undefined_cells & upper.tri(undefined_cells), arr.ind = TRUE)
+        bad_pairs <- sprintf("'%s' and '%s'", names(data)[bad_idx[, 1]], names(data)[bad_idx[, 2]])
+        stop(sprintf(
+          "Association is undefined for %s in at least one group that had enough data to be included (e.g. an unused factor level, or a degenerate contingency table within that group). Excluding it from the group_q aggregate would silently skip verifying that group; consider excluding the offending variable, choosing a coarser grouping, or filtering the degenerate group explicitly.",
+          paste(bad_pairs, collapse = ", ")
+        ))
+      }
+
+      # Aggregate across groups using group_q quantile. Only computed groups
+      # contribute; skipped groups (rows_per_group < 2, already warned above)
+      # are excluded here as a deliberate, already-communicated omission.
       A_eff <- apply(assoc_arrays, c(1, 2), function(vals) {
-        vals <- vals[!is.na(vals)]
+        vals <- vals[group_computed & !is.na(vals)]
         if (length(vals) == 0) return(NA_real_)
         quantile(vals, probs = group_q, na.rm = TRUE)
       })
       colnames(A_eff) <- rownames(A_eff) <- names(data)
       diag(A_eff) <- 1
 
-      n_rows_used <- sum(rows_per_group)
+      # Only rows from groups that actually contributed to A_eff count
+      # towards n_rows_used; a skipped group's rows never fed the
+      # association matrix at all.
+      n_rows_used <- sum(rows_per_group[group_computed])
+
+      n_contributing <- sum(group_computed)
+      if (n_contributing < n_groups) {
+        warning(sprintf(
+          "Only %d of %d groups had enough complete rows to contribute to the group_q aggregate; the rest were skipped.",
+          n_contributing, n_groups
+        ))
+      }
     }
+  }
+
+  # ===========================================================================
+  # Step 4b — Reject genuinely undefined associations
+  # ===========================================================================
+  # An NA in A_eff means the true association for that pair is unknown (e.g.
+  # Cramer's V undefined for a degenerate contingency table), not that the
+  # pair is known to be compatible. Surfacing this explicitly here keeps exact
+  # and greedy modes consistent: without this check, exact mode would hit a
+  # generic "mat must not contain NA" error deep inside MatSelect(), and
+  # greedy mode would silently pass NaN through the C++ backend as if it were
+  # a non-violation.
+  if (anyNA(A_eff)) {
+    na_idx <- which(is.na(A_eff) & upper.tri(A_eff), arr.ind = TRUE)
+    bad_pairs <- sprintf("'%s' and '%s'",
+                         colnames(A_eff)[na_idx[, 1]], colnames(A_eff)[na_idx[, 2]])
+    stop(sprintf(
+      "Association matrix contains undefined (NA) values for: %s. This may be caused by sparse combinations or unused factor levels.",
+      paste(bad_pairs, collapse = ", ")
+    ))
   }
 
   # ===========================================================================
@@ -429,8 +501,11 @@ corrPrune <- function(
       # Extract submatrix for force_in variables
       M <- A_eff[force_in_idx, force_in_idx]
 
-      # Check upper triangle (excluding diagonal)
-      violations <- which(M[upper.tri(M)] > threshold, arr.ind = FALSE)
+      # Check upper triangle (excluding diagonal). Step 4b above already
+      # stop()s on any NA anywhere in A_eff, so M can never contain NA here --
+      # only the magnitude check applies.
+      Mtri <- M[upper.tri(M)]
+      violations <- which(abs(Mtri) > threshold, arr.ind = FALSE)
 
       if (length(violations) > 0) {
         # Find which pairs violate
@@ -438,7 +513,7 @@ corrPrune <- function(
         bad_pairs <- upper_tri_idx[violations, , drop = FALSE]
         var1 <- force_in[bad_pairs[1, 1]]
         var2 <- force_in[bad_pairs[1, 2]]
-        bad_val <- M[bad_pairs[1, 1], bad_pairs[1, 2]]
+        bad_val <- abs(M[bad_pairs[1, 1], bad_pairs[1, 2]])
 
         stop(sprintf(
           "Variables in 'force_in' violate the threshold constraint. Example: '%s' and '%s' have association %.3f > %.3f",
@@ -454,7 +529,12 @@ corrPrune <- function(
 
   p <- ncol(data)
   if (mode == "auto") {
-    mode_used <- if (p <= max_exact_p) "exact" else "greedy"
+    # Exact mode routes through MatSelect(), which requires >= 2 columns
+    # and threshold > 0 -- stricter than corrPrune()'s own contract (>= 1
+    # column, threshold >= 0; both cap at 1). "auto" degrades to greedy for
+    # inputs exact mode cannot service, rather than erroring on
+    # documented-valid corrPrune() input.
+    mode_used <- if (p <= max_exact_p && p >= 2 && threshold > 0) "exact" else "greedy"
   } else {
     mode_used <- mode
   }
@@ -464,7 +544,21 @@ corrPrune <- function(
   # ===========================================================================
 
   if (mode_used == "exact") {
-    # Step 7A — Exact mode: use MatSelect to get all maximal subsets
+    # Step 7A — Exact mode: use MatSelect to get all maximal subsets.
+    # MatSelect() requires >= 2 columns and threshold > 0, stricter than
+    # corrPrune()'s own contract on the lower bound (both cap at 1) --
+    # surface a corrPrune-specific error for an explicit mode = "exact"
+    # request on input it cannot service, rather than letting MatSelect()'s
+    # internal message leak through.
+    if (p < 2) {
+      stop("mode = 'exact' requires at least two variables in 'data'. ",
+           "Use mode = 'greedy' (or the default mode = 'auto') for single-variable input.")
+    }
+    if (threshold <= 0) {
+      stop("mode = 'exact' requires 'threshold' > 0. ",
+           "Use mode = 'greedy' (or the default mode = 'auto') for threshold = 0.")
+    }
+
     combo_result <- MatSelect(
       mat = A_eff,
       threshold = threshold,
@@ -472,15 +566,15 @@ corrPrune <- function(
       force_in = force_in
     )
 
-    # Extract all subsets that satisfy the constraint
-    if (length(combo_result@subset_list) == 0) {
-      stop("No valid subsets found that satisfy the threshold constraint")
-    }
-
     # Choose one subset using deterministic tie-breaking:
     # 1. Largest subset size
     # 2. If tied: smallest average correlation
     # 3. If tied: lexicographically first
+    #
+    # MatSelect() always returns at least one maximal subset for a matrix
+    # with >= 2 columns -- including size-1 subsets when no pair of
+    # variables is mutually compatible under the threshold -- so
+    # combo_result@subset_list is never empty here.
 
     subset_sizes <- vapply(combo_result@subset_list, length, integer(1))
     max_size <- max(subset_sizes)
@@ -536,8 +630,12 @@ corrPrune <- function(
   # Step 8 — Final output
   # ===========================================================================
 
-  # Return the pruned data with selected variables
-  data_pruned <- data[, selected_vars, drop = FALSE]
+  # Return the pruned data with selected variables, subsetting from the
+  # caller's original untouched columns (data_orig) rather than the
+  # internally-converted `data` (character/logical -> factor, integer ->
+  # numeric), so corrPrune() only ever removes columns -- it never silently
+  # changes the type of a column it keeps.
+  data_pruned <- data_orig[, selected_vars, drop = FALSE]
 
   # Compute removed variables
   all_vars <- colnames(data)
@@ -548,9 +646,11 @@ corrPrune <- function(
   attr(data_pruned, "removed_vars") <- removed_vars
   attr(data_pruned, "mode") <- mode_used
   attr(data_pruned, "measure") <- measure_used
+  attr(data_pruned, "assoc_methods_used") <- assoc_methods_used
   attr(data_pruned, "threshold") <- threshold
   attr(data_pruned, "n_vars_original") <- ncol(data)
   attr(data_pruned, "n_vars_selected") <- length(selected_vars)
+  attr(data_pruned, "n_rows_used") <- n_rows_used
 
   return(data_pruned)
 }

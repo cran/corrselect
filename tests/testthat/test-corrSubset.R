@@ -26,6 +26,24 @@ test_that("errors if df is not a data.frame or matrix", {
   )
 })
 
+test_that("errors on non-integer numeric `which` instead of silently truncating (#66)", {
+  df <- data.frame(A = 1:5, B = 5:1)
+  res <- CorrCombo(
+             subset_list = list(c("A", "B"), c("A")),
+             avg_corr    = c(0.1, 0.0),
+             min_corr    = c(0.1, 0.0),
+             max_corr    = c(0.1, 0.0),
+             var_names       = c("A", "B"),
+             threshold   = 0.5,
+             forced_in   = character(),
+             search_type = "els",
+             n_rows_used = 5L)
+  expect_error(
+    corrSubset(res, df, which = 1.9),
+    "whole numbers"
+  )
+})
+
 test_that("errors if required columns are missing in df", {
   df <- data.frame(A = 1:5)
   res <- CorrCombo(
@@ -41,6 +59,28 @@ test_that("errors if required columns are missing in df", {
   expect_error(
     corrSubset(res, df),
     "The following variables are missing in `df`: B"
+  )
+})
+
+test_that("errors on which = 'best' when subset_list is empty (#95)", {
+  # Regression test for #95: this defensive path is unreachable through
+  # MatSelect()/corrSelect()/assocSelect() for ncol(mat) >= 2 (guaranteed
+  # non-empty since #30), but is directly constructible and testable here,
+  # matching the manual-CorrCombo pattern used throughout this file.
+  df <- data.frame(A = 1:5)
+  res <- CorrCombo(
+             subset_list = list(),
+             avg_corr    = numeric(0),
+             min_corr    = numeric(0),
+             max_corr    = numeric(0),
+             var_names       = "A",
+             threshold   = 0.5,
+             forced_in   = character(),
+             search_type = "els",
+             n_rows_used = 5L)
+  expect_error(
+    corrSubset(res, df, which = "best"),
+    "`res` contains no subsets to extract \\(subset_list is empty\\)\\."
   )
 })
 
@@ -155,6 +195,28 @@ test_that("warns on rows with missing values in selected vars", {
     corrSubset(res, df),
     "Some subsets contain rows with missing values"
   )
+})
+
+test_that("missing-value warning lists only the subsets that actually contain NAs (#106)", {
+  df <- data.frame(A = c(1, NA, 3, 4), B = 5:8, C = 9:12)
+  res <- CorrCombo(
+             subset_list = list(c("A", "B"), c("B", "C")),
+             avg_corr    = c(0.1, 0.1),
+             min_corr    = c(0.05, 0.05),
+             max_corr    = c(0.2, 0.2),
+             var_names       = c("A", "B", "C"),
+             threshold   = 0.5,
+             forced_in   = character(),
+             search_type = "els",
+             n_rows_used = 4L)
+
+  msg <- tryCatch({
+    corrSubset(res, df, which = c(1, 2))
+    NULL
+  }, warning = function(w) conditionMessage(w))
+
+  expect_match(msg, "Subset 1: 1 of 4 rows")
+  expect_no_match(msg, "Subset 2")
 })
 
 test_that("errors on invalid which argument", {

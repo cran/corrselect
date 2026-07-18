@@ -22,7 +22,7 @@
 #'   \item{forced_in}{Character vector. Variable names that were forced into each subset.}
 #'   \item{search_type}{Character string. One of \code{"els"} or \code{"bron-kerbosch"}.}
 #'   \item{cor_method}{Character string. Either a single method (e.g. "pearson") or "mixed" if multiple methods used.}
-#'   \item{n_rows_used}{Integer. Number of rows used for computing the correlation matrix (after removing missing values).}
+#'   \item{n_rows_used}{Integer. Number of rows used for computing the correlation matrix (after removing missing values). \code{NA} when constructed from a matrix directly (e.g. via \code{\link{MatSelect}}), since a matrix input has no associated row count.}
 #' }
 #'
 #' @param subset_list A list of character vectors. Each vector is a valid subset (variable names).
@@ -34,7 +34,7 @@
 #' @param forced_in Character vector. Variable names forced into each subset. Defaults to \code{character()}.
 #' @param search_type Character string. One of \code{"els"} or \code{"bron-kerbosch"}.
 #' @param cor_method Character string. Correlation method or \code{"mixed"}. Defaults to \code{character()}.
-#' @param n_rows_used Integer. Number of rows used for computing the correlation matrix.
+#' @param n_rows_used Integer. Number of rows used for computing the correlation matrix. \code{NA} for matrix input.
 #'
 #' @seealso \code{\link{corrSelect}}, \code{\link{MatSelect}}, \code{\link{corrSubset}}
 #'
@@ -109,7 +109,11 @@ print.CorrCombo <- function(x, ...) {
 
   cat(sprintf("  Threshold:   %.3f\n", x@threshold))
   cat(sprintf("  Subsets:     %d maximal subsets\n", n))
-  cat(sprintf("  Data Rows:   %d used in correlation\n", x@n_rows_used))
+  if (is.na(x@n_rows_used)) {
+    cat("  Data Rows:   not applicable (matrix input)\n")
+  } else {
+    cat(sprintf("  Data Rows:   %d used in correlation\n", x@n_rows_used))
+  }
 
   if (x@search_type == "bron-kerbosch") {
     use_pivot <- attr(x, "use_pivot")
@@ -160,6 +164,67 @@ print.CorrCombo <- function(x, ...) {
 }
 
 
+#' @rdname CorrCombo
+#' @param object A \code{CorrCombo} object to summarize.
+#' @export
+summary.CorrCombo <- function(object, ...) {
+  x <- object
+  n <- length(x@subset_list)
+  sizes <- lengths(x@subset_list)
+
+  result <- list(
+    n_subsets      = n,
+    search_type    = x@search_type,
+    cor_method     = x@cor_method,
+    threshold      = x@threshold,
+    n_rows_used    = x@n_rows_used,
+    forced_in      = x@forced_in,
+    size_range     = if (n) range(sizes) else c(NA_integer_, NA_integer_),
+    size_median    = if (n) stats::median(sizes) else NA_real_,
+    avg_corr_range = if (n) range(x@avg_corr) else c(NA_real_, NA_real_),
+    n_max_size     = if (n) sum(sizes == max(sizes)) else 0L
+  )
+  class(result) <- "summary.CorrCombo"
+  result
+}
+
+#' @rdname CorrCombo
+#' @param x A \code{summary.CorrCombo} object to be printed.
+#' @export
+print.summary.CorrCombo <- function(x, ...) {
+  cat("CorrCombo summary\n")
+  cat("-----------------\n")
+  cat(sprintf("  Method:      %s\n", x$search_type))
+  cat(sprintf("  Correlation: %s\n", x$cor_method))
+  cat(sprintf("  Threshold:   %.3f\n", x$threshold))
+  cat(sprintf("  Subsets:     %d maximal subsets\n", x$n_subsets))
+
+  if (x$n_subsets > 0) {
+    cat(sprintf(
+      "  Subset size: min %d, median %.1f, max %d (%d subset%s at max size)\n",
+      x$size_range[1], x$size_median, x$size_range[2],
+      x$n_max_size, if (x$n_max_size == 1) "" else "s"
+    ))
+    cat(sprintf(
+      "  Avg corr:    range [%.3f, %.3f] across subsets\n",
+      x$avg_corr_range[1], x$avg_corr_range[2]
+    ))
+  }
+
+  if (is.na(x$n_rows_used)) {
+    cat("  Data Rows:   not applicable (matrix input)\n")
+  } else {
+    cat(sprintf("  Data Rows:   %d used in correlation\n", x$n_rows_used))
+  }
+
+  if (length(x$forced_in)) {
+    cat(sprintf("  Forced-in:   %s\n", paste(x$forced_in, collapse = ", ")))
+  }
+
+  invisible(x)
+}
+
+
 #' @title Coerce CorrCombo to a Data Frame
 #'
 #' @description Converts a \code{CorrCombo} object into a data frame of variable combinations.
@@ -183,7 +248,7 @@ print.CorrCombo <- function(x, ...) {
 #' set.seed(1)
 #' mat <- matrix(rnorm(100), ncol = 10)
 #' colnames(mat) <- paste0("V", 1:10)
-#' res <- corrSelect(cor(mat), threshold = 0.5)
+#' res <- MatSelect(cor(mat), threshold = 0.5)
 #' as.data.frame(res)
 as.data.frame.CorrCombo <- function(x, row.names = NULL, optional = FALSE, ...) {
   n <- length(x@subset_list)

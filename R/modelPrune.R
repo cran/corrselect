@@ -71,6 +71,16 @@
 #' fixed-effects design matrix. For categorical predictors, VIF represents
 #' the inflation for the entire factor (not individual dummy variables).
 #'
+#' **Condition Number Computation**: Condition indices are computed via
+#' singular value decomposition of the fixed-effects design matrix, which is
+#' centered and scaled (`scale(X, center = TRUE, scale = TRUE)`) before the
+#' decomposition; this is a common convention for collinearity screening but
+#' means the diagnostic does not reflect intercept-related collinearity the
+#' way an uncentered decomposition would. For a categorical predictor with
+#' multiple dummy columns, the predictor's condition index is approximated as
+#' the maximum condition index across its associated columns, rather than a
+#' proper joint decomposition restricted to that factor's subspace.
+#'
 #' **Determinism**: The algorithm is deterministic. Ties in diagnostic values
 #' are broken by removing the predictor that appears last in the formula.
 #'
@@ -91,8 +101,10 @@
 #' # Force certain predictors to remain
 #' pruned <- modelPrune(mpg ~ ., data = mtcars, force_in = "drat", limit = 20)
 #'
-#' # GLM example (requires family argument)
-#' pruned <- modelPrune(am ~ ., data = mtcars, engine = "glm",
+#' # GLM example (requires family argument). Uses a small predictor set
+#' # that avoids quasi-complete separation on this data (unlike `am ~ .`,
+#' # which regresses a 32-row binary response on all 10 mtcars predictors).
+#' pruned <- modelPrune(vs ~ mpg + wt + hp, data = mtcars, engine = "glm",
 #'                      family = binomial(), limit = 5)
 #'
 #' \dontrun{
@@ -260,8 +272,20 @@ modelPrune <- function(
 
   parsed <- .parse_formula(formula, data)
   response_var <- parsed$response
+  response_vars <- parsed$response_vars
   fixed_effects <- parsed$fixed_effects
   has_random <- parsed$has_random
+
+  # A formula with zero fixed-effect terms (e.g. `y ~ (1|group)`, valid
+  # lme4/glmmTMB syntax) has nothing for VIF/condition-number pruning to act
+  # on; catch this here with a modelPrune-specific message rather than
+  # letting it fall through to .rebuild_formula()'s generic internal error
+  # on the first fit attempt.
+  if (length(fixed_effects) == 0L) {
+    stop("'formula' has no fixed-effect predictors to prune. ",
+         "modelPrune() requires at least one fixed effect (random-effect-only formulas, ",
+         "e.g. `y ~ (1|group)`, are not supported).")
+  }
 
   # Validate force_in against fixed effects
   if (!is.null(force_in)) {
@@ -296,6 +320,19 @@ modelPrune <- function(
 
   if (!is.null(force_in)) {
     force_in_diags <- diagnostics[force_in]
+
+    # An undefined diagnostic (e.g. a predictor whose design-matrix columns
+    # couldn't be identified) is not a "no violation" -- surface it explicitly
+    # rather than letting it fall through to which.max()/sprintf() on an
+    # all-NA vector, which previously raised a blank, contentless error.
+    na_vars <- force_in[is.na(force_in_diags)]
+    if (length(na_vars) > 0) {
+      stop(sprintf(
+        "The '%s' diagnostic is undefined for 'force_in' variable(s): %s.",
+        criterion, paste(na_vars, collapse = ", ")
+      ))
+    }
+
     violations <- force_in_diags[force_in_diags > limit]
 
     if (length(violations) > 0) {
@@ -360,13 +397,19 @@ modelPrune <- function(
     # Select worst variable (highest diagnostic value)
     # Tie-breaking: choose last in formula order
     # Handle Inf and NA by treating them as worse than any finite value
-    worst_val <- max(violations[removable], na.rm = TRUE)
-    if (is.infinite(worst_val) || is.na(worst_val)) {
-      # If we have Inf or NA, select any variable with Inf/NA (prefer last)
-      inf_or_na <- removable[is.infinite(violations[removable]) | is.na(violations[removable])]
+    removable_vals <- violations[removable]
+    finite_vals <- removable_vals[is.finite(removable_vals)]
+
+    if (length(finite_vals) == 0) {
+      # All candidates are NA/Inf (e.g. a constant predictor's undefined
+      # VIF) -- select any of them (prefer last in formula order) directly,
+      # rather than calling max(na.rm = TRUE) on a vector that is entirely
+      # NA/Inf, which raises base R's own "no non-missing arguments" warning.
+      inf_or_na <- removable[is.infinite(removable_vals) | is.na(removable_vals)]
       worst_var <- inf_or_na[length(inf_or_na)]
     } else {
-      candidates <- removable[violations[removable] == worst_val]
+      worst_val <- max(finite_vals)
+      candidates <- removable[!is.na(removable_vals) & removable_vals == worst_val]
       worst_var <- candidates[length(candidates)]  # Last in order
     }
 
@@ -389,8 +432,14 @@ modelPrune <- function(
   # Final output
   # ===========================================================================
 
-  # Extract relevant columns from data
-  all_vars <- c(response_var, current_fixed)
+  # Extract relevant columns from data. Use the bare variable name(s)
+  # referenced by the response (not `response_var`, which may be a full
+  # expression like "log(mpg)" and is not itself a column of `data`) and,
+  # analogously, the bare variable names referenced by each surviving fixed
+  # term (not `current_fixed` itself, which holds raw term labels like
+  # "poly(disp, 2)" or "cyl:disp" and is not itself a column of `data`).
+  fixed_vars <- unique(unlist(lapply(current_fixed, function(term) all.vars(str2lang(term)))))
+  all_vars <- unique(c(response_vars, fixed_vars))
   data_pruned <- data[, all_vars, drop = FALSE]
 
   # Add attributes
@@ -416,8 +465,14 @@ modelPrune <- function(
   # Extract terms
   terms_obj <- terms(formula, data = data)
 
-  # Get response variable
-  response <- as.character(formula[[2]])
+  # Get response variable. Keep the full expression (e.g. "log(mpg)") as a
+  # string for rebuilding the formula -- as.character() on a call node (any
+  # transformed response) returns a multi-element vector of its parts (e.g.
+  # c("log", "mpg")), silently corrupting downstream formula construction.
+  # Separately record the bare variable name(s) actually referenced (e.g.
+  # "mpg", or both sides of "y1/y2 ~ .") for extracting columns from `data`.
+  response <- paste(deparse(formula[[2]]), collapse = " ")
+  response_vars <- all.vars(formula[[2]])
 
   # Get all term labels
   all_terms <- attr(terms_obj, "term.labels")
@@ -430,6 +485,7 @@ modelPrune <- function(
 
   list(
     response = response,
+    response_vars = response_vars,
     fixed_effects = fixed_effects,
     random_effects = random_effects,
     has_random = length(random_effects) > 0
@@ -447,7 +503,18 @@ modelPrune <- function(
   rhs <- paste(fixed_effects, collapse = " + ")
 
   if (!is.null(random_effects) && length(random_effects) > 0) {
-    rhs <- paste(c(rhs, random_effects), collapse = " + ")
+    # `random_effects` comes from .parse_formula()'s term.labels extraction,
+    # which strips the parens `terms()` treats as pure grouping (e.g.
+    # "(1 | group)" becomes "1 | group"). Re-wrapping each term in parens is
+    # required, not cosmetic: `|` has lower precedence than `+`, so pasting
+    # unparenthesized bar terms back onto the fixed-effect side changes what
+    # they mean to lme4/glmmTMB's formula parser (a single "1 | group" term
+    # happens to still parse close enough to fit without erroring, silently
+    # turning a random intercept into an unintended random-slopes model; two
+    # or more terms, e.g. "1 | subject" and "1 | site", collide outright and
+    # lme4 raises "model frame and formula mismatch in model.matrix()"). See
+    # #102.
+    rhs <- paste(c(rhs, paste0("(", random_effects, ")")), collapse = " + ")
   }
 
   # Build formula
@@ -570,117 +637,149 @@ modelPrune <- function(
   }
 }
 
+#' Flags design-matrix columns that are constant (zero variance). A constant
+#' column makes both VIF's surrogate R^2 (0/0 in exact arithmetic) and
+#' condition_number's `scale()` step (division by a zero SD) produce
+#' floating-point noise instead of the documented undefined (NA) result, so
+#' both diagnostics need to detect and gate on this before scoring.
+#' @noRd
+.zero_variance_cols <- function(X) {
+  tol <- sqrt(.Machine$double.eps)
+  apply(X, 2, function(col) {
+    rng <- range(col)
+    (rng[2] - rng[1]) < tol * max(1, abs(mean(col)))
+  })
+}
+
 #' Compute VIF for fixed effects
 #' @noRd
 .compute_vif <- function(model, engine, fixed_effects) {
   # Determine engine string (handle both string and list inputs)
   engine_str <- if (is.list(engine)) "custom" else engine
 
-  # Extract fixed-effects design matrix
+  # Extract fixed-effects design matrix (intercept already removed, with
+  # `assign` kept aligned to the remaining columns)
   X <- .extract_design_matrix(model, engine_str)
 
-  # Remove intercept column if present
-  if ("(Intercept)" %in% colnames(X)) {
-    X <- X[, colnames(X) != "(Intercept)", drop = FALSE]
-  }
-
-  # Debug: Check if X became empty
   if (ncol(X) == 0) {
     warning(sprintf(
       "Design matrix has no columns after removing intercept. Engine: %s, Fixed effects: %s",
       engine_str, paste(fixed_effects, collapse = ", ")
     ))
-    # Return NA for all VIFs
-    vif_values <- setNames(rep(NA, length(fixed_effects)), fixed_effects)
-    return(vif_values)
+    return(setNames(rep(NA, length(fixed_effects)), fixed_effects))
   }
 
   # Handle edge case: single predictor
   if (ncol(X) == 1) {
-    vif_values <- setNames(1.0, fixed_effects)
-    return(vif_values)
+    return(setNames(1.0, fixed_effects))
   }
 
-  # Compute VIF for each predictor
-  # VIF_i = 1 / (1 - R²_i)
-  # where R²_i is from regressing predictor i on all other predictors
+  # A non-finite entry (Inf/-Inf/NaN) anywhere in the design matrix means the
+  # model/data is corrupted, not merely collinear -- stats::cor()/det() would
+  # silently propagate it into NaN correlations rather than erroring, which
+  # would be indistinguishable from genuine perfect collinearity (also a
+  # NaN-determinant case). Surface it explicitly as a computation failure
+  # instead, matching the tryCatch error path below.
+  if (!all(is.finite(X))) {
+    warning("VIF computation failed: design matrix contains non-finite values (Inf/-Inf/NaN).")
+    return(setNames(rep(NA, length(fixed_effects)), fixed_effects))
+  }
 
-  vif_values <- numeric(length(fixed_effects))
-  names(vif_values) <- fixed_effects
+  zero_var <- .zero_variance_cols(X)
 
-  # Map fixed effects to design matrix columns
-  # (handle categorical variables that expand to multiple columns)
-  for (i in seq_along(fixed_effects)) {
-    pred <- fixed_effects[i]
+  # Generalized VIF (Fox & Monette 1992): for a term occupying columns `idx`
+  # among all p non-constant design columns, GVIF = det(R[idx,idx]) *
+  # det(R[-idx,-idx]) / det(R), where R is the correlation matrix of all
+  # non-constant columns. This reduces to the classic 1/(1-R^2) formula when
+  # `idx` is a single column, and -- unlike averaging a multi-column term's
+  # dummy columns into one vector -- correctly captures collinearity for
+  # multi-level factors, matching car::vif()'s GVIF.
+  nonconst_cols <- colnames(X)[!zero_var]
+  R_full <- if (length(nonconst_cols) >= 2) stats::cor(X[, nonconst_cols, drop = FALSE]) else NULL
 
-    # Find columns in X that correspond to this predictor
-    # Simple match for now (assumes predictor names match exactly or are prefixes)
-    matching_cols <- grep(paste0("^", pred), colnames(X), value = TRUE)
+  .map_fixed_effects_by_columns(
+    X, model, engine_str, fixed_effects,
+    score_fn = function(pred, matching_cols) {
+      # A constant predictor has an undefined VIF -- return NA directly
+      # rather than letting the determinant ratio below land on
+      # floating-point noise close to (but not exactly) 0/0.
+      if (any(zero_var[matching_cols])) return(NA)
 
-    if (length(matching_cols) == 0) {
-      # Exact match fallback
-      matching_cols <- colnames(X)[colnames(X) == pred]
-    }
+      other_cols <- setdiff(nonconst_cols, matching_cols)
+      if (length(other_cols) == 0) return(1.0)  # No other predictors
 
-    if (length(matching_cols) == 0) {
-      # Debug: show what columns are available
+      tryCatch({
+        det_own   <- det(R_full[matching_cols, matching_cols, drop = FALSE])
+        det_other <- det(R_full[other_cols, other_cols, drop = FALSE])
+        det_full  <- det(R_full)
+        gvif <- (det_own * det_other) / det_full
+
+        if (is.na(gvif) || !is.finite(gvif) || gvif < 0) Inf else gvif
+      }, error = function(e) {
+        warning(sprintf("VIF computation failed for '%s': %s", pred, e$message))
+        NA
+      })
+    },
+    on_missing = function(pred) {
       avail_cols <- paste(colnames(X), collapse = ", ")
       warning(sprintf(
         "Could not find columns for predictor '%s' in design matrix. Available columns: %s",
         pred, avail_cols
       ))
-      vif_values[i] <- NA
-      next
+      NA
     }
+  )
+}
 
-    # Compute R² for this predictor regressed on all others
-    y_i <- X[, matching_cols, drop = FALSE]
-    X_other <- X[, !colnames(X) %in% matching_cols, drop = FALSE]
+#' Resolves each fixed effect to its design-matrix columns (via
+#' .design_columns_for_predictor()) and applies `score_fn(pred,
+#' matching_cols)` to compute its diagnostic value, or `on_missing(pred)`
+#' when no columns resolve. Shared by .compute_vif() and
+#' .compute_condition_indices(), which differ only in how they turn a
+#' predictor's resolved columns into a single diagnostic number.
+#' @noRd
+.map_fixed_effects_by_columns <- function(X, model, engine_str, fixed_effects, score_fn, on_missing) {
+  term_labels <- attr(.terms_for_engine(model, engine_str), "term.labels")
+  assign_vec <- attr(X, "assign")
 
-    if (ncol(X_other) == 0) {
-      # No other predictors
-      vif_values[i] <- 1.0
-      next
+  result <- numeric(length(fixed_effects))
+  names(result) <- fixed_effects
+
+  for (i in seq_along(fixed_effects)) {
+    pred <- fixed_effects[i]
+    matching_cols <- .design_columns_for_predictor(X, term_labels, assign_vec, pred)
+
+    result[i] <- if (length(matching_cols) == 0) {
+      on_missing(pred)
+    } else {
+      score_fn(pred, matching_cols)
     }
-
-    # Compute R² using correlation matrix approach (more numerically stable)
-    tryCatch({
-      # For multiple columns (factor), use first principal component
-      if (ncol(y_i) > 1) {
-        y_vec <- y_i %*% rep(1/ncol(y_i), ncol(y_i))  # Average
-      } else {
-        y_vec <- y_i[, 1]
-      }
-
-      # Fit linear model with singular value check
-      # Use a timeout wrapper to prevent hanging on degenerate cases
-      fit <- lm(y_vec ~ X_other)
-
-      # Check if model fit properly
-      if (is.null(fit) || inherits(fit, "try-error")) {
-        vif_values[i] <- Inf
-      } else {
-        r_squared <- summary(fit)$r.squared
-
-        # Handle edge cases:
-        # - If R² is NA (degenerate case), set VIF to Inf
-        # - If R² > 0.9999, clamp to avoid near-zero denominators
-        if (is.na(r_squared)) {
-          vif_values[i] <- Inf
-        } else if (r_squared > 0.9999) {
-          vif_values[i] <- 1 / (1 - 0.9999)  # VIF = 10000
-        } else {
-          # VIF = 1 / (1 - R²)
-          vif_values[i] <- 1 / (1 - r_squared)
-        }
-      }
-    }, error = function(e) {
-      warning(sprintf("VIF computation failed for '%s': %s", pred, e$message))
-      vif_values[i] <- NA
-    })
   }
 
-  vif_values
+  result
+}
+
+#' Terms object used to build a fitted model's design matrix, per engine, so
+#' design-matrix columns can be mapped back to fixed-effect terms via
+#' `attr(X, "assign")` instead of matching on column name strings.
+#' @noRd
+.terms_for_engine <- function(model, engine) {
+  switch(engine,
+    glmmTMB = stats::terms(model$modelInfo$terms$cond$fixed),
+    stats::terms(model)
+  )
+}
+
+#' Design-matrix columns belonging to a fixed-effect term, resolved via
+#' `attr(X, "assign")` (which `stats::model.matrix()` sets to the 1-based
+#' position of each column's originating term in `term_labels`). This is
+#' exact regardless of term name collisions -- unlike a name-prefix match
+#' (e.g. `grep("^x1", ...)`), which also matches an unrelated "x10" column.
+#' @noRd
+.design_columns_for_predictor <- function(X, term_labels, assign_vec, pred) {
+  term_idx <- match(pred, term_labels)
+  if (is.na(term_idx)) return(character(0))
+  colnames(X)[assign_vec == term_idx]
 }
 
 #' Extract fixed-effects design matrix from model
@@ -715,6 +814,18 @@ modelPrune <- function(
     colnames(X) <- paste0("V", seq_len(ncol(X)))
   }
 
+  # Drop the intercept column (if present) while keeping `assign` aligned with
+  # the remaining columns. Plain `[` subsetting on a matrix silently drops
+  # custom attributes like "assign", so it must be subset in parallel here --
+  # not left to callers, who would otherwise each need to remember to do this.
+  assign_vec <- attr(X, "assign")
+  if ("(Intercept)" %in% colnames(X)) {
+    keep <- colnames(X) != "(Intercept)"
+    if (!is.null(assign_vec)) assign_vec <- assign_vec[keep]
+    X <- X[, keep, drop = FALSE]
+  }
+  attr(X, "assign") <- assign_vec
+
   X
 }
 
@@ -724,13 +835,9 @@ modelPrune <- function(
   # Determine engine string (handle both string and list inputs)
   engine_str <- if (is.list(engine)) "custom" else engine
 
-  # Extract fixed-effects design matrix
+  # Extract fixed-effects design matrix (intercept already removed, with
+  # `assign` kept aligned to the remaining columns)
   X <- .extract_design_matrix(model, engine_str)
-
-  # Remove intercept column if present
-  if ("(Intercept)" %in% colnames(X)) {
-    X <- X[, colnames(X) != "(Intercept)", drop = FALSE]
-  }
 
   # Check if X became empty
   if (ncol(X) == 0) {
@@ -743,59 +850,50 @@ modelPrune <- function(
     return(setNames(1.0, fixed_effects))
   }
 
-  # Scale columns to unit length (required for proper condition number)
-  X_scaled <- scale(X, center = TRUE, scale = TRUE)
+  # Constant columns give `scale()` a zero SD to divide by, producing an
+  # all-NaN column that fails `svd()` -- as a fallback that used to return
+  # Inf for *every* predictor, not just the constant one. Exclude them from
+  # the SVD input so the remaining, well-behaved predictors still get a real
+  # condition index; the constant predictor itself is scored NA below,
+  # matching VIF's documented undefined-for-constant-predictor contract.
+  zero_var <- .zero_variance_cols(X)
+  X_use <- X[, !zero_var, drop = FALSE]
 
-  # Compute SVD
-  svd_result <- tryCatch(
-    svd(X_scaled),
-    error = function(e) NULL
-  )
+  condition_indices <- NULL
+  if (ncol(X_use) == 1) {
+    condition_indices <- setNames(1.0, colnames(X_use))
+  } else if (ncol(X_use) >= 2) {
+    # Scale columns to unit length (required for proper condition number)
+    X_scaled <- scale(X_use, center = TRUE, scale = TRUE)
 
-  if (is.null(svd_result)) {
-    warning("SVD failed for design matrix.")
-    return(setNames(rep(Inf, length(fixed_effects)), fixed_effects))
-  }
+    svd_result <- tryCatch(svd(X_scaled), error = function(e) NULL)
 
-  # Singular values
-  d <- svd_result$d
-
-  # Condition indices = max(d) / d_i
-  max_sv <- max(d)
-  condition_indices <- max_sv / d
-
-  # Map condition indices back to fixed effects
-  # For each fixed effect, find the corresponding condition index
-  # (use the maximum condition index for columns related to that effect)
-  result <- numeric(length(fixed_effects))
-  names(result) <- fixed_effects
-
-  for (i in seq_along(fixed_effects)) {
-    pred <- fixed_effects[i]
-
-    # Find columns in X that correspond to this predictor
-    matching_cols <- grep(paste0("^", pred), colnames(X), value = TRUE)
-
-    if (length(matching_cols) == 0) {
-      matching_cols <- colnames(X)[colnames(X) == pred]
-    }
-
-    if (length(matching_cols) == 0) {
-      result[i] <- NA
+    if (is.null(svd_result)) {
+      warning("SVD failed for design matrix.")
     } else {
-      # Find column indices
-      col_indices <- which(colnames(X) %in% matching_cols)
-
-      # Use the maximum condition index for this effect
-      # (approximation - proper decomposition is more complex)
-      if (length(col_indices) > 0 && max(col_indices) <= length(condition_indices)) {
-        result[i] <- max(condition_indices[col_indices])
-      } else {
-        # Fallback: use overall condition number
-        result[i] <- max(condition_indices)
-      }
+      d <- svd_result$d
+      max_sv <- max(d)
+      condition_indices <- setNames(max_sv / d, colnames(X_use))
     }
   }
 
-  result
+  # Map condition indices back to fixed effects: use the maximum condition
+  # index across the columns associated with each effect (an approximation --
+  # see ?modelPrune's Details for why a full per-factor decomposition isn't
+  # done here).
+  .map_fixed_effects_by_columns(
+    X, model, engine_str, fixed_effects,
+    score_fn = function(pred, matching_cols) {
+      if (any(zero_var[matching_cols])) return(NA)
+      if (is.null(condition_indices)) return(Inf)  # SVD failed on the non-constant columns
+
+      col_indices <- which(colnames(X_use) %in% matching_cols)
+      if (length(col_indices) > 0) {
+        max(condition_indices[col_indices])
+      } else {
+        max(condition_indices)  # Fallback: use overall condition number
+      }
+    },
+    on_missing = function(pred) NA
+  )
 }

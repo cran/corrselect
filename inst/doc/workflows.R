@@ -378,21 +378,20 @@ dim(genes_example)
 table(genes_example$disease_status)
 
 ## -----------------------------------------------------------------------------
-library(microbenchmark)
-
 # Extract gene expression data (exclude ID and outcome)
 gene_expr <- genes_example[, -(1:2)]
 
-# Greedy pruning with timing
-greedy_timing <- microbenchmark(
-  genes_pruned <- corrPrune(
+# Greedy pruning with timing (median of 3 runs)
+greedy_times <- sapply(1:3, function(i) {
+  system.time(corrPrune(
     data = gene_expr,
     threshold = 0.8,
     mode = "greedy"  # Fast for large p
-  ),
-  times = 3
-)
-greedy_ms <- median(greedy_timing$time) / 1e6
+  ))["elapsed"]
+})
+greedy_ms <- median(greedy_times) * 1000
+
+genes_pruned <- corrPrune(data = gene_expr, threshold = 0.8, mode = "greedy")
 
 # Reduction
 cat(sprintf("Reduced from %d → %d genes (%.1f ms)\n",
@@ -417,19 +416,17 @@ text(1.9, reduction_data[2] + 10, paste(reduction_data[2], "genes\n(",
 # Subset for comparison (use smaller subset for vignette build speed)
 gene_subset <- gene_expr[, 1:20]  # Reduced from 50 to 20 for faster builds
 
-# Benchmark exact mode
-exact_time <- median(microbenchmark(
-  exact_result <- corrPrune(gene_subset, threshold = 0.8, mode = "exact"),
-  times = 3,
-  unit = "ms"
-)$time) / 1e6  # Convert nanoseconds to milliseconds
+# Benchmark exact mode (median of 3 runs)
+exact_times <- sapply(1:3, function(i) {
+  system.time(corrPrune(gene_subset, threshold = 0.8, mode = "exact"))["elapsed"]
+})
+exact_time <- median(exact_times) * 1000  # seconds -> milliseconds
 
-# Benchmark greedy mode
-greedy_time <- median(microbenchmark(
-  greedy_result <- corrPrune(gene_subset, threshold = 0.8, mode = "greedy"),
-  times = 3,
-  unit = "ms"
-)$time) / 1e6  # Convert nanoseconds to milliseconds
+# Benchmark greedy mode (median of 3 runs)
+greedy_times <- sapply(1:3, function(i) {
+  system.time(corrPrune(gene_subset, threshold = 0.8, mode = "greedy"))["elapsed"]
+})
+greedy_time <- median(greedy_times) * 1000  # seconds -> milliseconds
 
 # Run once more to get actual results for comparison
 exact_result <- corrPrune(gene_subset, threshold = 0.8, mode = "exact")

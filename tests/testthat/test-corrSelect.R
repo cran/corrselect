@@ -93,17 +93,18 @@ test_that("returns subsets when correlation is below threshold", {
   expect_gte(length(res@subset_list), 1)
 })
 
-test_that("returns empty when all pairs exceed threshold", {
+test_that("returns size-1 subsets when all pairs exceed threshold", {
   # Create perfectly correlated variables
   x <- 1:10
   y <- x  # Perfect correlation
   df <- data.frame(x = x, y = y)
   res <- corrSelect(df, threshold = 0.5, method = "els")
 
-  # With r = 1.0 and threshold = 0.5, no pair meets threshold
-  # So we should get no subsets of size >= 2
+  # With r = 1.0 and threshold = 0.5, no pair meets threshold, so the only
+  # maximal subsets are "x" and "y" on their own (see #30).
   expect_true(inherits(res, "CorrCombo"))
-  expect_length(res@subset_list, 0)
+  expect_length(res@subset_list, 2)
+  expect_true(all(vapply(res@subset_list, length, integer(1)) == 1))
 })
 
 
@@ -281,10 +282,10 @@ test_that("perfect duplicate (r=1.0) variables are separated into different subs
   expect_gte(length(res_els@subset_list), 2L)
 })
 
-test_that("threshold boundary: r exactly equal to threshold is excluded", {
-  # Test that correlation exactly equal to threshold is treated as > threshold
-
-  # (i.e., the pair is excluded, not included)
+test_that("threshold boundary: r exactly equal to threshold is included (threshold is inclusive)", {
+  # The backend compares |r| <= threshold (src/clique_core.cpp), and the
+  # documented contract is "maximum allowed absolute correlation" -- i.e. a
+  # pair at exactly the threshold is compatible, not excluded.
   cor_mat <- diag(3)
   cor_mat[1, 2] <- cor_mat[2, 1] <- 0.7  # Exactly at threshold
   cor_mat[1, 3] <- cor_mat[3, 1] <- 0.3  # Below threshold
@@ -292,17 +293,19 @@ test_that("threshold boundary: r exactly equal to threshold is excluded", {
   colnames(cor_mat) <- c("A", "B", "C")
   rownames(cor_mat) <- colnames(cor_mat)
 
-  # With threshold = 0.7, A and B (r = 0.7) should NOT be in the same subset
-  # because we require |r| <= threshold (strictly)
   res <- MatSelect(cor_mat, threshold = 0.7, method = "bron-kerbosch")
 
-  # A and B should be separable
-  for (subset in res@subset_list) {
-    if (all(c("A", "B") %in% subset)) {
-      # If A and B appear together, the max correlation should be at threshold
-      # This is actually allowed since threshold is inclusive (<=)
-      expect_true(TRUE)  # This is fine
-    }
+  # All three pairs are at or below the threshold, so {A,B,C} is a single
+  # maximal clique: A and B (r = 0.7) DO co-occur.
+  expect_equal(length(res@subset_list), 1L)
+  expect_true(all(c("A", "B", "C") %in% res@subset_list[[1]]))
+
+  # Tightening the threshold just below 0.7 makes A-B incompatible: they
+  # must now be separated into different maximal subsets.
+  res_strict <- MatSelect(cor_mat, threshold = 0.69, method = "bron-kerbosch")
+  for (subset in res_strict@subset_list) {
+    expect_false(all(c("A", "B") %in% subset),
+      info = "A and B (r=0.7) should not co-occur once threshold < 0.7")
   }
 })
 
@@ -319,18 +322,38 @@ test_that("corrSelect errors with invalid cor_method", {
   )
 })
 
-test_that("corrSelect handles single row warning after NA removal", {
+test_that("corrSelect errors clearly when only one complete-case row remains after NA removal (#32)", {
   df <- data.frame(
     a = c(1, NA, NA, NA),
     b = c(2, NA, NA, NA),
     c = c(3, NA, NA, NA)
   )
 
-  # Should warn and possibly error due to insufficient data
+  # Should warn about the dropped rows, then error with a clear message
+  # instead of the opaque `sd()`-on-too-few-rows base-R error it used to
+  # surface (see #32).
   expect_warning(
-    expect_error(corrSelect(df, threshold = 0.7)),
+    expect_error(corrSelect(df, threshold = 0.7),
+                 "Fewer than two complete-case rows"),
     "Removed"
   )
+})
+
+test_that("corrSelect errors clearly when every row is dropped for missing values (#32)", {
+  df <- data.frame(x = rnorm(10), y = rep(NA_real_, 10), z = rnorm(10))
+
+  expect_warning(
+    expect_error(corrSelect(df, threshold = 0.7),
+                 "Fewer than two complete-case rows"),
+    "Removed"
+  )
+})
+
+test_that("corrSelect errors clearly on a single-row data frame with no missing values (#64)", {
+  # Distinct from #32 above: no NA-driven row drop at all, just a data frame
+  # that starts with a single row.
+  df <- data.frame(x = 1, y = 2, z = 3)
+  expect_error(corrSelect(df, threshold = 0.7), "Fewer than two complete-case rows")
 })
 
 test_that("corrSelect handles use_pivot argument with bron-kerbosch", {
@@ -559,6 +582,25 @@ test_that("corrSelect errors when all remaining columns are constant", {
   )
 })
 
+test_that("corrSelect errors on a correlation matrix with NA/infinite values (#82)", {
+  # Two non-constant columns of extreme magnitude overflow stats::cor()'s
+  # internal variance/covariance computation to NaN -- distinct from the
+  # constant-column path above (sd != 0 here, so that guard never fires),
+  # exercising corrSelect()'s own "contains NA or infinite values" guard.
+  set.seed(2001)
+  n <- 20
+  df <- data.frame(
+    x1 = rnorm(n) * 1e200,
+    x2 = rnorm(n) * 1e200,
+    x3 = rnorm(n)
+  )
+
+  expect_error(
+    corrSelect(df, threshold = 0.7),
+    "Correlation matrix contains NA or infinite values"
+  )
+})
+
 test_that("corrSelect prints message about skipped non-numeric columns", {
   set.seed(1003)
   df <- data.frame(
@@ -600,12 +642,12 @@ test_that("corrSelect force_in with invalid index errors", {
 
   expect_error(
     corrSelect(df, threshold = 0.8, force_in = c(0, 1)),
-    "valid 1-based column indices"
+    "whole numbers between 1 and ncol"
   )
 
   expect_error(
     corrSelect(df, threshold = 0.8, force_in = c(1, 10)),
-    "valid 1-based column indices"
+    "whole numbers between 1 and ncol"
   )
 })
 
@@ -874,33 +916,6 @@ test_that("corrSelect errors on empty numeric data", {
   )
 })
 
-test_that("corrSelect bicor method skipped if WGCNA not installed", {
-  skip_if_not_installed("WGCNA")
-  set.seed(4102)
-  df <- data.frame(num1 = rnorm(20), num2 = rnorm(20), num3 = rnorm(20))
-
-  res <- corrSelect(df, threshold = 0.9, cor_method = "bicor")
-  expect_true(inherits(res, "CorrCombo"))
-})
-
-test_that("corrSelect distance method skipped if energy not installed", {
-  skip_if_not_installed("energy")
-  set.seed(4103)
-  df <- data.frame(num1 = rnorm(20), num2 = rnorm(20), num3 = rnorm(20))
-
-  res <- corrSelect(df, threshold = 0.9, cor_method = "distance")
-  expect_true(inherits(res, "CorrCombo"))
-})
-
-test_that("corrSelect maximal method skipped if minerva not installed", {
-  skip_if_not_installed("minerva")
-  set.seed(4104)
-  df <- data.frame(num1 = rnorm(20), num2 = rnorm(20), num3 = rnorm(20))
-
-  res <- corrSelect(df, threshold = 0.9, cor_method = "maximal")
-  expect_true(inherits(res, "CorrCombo"))
-})
-
 
 # ===========================================================================
 # Tests for corrSelect with optional measures
@@ -949,5 +964,21 @@ test_that("corrSelect with maximal works", {
 
   result <- corrSelect(df, threshold = 0.5, cor_method = "maximal")
   expect_true(inherits(result, "CorrCombo"))
+})
+
+test_that("corrSelect returns size-1 subsets when all variables are mutually correlated (#30)", {
+  set.seed(7100)
+  n <- 30
+  x <- rnorm(n)
+  df <- data.frame(
+    A = x,
+    B = x + rnorm(n, sd = 0.001),
+    C = x + rnorm(n, sd = 0.001)
+  )
+
+  result <- corrSelect(df, threshold = 0.5)
+
+  expect_equal(length(result@subset_list), 3)
+  expect_setequal(vapply(result@subset_list, identity, character(1)), c("A", "B", "C"))
 })
 

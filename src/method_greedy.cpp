@@ -1,13 +1,28 @@
 #include "method_greedy.h"
+#include "utils.h"
 #include <Rcpp.h>
 #include <vector>
 #include <map>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 using namespace Rcpp;
 
-// Helper: compute maximum association between var and any other active variable
+// Reads the association between variables i and j from the upper triangle
+// only (i<j), mirroring buildCompatibilityMatrix()'s i<j convention
+// (clique_core.cpp). validateMatrixStructure() permits a validly
+// upper-triangular-only matrix (lower triangle = NA); reading raw A(i,j)
+// for both i<j and i>j would misread such a matrix as having NA on roughly
+// half of all pairs.
+inline double assocAt(const NumericMatrix& A, int i, int j) {
+    return (i < j) ? A(i, j) : A(j, i);
+}
+
+// Helper: compute maximum association between var and any other active variable.
+// An undefined (NaN) association is treated as worse than any defined value, so a
+// variable involved in an undefined association is never silently preferred for
+// retention during tie-breaking.
 double computeMaxAssoc(
     const NumericMatrix& A,
     int var,
@@ -17,29 +32,14 @@ double computeMaxAssoc(
     int n = A.nrow();
     for (int j = 0; j < n; j++) {
         if (j == var || !active[j]) continue;
-        double val = std::fabs(A(var, j));
+        double val = assocAt(A, var, j);
+        if (std::isnan(val)) return std::numeric_limits<double>::infinity();
+        val = std::fabs(val);
         if (val > max_val) {
             max_val = val;
         }
     }
     return max_val;
-}
-
-// Helper: compute average association between var and all other active variables
-double computeAvgAssoc(
-    const NumericMatrix& A,
-    int var,
-    const std::vector<bool>& active
-) {
-    double sum = 0.0;
-    int count = 0;
-    int n = A.nrow();
-    for (int j = 0; j < n; j++) {
-        if (j == var || !active[j]) continue;
-        sum += std::fabs(A(var, j));
-        count++;
-    }
-    return (count > 0) ? (sum / count) : 0.0;
 }
 
 // Main greedy pruning algorithm
@@ -53,14 +53,49 @@ Combo greedyPrune(
     // Initialize with all variables active
     std::vector<bool> active(n, true);
 
-    // Mark force_in variables as protected
+    // Mark force_in variables as protected. Bounds are already checked by
+    // validateForcedIndices() in the caller (greedyPruneBackend); force_in
+    // is trusted here.
     std::vector<bool> protected_vars(n, false);
     for (int idx : force_in) {
-        if (idx < 0 || idx >= n) {
-            stop("Invalid force_in index");
-        }
         protected_vars[idx] = true;
     }
+
+    // Incrementally maintained per-variable tie-break statistics, so each
+    // outer iteration doesn't have to rescan every neighbor from scratch for
+    // every candidate (see #60). sumAbs/cnt/nanCount track the running
+    // average association exactly, updated in O(1) per neighbor whenever a
+    // variable is removed. maxVal is a cached max association that is only
+    // recomputed (via computeMaxAssoc's O(n) scan) for a variable whose
+    // removed neighbor could plausibly have been its argmax -- typically far
+    // fewer than all n variables per removal.
+    std::vector<double> sumAbs(n, 0.0);
+    std::vector<int> cnt(n, 0);
+    std::vector<int> nanCount(n, 0);
+    std::vector<double> maxVal(n, 0.0);
+    std::vector<bool> maxDirty(n, true);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (j == i) continue;
+            double val = assocAt(A, i, j);
+            if (std::isnan(val)) { nanCount[i]++; continue; }
+            sumAbs[i] += std::fabs(val);
+            cnt[i]++;
+        }
+    }
+
+    auto avgOf = [&](int i) {
+        return cnt[i] > 0 ? sumAbs[i] / cnt[i] : 0.0;
+    };
+    auto maxOf = [&](int i) {
+        if (nanCount[i] > 0) return std::numeric_limits<double>::infinity();
+        if (maxDirty[i]) {
+            maxVal[i] = computeMaxAssoc(A, i, active);
+            maxDirty[i] = false;
+        }
+        return maxVal[i];
+    };
 
     // Iteratively remove worst variable until no violations
     bool changed = true;
@@ -73,7 +108,8 @@ Combo greedyPrune(
             if (!active[i]) continue;
             for (int j = i + 1; j < n; j++) {
                 if (!active[j]) continue;
-                if (std::fabs(A(i, j)) > threshold) {
+                double val = A(i, j);
+                if (std::isnan(val) || std::fabs(val) > threshold) {
                     violations.push_back({i, j});
                 }
             }
@@ -110,13 +146,13 @@ Combo greedyPrune(
             if (bad_count > max_badness) {
                 worst_idx = var;
                 max_badness = bad_count;
-                tie_max_assoc = computeMaxAssoc(A, var, active);
-                tie_avg_assoc = computeAvgAssoc(A, var, active);
+                tie_max_assoc = maxOf(var);
+                tie_avg_assoc = avgOf(var);
             }
             // Tie-breaking
             else if (bad_count == max_badness) {
-                double this_max = computeMaxAssoc(A, var, active);
-                double this_avg = computeAvgAssoc(A, var, active);
+                double this_max = maxOf(var);
+                double this_avg = avgOf(var);
 
                 bool should_replace = false;
 
@@ -128,12 +164,11 @@ Combo greedyPrune(
                 else if (std::fabs(this_max - tie_max_assoc) < 1e-10 && this_avg > tie_avg_assoc) {
                     should_replace = true;
                 }
-                // Third tie-breaker: lexicographically first (smallest index)
-                else if (std::fabs(this_max - tie_max_assoc) < 1e-10 &&
-                         std::fabs(this_avg - tie_avg_assoc) < 1e-10 &&
-                         var < worst_idx) {
-                    should_replace = true;
-                }
+                // Third tie-breaker (smallest column index wins): `badness`
+                // is a std::map, which the standard guarantees iterates keys
+                // in ascending order, so on a full tie `worst_idx` already
+                // holds the smallest index and `should_replace` correctly
+                // stays false here.
 
                 if (should_replace) {
                     worst_idx = var;
@@ -149,8 +184,26 @@ Combo greedyPrune(
             stop("Cannot satisfy threshold: force_in variables violate the constraint");
         }
 
-        // Remove the worst variable
+        // Remove the worst variable, updating every remaining active
+        // neighbor's cached stats in O(1) amortized instead of recomputing
+        // them from scratch on the next iteration.
         active[worst_idx] = false;
+        for (int i = 0; i < n; i++) {
+            if (!active[i] || i == worst_idx) continue;
+            double val = assocAt(A, i, worst_idx);
+            if (std::isnan(val)) {
+                nanCount[i]--;
+                if (nanCount[i] == 0) maxDirty[i] = true;  // may no longer be infinity
+            } else {
+                double av = std::fabs(val);
+                sumAbs[i] -= av;
+                cnt[i]--;
+                if (nanCount[i] == 0 && av >= maxVal[i] - 1e-12) {
+                    // removed neighbor may have been the argmax; recompute lazily
+                    maxDirty[i] = true;
+                }
+            }
+        }
         changed = true;
     }
 
@@ -172,11 +225,10 @@ IntegerVector greedyPruneBackend(
     double threshold,
     Nullable<IntegerVector> force_in = R_NilValue
 ) {
-    // Validate input
+    // Validate input via the same shared checks used by the other three
+    // Rcpp-exported backends (findAllMaxSets, runELS, runBronKerbosch).
+    validateCorMatrix(assoc_matrix);
     int n = assoc_matrix.nrow();
-    if (n != assoc_matrix.ncol()) {
-        stop("Association matrix must be square");
-    }
 
     // Convert force_in to 0-based indices
     Combo forcedVec;
@@ -184,13 +236,10 @@ IntegerVector greedyPruneBackend(
         IntegerVector f = force_in.get();
         for (int i = 0; i < f.size(); ++i) {
             // R passes 0-based indices (already converted in R layer)
-            int idx = f[i];
-            if (idx < 0 || idx >= n) {
-                stop("force_in indices out of bounds");
-            }
-            forcedVec.push_back(idx);
+            forcedVec.push_back(f[i]);
         }
     }
+    validateForcedIndices(forcedVec, n);
 
     // Run greedy algorithm
     Combo result = greedyPrune(assoc_matrix, threshold, forcedVec);

@@ -20,20 +20,31 @@ corrPrune(
 \item{data}{A data.frame containing candidate predictors.}
 
 \item{threshold}{Numeric scalar. Maximum allowed pairwise association
-(default: 0.7). Must be non-negative.}
+(default: 0.7). Must be in \verb{[0, 1]} -- every supported association
+measure is bounded in \verb{[0, 1]} (in absolute value), so this range is
+enforced the same way regardless of \code{mode} (\code{threshold = 0} is valid
+only in \code{mode = "greedy"}; see Mode Selection below).}
 
-\item{measure}{Character string specifying the association measure to use.
-Options: \code{"auto"} (default), \code{"pearson"}, \code{"spearman"}, \code{"kendall"},
-\code{"cramersv"}, \code{"eta"}, etc. When \code{"auto"}, Pearson correlation is used
-for all-numeric data, and appropriate measures are selected for mixed-type
-data.}
+\item{measure}{Character string specifying the numeric-numeric association
+measure to use. One of \code{"auto"} (default, Pearson), \code{"pearson"},
+\code{"spearman"}, \code{"kendall"}, \code{"bicor"}, \code{"distance"}, or \code{"maximal"}. This
+only customizes numeric-numeric pairs; every other pair-type combination
+is fixed and not affected by \code{measure}: eta-squared for
+numeric-categorical pairs, Cramer's V for categorical-categorical pairs,
+and Spearman for numeric-ordered and ordered-ordered pairs. The measure
+actually used for each pair-type combination is reported in the
+\code{assoc_methods_used} attribute of the result.}
 
 \item{mode}{Character string specifying the search algorithm. Options:
 \itemize{
-\item \code{"auto"} (default): uses exact search if number of predictors <= \code{max_exact_p},
-otherwise uses greedy search
-\item \code{"exact"}: exhaustive search for maximal subsets (may be slow for large p)
-\item \code{"greedy"}: fast approximate search using iterative removal
+\item \code{"auto"} (default): uses exact search if number of predictors <= \code{max_exact_p}
+and there are at least 2 predictors with \code{threshold > 0}, otherwise uses
+greedy search (exact search requires both, since it routes through
+\code{\link{MatSelect}()})
+\item \code{"exact"}: exhaustive search for maximal subsets (may be slow for large p);
+requires at least 2 predictors and \code{threshold > 0}
+\item \code{"greedy"}: fast approximate search using iterative removal; supports a
+single predictor and \code{threshold = 0}
 }}
 
 \item{force_in}{Character vector of variable names that must be retained in
@@ -53,14 +64,19 @@ mode is used when \code{mode = "auto"}. Default: 100.}
 \item{...}{Additional arguments (reserved for future use).}
 }
 \value{
-A data.frame containing the pruned subset of predictors. The result
+A data.frame containing the pruned subset of predictors, with the
+selected columns unchanged from \code{data} (same types and values --
+character/logical/integer columns are converted internally only for
+association computation, never in the returned data). The result
 has the following attributes:
 \describe{
 \item{selected_vars}{Character vector of retained variable names}
 \item{removed_vars}{Character vector of removed variable names}
 \item{mode}{Character string indicating which mode was used ("exact" or "greedy")}
-\item{measure}{Character string indicating which association measure was used}
+\item{measure}{Character string indicating which measure was used for numeric-numeric pairs}
+\item{assoc_methods_used}{Named list mapping each pair-type combination (e.g. "numeric_numeric", "numeric_factor") to the association method actually used}
 \item{threshold}{The threshold value used}
+\item{n_rows_used}{Number of complete-case rows used to compute associations (see Details); the returned data itself is not row-filtered}
 }
 }
 \description{

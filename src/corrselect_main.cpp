@@ -1,4 +1,5 @@
 #include <Rcpp.h>
+#include <algorithm>
 #include "corrselect_types.h"
 #include "utils.h"
 #include "method_els.h"
@@ -16,19 +17,17 @@ List findAllMaxSets(
 ) {
   // 1) Basic checks
   int n = corMatrix.nrow();
-  if (n != corMatrix.ncol()) stop("Matrix must be square.");
-  if (!validateMatrixStructure(corMatrix))
-    stop("Matrix must be symmetric or upper triangular.");
+  validateCorMatrix(corMatrix);
 
-  // 2) Build forcedVec (expecting 0-based indices from R)
+  // 2) Build forcedVec (expecting 0-based indices from R); validateForcedIndices()
+  // deduplicates it so a repeated index can't land twice in the final combo.
   Combo forcedVec;
   if (force_in.isNotNull()) {
     IntegerVector f = force_in.get();
     for (int i = 0; i < f.size(); ++i) {
-      if (f[i] < 0 || f[i] >= n)
-        stop("`force_in` must be valid 0-based column indices");
       forcedVec.push_back(f[i]);
     }
+    validateForcedIndices(forcedVec, n);
   }
 
   // 3) Dispatch to selected algorithm
@@ -47,22 +46,29 @@ List findAllMaxSets(
     stop("Unknown method. Use 'els' or 'bron_kerbosch'.");
   }
 
-  // 4) Sort: size descending, then avg-correlation ascending
-  std::sort(results.begin(), results.end(),
-    [&](const Combo &a, const Combo &b) {
-      if (a.size() != b.size()) return a.size() > b.size();
-      return meanAbsCorrelation(corMatrix, a)
-           < meanAbsCorrelation(corMatrix, b);
+  // 4) Precompute each combo's average correlation once, then sort:
+  // size descending, then avg-correlation ascending.
+  std::vector<double> avgCorr(results.size());
+  for (size_t i = 0; i < results.size(); ++i) {
+    avgCorr[i] = meanAbsCorrelation(corMatrix, results[i]);
+  }
+
+  std::vector<size_t> order(results.size());
+  for (size_t i = 0; i < order.size(); ++i) order[i] = i;
+  std::sort(order.begin(), order.end(),
+    [&](size_t i, size_t j) {
+      if (results[i].size() != results[j].size()) return results[i].size() > results[j].size();
+      return avgCorr[i] < avgCorr[j];
     });
 
   // 5) Format output into R list (convert back to 1-based)
   List out;
-  for (const Combo &combo : results) {
-    IntegerVector v(combo.begin(), combo.end());
+  for (size_t idx : order) {
+    IntegerVector v(results[idx].begin(), results[idx].end());
     v = v + 1; // convert to 1-based for R
     out.push_back(List::create(
       Named("combo")    = v,
-      Named("avg_corr") = meanAbsCorrelation(corMatrix, combo)
+      Named("avg_corr") = avgCorr[idx]
     ));
   }
 

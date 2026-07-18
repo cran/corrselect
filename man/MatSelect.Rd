@@ -10,21 +10,27 @@ MatSelect(mat, threshold = 0.7, method = NULL, force_in = NULL, ...)
 \item{mat}{A numeric, symmetric matrix with 1s on the diagonal (e.g. correlation matrix).
 Column names (if present) are used to label output variables.}
 
-\item{threshold}{A numeric scalar in (0, 1). Maximum allowed absolute pairwise value.
+\item{threshold}{A numeric scalar in (0, 1]. Maximum allowed absolute pairwise value.
 Defaults to \code{0.7}.}
 
 \item{method}{Character. Selection algorithm to use. One of \code{"els"} or
 \code{"bron-kerbosch"}. If not specified, the function chooses automatically:
 \code{"els"} when \code{force_in} is provided, otherwise \code{"bron-kerbosch"}.}
 
-\item{force_in}{Optional integer vector of 1-based column indices to force into every subset.}
+\item{force_in}{Optional integer vector of 1-based column indices to force into every subset.
+If the forced variables are themselves mutually correlated beyond \code{threshold},
+\code{MatSelect()} warns (naming the offending pair) but still forces them into every
+returned subset -- unlike \code{\link{corrPrune}()}, which treats this condition as
+infeasible and errors instead.}
 
 \item{...}{Additional arguments passed to the backend, e.g., \code{use_pivot} (logical)
 for enabling pivoting in Bron–Kerbosch (ignored by ELS).}
 }
 \value{
 An object of class \code{\link{CorrCombo}}, containing all valid subsets and their
-correlation statistics.
+correlation statistics. If every variable is pairwise correlated above \code{threshold},
+the only valid maximal subsets are single variables; these are returned with
+\code{min_corr}/\code{max_corr} set to \code{NA} (there is no pair to summarize).
 }
 \description{
 Identifies all maximal subsets of variables from a symmetric matrix (typically a correlation matrix)
@@ -46,7 +52,8 @@ res2 <- MatSelect(cmat, threshold = 0.5, method = "bron-kerbosch", use_pivot = F
 # Bron–Kerbosch with pivoting
 res3 <- MatSelect(cmat, threshold = 0.5, method = "bron-kerbosch", use_pivot = TRUE)
 
-# Force variable 1 into every subset (with warning if too correlated)
-res4 <- MatSelect(cmat, threshold = 0.5, force_in = 1)
+# Force variables 1 and 2 into every subset (warns if they are mutually
+# correlated beyond the threshold; both are still forced in regardless)
+res4 <- MatSelect(cmat, threshold = 0.5, force_in = c(1, 2))
 
 }

@@ -50,7 +50,7 @@ corrselect offers two algorithmic approaches for `corrPrune()`:
 ### Exact Mode (Graph-Theoretic)
 
 **Algorithm**: Eppstein–Löffler–Strash (ELS) or Bron–Kerbosch
-**Complexity**: O(2^p) - exponential in number of predictors
+**Complexity**: O(3^(p/3)) for Bron-Kerbosch, O(d * 3^(d/3)) for ELS (d = degeneracy) - exponential in number of predictors, tighter than the naive O(2^p) enumeration bound
 **Guarantee**: Finds the **largest** maximal independent set
 
 ```{r}
@@ -63,7 +63,7 @@ cat("Exact mode kept:", ncol(exact_result), "variables\n")
 
 **Use exact mode when**:
 
-- p ≤ 20 (feasible runtime)
+- p <= 100 (feasible runtime; this is `corrPrune()`'s default `max_exact_p`)
 
 - You need guaranteed optimal solution
 
@@ -85,20 +85,20 @@ cat("Greedy mode kept:", ncol(greedy_result), "variables\n")
 
 **Use greedy mode when**:
 
-- p > 20 (exact becomes slow)
+- p > 100 (exact becomes slow; raise `max_exact_p` to push this boundary higher)
 
 - Speed is priority
 
 - Near-optimal is acceptable
 
-- High-dimensional data (p > 100)
+- High-dimensional data (several hundred variables or more)
 
 ### Auto Mode (Recommended)
 
 Automatically selects based on p:
 
 ```{r}
-# Auto mode: smart switching (exact if p ≤ 20, greedy otherwise)
+# Auto mode: smart switching (exact if p <= max_exact_p [default 100], greedy otherwise)
 auto_result <- corrPrune(mtcars, threshold = 0.7, mode = "auto")
 cat("Auto mode kept:", ncol(auto_result), "variables\n")
 ```
@@ -109,7 +109,6 @@ Let's measure runtime scaling:
 
 ```{r}
 # Generate datasets with increasing p
-library(microbenchmark)
 
 benchmark_corrPrune <- function(p_values) {
   results <- data.frame(
@@ -124,23 +123,21 @@ benchmark_corrPrune <- function(p_values) {
     cor_mat <- 0.5^abs(outer(1:p, 1:p, "-"))
     data <- as.data.frame(MASS::mvrnorm(n = 100, mu = rep(0, p), Sigma = cor_mat))
 
-    # Exact mode (skip if p too large)
+    # Exact mode (skip if p too large), median of 3 runs
     exact_time_ms <- if (p <= 500) {
-      median(microbenchmark(
-        corrPrune(data, threshold = 0.7, mode = "exact"),
-        times = 3,  # Few iterations for speed
-        unit = "ms"
-      )$time) / 1e6  # Convert nanoseconds to milliseconds
+      times <- sapply(1:3, function(i) {
+        system.time(corrPrune(data, threshold = 0.7, mode = "exact"))["elapsed"]
+      })
+      median(times) * 1000  # seconds -> milliseconds
     } else {
       NA
     }
 
-    # Greedy mode
-    greedy_time_ms <- median(microbenchmark(
-      corrPrune(data, threshold = 0.7, mode = "greedy"),
-      times = 3,  # Few iterations for speed
-      unit = "ms"
-    )$time) / 1e6  # Convert nanoseconds to milliseconds
+    # Greedy mode, median of 3 runs
+    greedy_times_ms <- sapply(1:3, function(i) {
+      system.time(corrPrune(data, threshold = 0.7, mode = "greedy"))["elapsed"]
+    })
+    greedy_time_ms <- median(greedy_times_ms) * 1000  # seconds -> milliseconds
 
     results <- rbind(results, data.frame(
       p = p,
@@ -226,10 +223,15 @@ cat("Run 2 selected:", names(result2), "\n")
 cat("Identical:", identical(names(result1), names(result2)), "\n")
 ```
 
-**Tie-breaking rules**:
-1. Prefer variables with lower **mean absolute correlation** with others
+This example uses the default `mode = "auto"`, which resolves to exact search for this small `p`. Exact mode's tie-breaking rules, applied when multiple maximal subsets exist:
 
-2. If still tied, prefer **lexicographically first** (alphabetical)
+1. Prefer the **largest subset size**
+
+2. If still tied, prefer the **lowest average absolute correlation**
+
+3. If still tied, prefer **lexicographically first** variable names
+
+(Greedy mode, selected via `mode = "greedy"`, breaks ties differently: it removes the variable with the most threshold violations first, then the highest max association, then the highest average association, then the lowest column index -- see the Theory vignette for details.)
 
 This ensures reproducibility across runs, machines, and R versions.
 
@@ -678,28 +680,26 @@ For repeated pruning with different thresholds, precompute the correlation matri
 set.seed(123)
 large_data <- as.data.frame(matrix(rnorm(100 * 50), ncol = 50))
 
-# Benchmark: Recompute correlation every time
-time1 <- median(microbenchmark(
-  {
+# Benchmark: Recompute correlation every time (median of 3 runs)
+time1_runs <- sapply(1:3, function(i) {
+  system.time({
     result1 <- corrPrune(large_data, threshold = 0.7)
     result2 <- corrPrune(large_data, threshold = 0.8)
     result3 <- corrPrune(large_data, threshold = 0.9)
-  },
-  times = 3,
-  unit = "ms"
-)$time) / 1e6  # Convert nanoseconds to milliseconds
+  })["elapsed"]
+})
+time1 <- median(time1_runs) * 1000  # seconds -> milliseconds
 
-# Benchmark: Compute correlation once, reuse
+# Benchmark: Compute correlation once, reuse (median of 3 runs)
 cor_matrix <- cor(large_data)
-time2 <- median(microbenchmark(
-  {
+time2_runs <- sapply(1:3, function(i) {
+  system.time({
     result1 <- MatSelect(cor_matrix, threshold = 0.7)
     result2 <- MatSelect(cor_matrix, threshold = 0.8)
     result3 <- MatSelect(cor_matrix, threshold = 0.9)
-  },
-  times = 3,
-  unit = "ms"
-)$time) / 1e6  # Convert nanoseconds to milliseconds
+  })["elapsed"]
+})
+time2 <- median(time2_runs) * 1000  # seconds -> milliseconds
 
 cat(sprintf("Recomputing each time: %.1f ms\n", time1))
 cat(sprintf("Precomputed matrix: %.1f ms\n", time2))
@@ -786,10 +786,8 @@ stopCluster(cl)
 Decision tree for mode selection:
 
 ```
-p ≤ 15:  Use "exact" (fast enough, guaranteed optimal)
-15 < p ≤ 25:  Use "exact" if time permits, "greedy" if speed critical
-p > 25:  Use "greedy" or "auto"
-p > 100: Always use "greedy"
+p <= max_exact_p (default 100):  Use "exact" (guaranteed optimal; practical up to p ~ 500)
+p > max_exact_p:  Use "greedy" (exact becomes slow; raise max_exact_p to push this boundary higher)
 ```
 
 ---
@@ -1079,9 +1077,9 @@ pipeline <- function(data, response) {
 ## Key Takeaways
 
 ### Algorithms
-- Use **exact mode** for p ≤ 20 (optimal, reproducible)
+- Use **exact mode** for p <= 100 (optimal, reproducible; the default `max_exact_p`)
 
-- Use **greedy mode** for p > 20 (fast, near-optimal)
+- Use **greedy mode** for p > 100 (fast, near-optimal)
 
 - Use **auto mode** to let corrselect decide
 
@@ -1138,7 +1136,7 @@ pipeline <- function(data, response) {
 
 - `vignette("comparison")` - vs caret, Boruta, glmnet
 
-- `vignette("corrselect_vignette")` - Original exact methods vignette
+- `vignette("theory")` - Formal problem statement and exact methods
 
 - `?corrPrune` - Association-based pruning
 

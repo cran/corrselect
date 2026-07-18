@@ -28,13 +28,16 @@ test_that("ELS includes forced variables", {
   expect_true(all(ok))
 })
 
-test_that("ELS returns empty when no subset is valid", {
+test_that("ELS returns size-1 subsets when no multi-variable subset is valid", {
   m <- matrix(0.95, 3,3); diag(m) <- 1
   res <- MatSelect(m, threshold = 0.1, method = "els")
-  expect_length(res@subset_list, 0)
-  expect_equal(res@avg_corr, numeric(0))
-  expect_equal(res@min_corr, numeric(0))
-  expect_equal(res@max_corr, numeric(0))
+  # No pair is compatible under so strict a threshold, so the only maximal
+  # subsets are the three variables on their own (see #30).
+  expect_length(res@subset_list, 3)
+  expect_true(all(vapply(res@subset_list, length, integer(1)) == 1))
+  expect_equal(res@avg_corr, rep(0, 3))
+  expect_true(all(is.na(res@min_corr)))
+  expect_true(all(is.na(res@max_corr)))
 })
 
 test_that("ELS rejects NA matrices", {
@@ -42,6 +45,41 @@ test_that("ELS rejects NA matrices", {
   m[1,2] <- NA
   expect_error(MatSelect(m, threshold = 0.5, method = "els"),
                "`mat` must not contain NA\\.")
+})
+
+test_that("MatSelect rejects matrices with duplicate column names (#28)", {
+  m <- diag(1, 3)
+  colnames(m) <- c("a", "a", "b")
+  expect_error(MatSelect(m, threshold = 0.5, method = "els"),
+               "duplicate column names")
+})
+
+test_that("MatSelect deduplicates a repeated force_in index/name (#31)", {
+  # Regression test for issue #31: a duplicate force_in entry used to reach
+  # the C++ backend unmodified, so the same variable could be listed twice
+  # in one returned subset, with a spurious self-correlation (r = 1.0)
+  # reported as that subset's max_corr.
+  mat <- matrix(c(1, 0.9, 0.1, 0.9, 1, 0.2, 0.1, 0.2, 1), 3,
+                dimnames = list(c("V1", "V2", "V3"), c("V1", "V2", "V3")))
+
+  res_idx  <- MatSelect(mat, threshold = 0.5, method = "els", force_in = c(1, 1))
+  res_name <- MatSelect(mat, threshold = 0.5, method = "els", force_in = c("V1", "V1"))
+
+  for (res in list(res_idx, res_name)) {
+    expect_equal(length(res@subset_list), 1)
+    expect_equal(sort(res@subset_list[[1]]), c("V1", "V3"))
+    expect_false(anyDuplicated(res@subset_list[[1]]) > 0)
+    expect_lte(res@max_corr[1], 0.5)
+  }
+})
+
+test_that("MatSelect does not warn about mutual correlation for a duplicated force_in entry", {
+  # A repeated index resolves to a single distinct variable, so the
+  # "force_in are mutually correlated" warning (which only makes sense for
+  # >= 2 distinct forced variables) must not fire.
+  mat <- matrix(c(1, 0.9, 0.1, 0.9, 1, 0.2, 0.1, 0.2, 1), 3,
+                dimnames = list(c("V1", "V2", "V3"), c("V1", "V2", "V3")))
+  expect_no_warning(MatSelect(mat, threshold = 0.5, method = "els", force_in = c(1, 1)))
 })
 
 test_that("ELS returns correct variable names", {
@@ -106,15 +144,14 @@ test_that("ELS handles mixed positive and negative correlations", {
   }
 })
 
-test_that("ELS handles single variable", {
+test_that("ELS rejects a 1x1 matrix (need at least two columns)", {
   m <- matrix(1, nrow = 1, ncol = 1)
   colnames(m) <- "V1"
 
-  res <- MatSelect(m, threshold = 0.5, method = "els")
-
-  # Single variable case: no pairs to evaluate, returns empty
-  # This is expected behavior for clique enumeration with n=1
-  expect_true(inherits(res, "CorrCombo"))
+  expect_error(
+    MatSelect(m, threshold = 0.5, method = "els"),
+    "at least two columns"
+  )
 })
 
 test_that("ELS handles two uncorrelated variables", {
@@ -134,8 +171,10 @@ test_that("ELS handles two perfectly correlated variables", {
 
   res <- MatSelect(m, threshold = 0.5, method = "els")
 
-  # Each should be in separate subset
-  expect_equal(length(res@subset_list), 0)
+  # Each should be in its own separate (size-1) subset (see #30).
+  expect_equal(length(res@subset_list), 2)
+  expect_true(all(vapply(res@subset_list, length, integer(1)) == 1))
+  expect_setequal(vapply(res@subset_list, identity, character(1)), c("A", "B"))
 })
 
 test_that("ELS with force_in and multiple subsets", {
@@ -281,12 +320,17 @@ test_that("ELS handles extremely low threshold (no valid pairs)", {
   m[3, 4] <- m[4, 3] <- 0.08
   colnames(m) <- paste0("V", 1:4)
 
-  # With extremely low threshold, fewer variables per subset
+  # With extremely low threshold, only the two pairs never explicitly
+  # assigned a correlation above (V1-V4, V2-V3; both default to 0 from
+  # diag(1, 4)) are compatible -- every other pair (0.08-0.15) exceeds 0.05.
   res <- MatSelect(m, threshold = 0.05, method = "els")
 
   expect_true(inherits(res, "CorrCombo"))
-  # Subsets should exist
-  expect_true(length(res@subset_list) >= 0)
+  expect_equal(length(res@subset_list), 2)
+  expect_setequal(
+    vapply(res@subset_list, function(s) paste(sort(s), collapse = ","), character(1)),
+    c("V1,V4", "V2,V3")
+  )
 })
 
 test_that("Bron-Kerbosch handles extremely low threshold", {
@@ -370,4 +414,27 @@ test_that("ELS returns correct subset stats for multi-variable subsets", {
   expect_true(length(res@avg_corr) > 0)
   expect_true(length(res@min_corr) > 0)
   expect_true(length(res@max_corr) > 0)
+})
+
+test_that("ELS's avg_corr/min_corr/max_corr match hand-computed values for a size-4 subset (#62)", {
+  # A 4-variable subset with 6 distinct known pairwise values (C(4,2) = 6),
+  # all below threshold, so a bug in the pairwise-index walk (wrong
+  # triangle, off-by-one, transposed pair) would show up as a wrong
+  # avg/min/max rather than being masked by repeated or symmetric-looking
+  # values.
+  m <- matrix(c(
+    1,    0.10, 0.20, 0.30,
+    0.10, 1,    0.15, 0.25,
+    0.20, 0.15, 1,    0.05,
+    0.30, 0.25, 0.05, 1
+  ), nrow = 4, byrow = TRUE)
+  colnames(m) <- rownames(m) <- c("A", "B", "C", "D")
+
+  res <- MatSelect(m, threshold = 0.5, method = "els")
+
+  expect_length(res@subset_list, 1)
+  expect_setequal(res@subset_list[[1]], c("A", "B", "C", "D"))
+  expect_equal(res@avg_corr[1], mean(c(0.10, 0.20, 0.30, 0.15, 0.25, 0.05)))
+  expect_equal(res@min_corr[1], 0.05)
+  expect_equal(res@max_corr[1], 0.30)
 })

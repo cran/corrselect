@@ -23,16 +23,16 @@ colnames(cor_4var) <- rownames(cor_4var) <- paste0("V", 1:4)
 # Display matrix
 print(cor_4var)
 
-## ----fig.width=6, fig.height=4, fig.alt="Text output showing adjacency matrix for threshold graph with 4 variables. Matrix displays 1 where edges exist (variables with absolute correlation below 0.7 can coexist) and 0 where edges don't exist (variables with absolute correlation above 0.7 cannot coexist). The pattern reveals which variable pairs are compatible for inclusion in the same maximal subset."----
-# Adjacency matrix for threshold graph (edges where |cor| < 0.7)
-adj_matrix <- abs(cor_4var) < 0.7
+## ----fig.width=6, fig.height=4, fig.alt="Text output showing adjacency matrix for threshold graph with 4 variables. Matrix displays 1 where edges exist (variables with absolute correlation at or below 0.7 can coexist) and 0 where edges don't exist (variables with absolute correlation above 0.7 cannot coexist). The pattern reveals which variable pairs are compatible for inclusion in the same maximal subset."----
+# Adjacency matrix for threshold graph (edges where |cor| <= 0.7)
+adj_matrix <- abs(cor_4var) <= 0.7
 diag(adj_matrix) <- FALSE  # No self-loops
 
 # Visualize as adjacency matrix
 cat("Threshold graph edges (1 = edge exists):\n")
 print(adj_matrix * 1)
 
-## ----fig.width=8, fig.height=6, fig.alt="Graph visualization with 4 nodes (V1, V2, V3, V4) arranged in a square pattern. Blue edges connect variable pairs with absolute correlation below 0.7 threshold. Red labels on edges show actual correlation values. Large red circles highlight nodes, with white labels. The graph structure reveals two maximal cliques: {V1,V3} and {V2,V4}, corresponding to maximal subsets where all pairwise correlations remain below threshold."----
+## ----fig.width=8, fig.height=6, fig.alt="Graph visualization with 4 nodes (V1, V2, V3, V4) arranged in a square pattern. Blue edges connect variable pairs with absolute correlation at or below 0.7 threshold. Red labels on edges show actual correlation values. Large red circles highlight nodes, with white labels. The graph structure reveals two maximal cliques: {V1,V3} and {V2,V4}, corresponding to maximal subsets where all pairwise correlations remain at or below threshold."----
 # Node positions (arranged in a square for clarity)
 node_pos <- matrix(c(
   0, 1,    # V1 (top-left)
@@ -88,12 +88,12 @@ legend("right",
 # Add box around graph
 box()
 
-## ----fig.width=8, fig.height=8, fig.alt="Network graph visualization of 20 variables organized into 4 correlation blocks. Nodes are colored by block: red (Block 1, V1-V5, high correlation), orange (Block 2, V6-V10, moderate), light blue (Block 3, V11-V15, low), and dark blue (Block 4, V16-V20, minimal). Gray edges connect variables with absolute correlation below 0.7 threshold. The force-directed layout clusters highly correlated variables together, revealing the block structure. Variables within blocks have few connections (high correlation), while variables across blocks have many connections (low correlation), illustrating which combinations can form maximal cliques."----
+## ----fig.width=8, fig.height=8, fig.alt="Network graph visualization of 20 variables organized into 4 correlation blocks. Nodes are colored by block: red (Block 1, V1-V5, high correlation), orange (Block 2, V6-V10, moderate), light blue (Block 3, V11-V15, low), and dark blue (Block 4, V16-V20, minimal). Gray edges connect variables with absolute correlation at or below 0.7 threshold. The force-directed layout clusters highly correlated variables together, revealing the block structure. Variables within blocks have few connections (high correlation), while variables across blocks have many connections (low correlation), illustrating which combinations can form maximal cliques."----
 data(cor_example)
 
-# Build threshold graph (edges where |correlation| < 0.7)
+# Build threshold graph (edges where |correlation| <= 0.7)
 threshold <- 0.7
-adj_mat <- abs(cor_example) < threshold
+adj_mat <- abs(cor_example) <= threshold
 diag(adj_mat) <- FALSE
 
 if (requireNamespace("igraph", quietly = TRUE)) {
@@ -122,7 +122,7 @@ if (requireNamespace("igraph", quietly = TRUE)) {
        edge.color = rgb(0.5, 0.5, 0.5, 0.3),
        edge.width = 1,
        layout = layout_with_fr(g),
-       main = sprintf("Threshold Graph (τ = %.1f): Variables with |cor| < %.1f are connected",
+       main = sprintf("Threshold Graph (τ = %.1f): Variables with |cor| <= %.1f are connected",
                      threshold, threshold))
 
   # Add legend
@@ -160,10 +160,10 @@ rownames(cor_6var) <- colnames(cor_6var) <- paste0("V", 1:6)
 # Display correlation matrix
 print(round(cor_6var, 2))
 
-## ----fig.width=8, fig.height=4, fig.alt="Two side-by-side visualizations for 6-variable example. Left panel: correlation matrix heatmap with blue (negative), white (zero), and red (positive) colors, numerical values overlaid, and black dashed lines separating two correlation blocks. Right panel: threshold graph showing 6 nodes positioned in two groups based on correlation structure, with blue edges connecting variables where absolute correlation is below 0.7. The dual visualization demonstrates how correlation matrix structure translates to threshold graph topology, revealing maximal cliques within and across correlation blocks."----
+## ----fig.width=8, fig.height=4, fig.alt="Two side-by-side visualizations for 6-variable example. Left panel: correlation matrix heatmap with blue (negative), white (zero), and red (positive) colors, numerical values overlaid, and black dashed lines separating two correlation blocks. Right panel: threshold graph showing 6 nodes positioned in two groups based on correlation structure, with blue edges connecting variables where absolute correlation is at or below 0.7. The dual visualization demonstrates how correlation matrix structure translates to threshold graph topology, revealing maximal cliques within and across correlation blocks."----
 # Build adjacency matrix for threshold graph
 tau <- 0.7
-adj_matrix <- abs(cor_6var) < tau
+adj_matrix <- abs(cor_6var) <= tau
 diag(adj_matrix) <- FALSE
 
 # Visualize correlation structure and threshold graph
@@ -191,7 +191,7 @@ for (i in 1:6) {
 abline(h = 3.5, lwd = 2, lty = 2, col = "black")
 abline(v = 3.5, lwd = 2, lty = 2, col = "black")
 
-# Panel 2: Threshold graph (edges where |cor| < tau)
+# Panel 2: Threshold graph (edges where |cor| <= tau)
 plot.new()
 plot.window(xlim = c(0, 1), ylim = c(0, 1))
 title(main = sprintf("Threshold Graph (τ = %.1f)", tau))
@@ -228,7 +228,7 @@ text(pos[, 1], pos[, 2], labels = colnames(cor_6var),
 
 # Add legend
 legend("bottomleft",
-       legend = c("Clique 1 (V1-V3)", "Clique 2 (V4-V6)", "Edge: |cor| < 0.7"),
+       legend = c("Clique 1 (V1-V3)", "Clique 2 (V4-V6)", "Edge: |cor| <= 0.7"),
        pch = c(21, 21, NA),
        pt.bg = c(rgb(0.8, 0.2, 0.2, 0.7), rgb(0.2, 0.5, 0.8, 0.7), NA),
        pt.cex = 2,

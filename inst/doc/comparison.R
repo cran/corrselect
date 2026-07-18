@@ -113,14 +113,19 @@ if (requireNamespace("caret", quietly = TRUE)) {
          bg = "white")
 }
 
-## ----eval=requireNamespace("Boruta", quietly=TRUE)----------------------------
-# if (requireNamespace("Boruta", quietly = TRUE)) {
+## ----eval=requireNamespace("Boruta", quietly=TRUE) && requireNamespace("ranger", quietly=TRUE)----
+# if (requireNamespace("Boruta", quietly = TRUE) &&
+#     requireNamespace("ranger", quietly = TRUE)) {
 #   # Boruta: "Which variables predict species_richness?"
+#   # getImp = getImpRfZ pins the ranger importance backend so the seeded run
+#   # is reproducible across Boruta versions (Boruta 10 defaults to the fru
+#   # backend, which is stochastic even at a fixed seed).
 #   set.seed(123)
 #   boruta_result <- Boruta::Boruta(
 #     species_richness ~ .,
 #     data    = bioclim_example,
-#     maxRuns = 100
+#     maxRuns = 100,
+#     getImp  = Boruta::getImpRfZ
 #   )
 # 
 #   cat("Boruta variable importance screening:\n")
@@ -156,61 +161,61 @@ cat(" ", paste(names(corrselect_result), collapse = ", "), "\n")
 # final_model <- lm(response ~ ., data = cbind(response, data_pruned)[, c("response", final_vars)])
 
 ## ----eval=requireNamespace("glmnet", quietly=TRUE)----------------------------
-# if (requireNamespace("glmnet", quietly = TRUE)) {
-#   # Fit LASSO with cross-validation
-#   X <- as.matrix(predictors)
-#   y <- response
-# 
-#   set.seed(123)
-#   cv_lasso <- glmnet::cv.glmnet(X, y, alpha = 1)
-# 
-#   # Extract non-zero coefficients at lambda.1se (conservative choice)
-#   coef_lasso <- stats::coef(cv_lasso, s = "lambda.1se")
-#   selected_lasso <- rownames(coef_lasso)[coef_lasso[, 1] != 0][-1]  # Remove intercept
-# 
-#   cat("glmnet (LASSO, λ = lambda.1se):\n")
-#   cat("  Variables retained:", length(selected_lasso), "\n")
-#   cat(" ", paste(selected_lasso, collapse = ", "), "\n")
-# }
+if (requireNamespace("glmnet", quietly = TRUE)) {
+  # Fit LASSO with cross-validation
+  X <- as.matrix(predictors)
+  y <- response
+
+  set.seed(123)
+  cv_lasso <- glmnet::cv.glmnet(X, y, alpha = 1)
+
+  # Extract non-zero coefficients at lambda.1se (conservative choice)
+  coef_lasso <- stats::coef(cv_lasso, s = "lambda.1se")
+  selected_lasso <- rownames(coef_lasso)[coef_lasso[, 1] != 0][-1]  # Remove intercept
+
+  cat("glmnet (LASSO, λ = lambda.1se):\n")
+  cat("  Variables retained:", length(selected_lasso), "\n")
+  cat(" ", paste(selected_lasso, collapse = ", "), "\n")
+}
 
 ## ----eval=requireNamespace("glmnet", quietly=TRUE)----------------------------
-# if (requireNamespace("glmnet", quietly = TRUE)) {
-#   # Compare model performance
-#   model_glmnet <- lm(species_richness ~ .,
-#                      data = bioclim_example[, c("species_richness", selected_lasso)])
-# 
-#   model_corrselect <- lm(species_richness ~ .,
-#                          data = cbind(species_richness = response, result_corrselect))
-# 
-#   cat("\nModel comparison (OLS on selected variables):\n")
-#   cat("  glmnet:     R² =", round(summary(model_glmnet)$r.squared, 3),
-#       "with", length(selected_lasso), "predictors\n")
-#   cat("  corrselect: R² =", round(summary(model_corrselect)$r.squared, 3),
-#       "with", ncol(result_corrselect), "predictors\n")
-# }
+if (requireNamespace("glmnet", quietly = TRUE)) {
+  # Compare model performance
+  model_glmnet <- lm(species_richness ~ .,
+                     data = bioclim_example[, c("species_richness", selected_lasso)])
+
+  model_corrselect <- lm(species_richness ~ .,
+                         data = cbind(species_richness = response, result_corrselect))
+
+  cat("\nModel comparison (OLS on selected variables):\n")
+  cat("  glmnet:     R² =", round(summary(model_glmnet)$r.squared, 3),
+      "with", length(selected_lasso), "predictors\n")
+  cat("  corrselect: R² =", round(summary(model_corrselect)$r.squared, 3),
+      "with", ncol(result_corrselect), "predictors\n")
+}
 
 ## ----eval=requireNamespace("glmnet", quietly=TRUE), fig.width=10, fig.height=5, fig.alt="Side-by-side barplots comparing coefficient magnitudes between glmnet (left panel, salmon bars) and corrselect (right panel, blue bars). Left panel shows glmnet's shrunk coefficients affected by L1 penalty, biased toward zero. Right panel shows corrselect's unbiased OLS coefficients on pruned variables with preserved effect sizes. The comparison illustrates the tradeoff between prediction-focused shrinkage and interpretation-focused hard selection."----
-# if (requireNamespace("glmnet", quietly = TRUE)) {
-#   par(mfrow = c(1, 2), mar = c(8, 4, 3, 2))
-# 
-#   # glmnet coefficients (shrinkage)
-#   coef_vals <- coef_lasso[coef_lasso[, 1] != 0, ][-1]
-#   barplot(sort(abs(coef_vals), decreasing = TRUE),
-#           las = 2,
-#           main = "glmnet: Shrunk Coefficients",
-#           ylab = "Absolute Coefficient Value",
-#           col = "salmon",
-#           cex.names = 0.7)
-# 
-#   # corrselect: unbiased OLS coefficients
-#   coef_corrselect <- coef(model_corrselect)[-1]  # Remove intercept
-#   barplot(sort(abs(coef_corrselect), decreasing = TRUE),
-#           las = 2,
-#           main = "corrselect: Unbiased OLS Coefficients",
-#           ylab = "Absolute Coefficient Value",
-#           col = rgb(0.2, 0.5, 0.8, 0.7),
-#           cex.names = 0.7)
-# }
+if (requireNamespace("glmnet", quietly = TRUE)) {
+  par(mfrow = c(1, 2), mar = c(8, 4, 3, 2))
+
+  # glmnet coefficients (shrinkage)
+  coef_vals <- coef_lasso[coef_lasso[, 1] != 0, ][-1]
+  barplot(sort(abs(coef_vals), decreasing = TRUE),
+          las = 2,
+          main = "glmnet: Shrunk Coefficients",
+          ylab = "Absolute Coefficient Value",
+          col = "salmon",
+          cex.names = 0.7)
+
+  # corrselect: unbiased OLS coefficients
+  coef_corrselect <- coef(model_corrselect)[-1]  # Remove intercept
+  barplot(sort(abs(coef_corrselect), decreasing = TRUE),
+          las = 2,
+          main = "corrselect: Unbiased OLS Coefficients",
+          ylab = "Absolute Coefficient Value",
+          col = rgb(0.2, 0.5, 0.8, 0.7),
+          cex.names = 0.7)
+}
 
 ## -----------------------------------------------------------------------------
 # Manual iterative VIF removal

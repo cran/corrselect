@@ -32,8 +32,8 @@
 #' # Compute correlation matrix
 #' cmat <- cor(df)
 #'
-#' # Select subsets using corrSelect
-#' res <- corrSelect(cmat, threshold = 0.5)
+#' # Select subsets using MatSelect (cmat is already a correlation matrix)
+#' res <- MatSelect(cmat, threshold = 0.5)
 #'
 #' # Extract the best subset (default)
 #' corrSubset(res, df)
@@ -72,8 +72,14 @@ corrSubset <- function(res, df, which = "best", keepExtra = FALSE) {
   if (identical(which, "all")) {
     indices <- seq_along(subset_list)
   } else if (is.character(which) && identical(which, "best")) {
+    if (length(subset_list) == 0) {
+      stop("`res` contains no subsets to extract (subset_list is empty).")
+    }
     indices <- 1L
   } else if (is.numeric(which)) {
+    if (any(is.na(which)) || any(which != as.integer(which))) {
+      stop("`which` numeric indices must be whole numbers.")
+    }
     indices <- as.integer(which)
     if (any(indices < 1 | indices > length(subset_list))) {
       stop("`which` indices are out of bounds.")
@@ -98,10 +104,11 @@ corrSubset <- function(res, df, which = "best", keepExtra = FALSE) {
   }, integer(1))
   n_rows <- vapply(result_list, nrow, integer(1))
   if (any(na_counts > 0)) {
+    bad <- which(na_counts > 0)
     warning(
       "Some subsets contain rows with missing values:\n",
       paste(sprintf("Subset %d: %d of %d rows",
-                    indices, na_counts, n_rows),
+                    indices[bad], na_counts[bad], n_rows[bad]),
             collapse = "\n")
     )
   }
