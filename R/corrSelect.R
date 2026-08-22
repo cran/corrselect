@@ -78,45 +78,41 @@ corrSelect <- function(df,
   # Normalize cor_method
   cor_method <- match.arg(cor_method)
 
+  # Validate `df`'s type *before* coercion, so common misuse gets a clear,
+  # package-specific error instead of base R's generic coercion error.
+  # Data frames (and subclasses such as tibbles/data.tables), matrices, and
+  # lists of equal-length columns are all valid inputs to as.data.frame().
+  if (!is.data.frame(df) && !is.matrix(df)) {
+    if (is.list(df)) {
+      col_lengths <- lengths(df)
+      if (length(col_lengths) > 0 && length(unique(col_lengths)) > 1) {
+        stop("`df` must be a data frame: list elements have differing lengths (",
+             paste(col_lengths, collapse = ", "), ").")
+      }
+    } else {
+      stop("`df` must be a data frame (or an object coercible to one, ",
+           "such as a matrix or a list of equal-length columns); got an ",
+           "object of class '", paste(class(df), collapse = "/"), "'.")
+    }
+  }
   df <- as.data.frame(df)
-  if (!is.data.frame(df)) stop("`df` must be a data frame.")
   if (ncol(df) < 2) stop("`df` must have at least two columns.")
 
   # Validate threshold
-  if (!is.numeric(threshold) || length(threshold) != 1 || is.na(threshold)) {
-    stop("`threshold` must be a single numeric value.")
-  }
-  if (threshold <= 0 || threshold > 1) {
-    stop("`threshold` must be in the range (0, 1].")
-  }
+  .validate_threshold(threshold)
 
-  # Resolve numeric `force_in` against the *original* data frame's column
-  # positions, then treat it identically to character `force_in` from here on.
-  # Columns are filtered (non-numeric, then constant) before the correlation
-  # matrix is built, so a numeric index checked only against the final matrix
-  # would silently point at a different variable than the caller intended.
-  if (!is.null(force_in) && is.numeric(force_in)) {
-    if (any(is.na(force_in)) || any(force_in != as.integer(force_in)) ||
-        any(force_in < 1) || any(force_in > ncol(df))) {
-      stop("`force_in` numeric indices must be whole numbers between 1 and ncol(df) = ",
-           ncol(df), ".")
-    }
-    force_in <- names(df)[as.integer(force_in)]
-  }
+  # Resolve `force_in` (numeric indices or names) against the *original*
+  # data frame's columns, before any filtering (non-numeric, then constant)
+  # removes columns from consideration -- a numeric index checked only
+  # against the final matrix would silently point at a different variable
+  # than the caller intended. Shared with assocSelect() so both data-frame
+  # entry points validate and report on `force_in` identically.
+  force_in <- .resolve_force_in(force_in, names(df))
 
   # Identify numeric columns
   numeric_cols <- vapply(df, is.numeric, logical(1))
   df_num       <- df[, numeric_cols, drop = FALSE]
   used_names   <- names(df_num)
-
-  # Validate character force_in *before* subsetting
-  if (!is.null(force_in) && is.character(force_in)) {
-    if (!all(force_in %in% names(df))) {
-      missing <- setdiff(force_in, names(df))
-      stop("The following `force_in` names are not in the data frame: ",
-           paste(missing, collapse = ", "))
-    }
-  }
 
   # Remove rows with NA
   n_before <- nrow(df_num)
@@ -138,14 +134,7 @@ corrSelect <- function(df,
   }
 
   # Drop constant variables
-  is_const <- vapply(df_num, function(x) sd(x) == 0, logical(1))
-  if (any(is_const)) {
-    const_vars <- names(df_num)[is_const]
-    warning("The following numeric columns were constant and excluded: ",
-            paste(const_vars, collapse = ", "))
-    df_num     <- df_num[, !is_const, drop = FALSE]
-    used_names <- used_names[!is_const]
-  }
+  df_num <- .drop_constant_columns(df_num)
   if (ncol(df_num) < 2) stop("Less than two numeric columns remain after excluding constants.")
 
   # Build correlation/association matrix
@@ -168,12 +157,10 @@ corrSelect <- function(df,
     force_in <- integer(0)
   }
 
-  # Conditionally set default method
-  if (is.null(method)) {
-    method <- if (length(force_in) > 0) "els" else "bron-kerbosch"
-  } else {
-    method <- match.arg(method, choices = c("bron-kerbosch", "els"))
-  }
+  # `method`'s default-selection logic (els when force_in is non-empty,
+  # otherwise bron-kerbosch) and its choices= validation live only in
+  # MatSelect() -- the common downstream entry point -- so `method` is passed
+  # through unresolved here rather than re-derived independently.
 
   # Run backend selection
   result <- MatSelect(

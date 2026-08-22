@@ -23,14 +23,21 @@ If the forced variables are themselves mutually correlated beyond \code{threshol
 returned subset -- unlike \code{\link{corrPrune}()}, which treats this condition as
 infeasible and errors instead.}
 
-\item{...}{Additional arguments passed to the backend, e.g., \code{use_pivot} (logical)
-for enabling pivoting in Bron–Kerbosch (ignored by ELS).}
+\item{...}{Additional arguments passed to the backend. The only supported
+argument is \code{use_pivot} (logical), for enabling pivoting in
+Bron–Kerbosch (ignored by ELS); any other named argument is an error.}
 }
 \value{
 An object of class \code{\link{CorrCombo}}, containing all valid subsets and their
 correlation statistics. If every variable is pairwise correlated above \code{threshold},
 the only valid maximal subsets are single variables; these are returned with
 \code{min_corr}/\code{max_corr} set to \code{NA} (there is no pair to summarize).
+
+Subsets are ordered by decreasing size, then increasing average absolute
+correlation. Subsets tying on both keep the order the search enumerated
+them in, which is itself determined by \code{mat} and \code{threshold}, so
+the ordering is reproducible across platforms. It is this ordering that
+\code{\link{corrSubset}(which = "best")} and \code{print()} read.
 }
 \description{
 Identifies all maximal subsets of variables from a symmetric matrix (typically a correlation matrix)

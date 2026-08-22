@@ -2,12 +2,18 @@
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 8,
-  fig.height = 5,
+  fig.width = 6.5,
+  fig.height = 4.5,
   dev = "svglite",
-  fig.ext = "svg"
+  fig.ext = "svg",
+  dev.args = list(pointsize = 14)
 )
 library(corrselect)
+
+# Figure palette, light mode hex; the pkgdown CSS swaps in dark counterparts
+PAL <- c(blue = "#2E6F9E", red = "#B5342B", green = "#3F7A3D",
+         orange = "#9E5E0F", purple = "#7A4F9E", teal = "#2A7A7A",
+         grey = "#5C6166")
 
 ## -----------------------------------------------------------------------------
 data(bioclim_example)
@@ -18,13 +24,14 @@ cat("Variables:", ncol(predictors), "\n")
 cat("Observations:", nrow(predictors), "\n")
 cat("Response: species_richness (continuous)\n")
 
-## ----fig.width=8, fig.height=6, fig.alt="Correlation heatmap of 19 bioclimatic variables displayed as a color-coded matrix. Blue indicates negative correlations, white indicates near-zero correlations, and red indicates positive correlations. Numerical correlation values are overlaid on each cell. The heatmap reveals block structure with correlations ranging from -0.15 to 0.97, showing strong correlations among temperature-related variables and precipitation-related variables."----
+## ----fig.width=7, fig.height=6, dev.args=list(pointsize=15), fig.alt="Correlation heatmap of 19 bioclimatic variables displayed as a color-coded matrix, with a color scale bar to the right. Blue indicates negative correlations, white indicates near-zero correlations, and red indicates positive correlations. The heatmap reveals block structure with correlations ranging from -0.15 to 0.97, showing strong correlations among temperature-related variables and precipitation-related variables."----
 cor_matrix <- cor(predictors)
 
-# Correlation heatmap
+# Correlation heatmap, with a color scale bar in a narrow second panel
 col_pal <- colorRampPalette(c("#3B4992", "white", "#EE0000"))(100)
 
-par(mar = c(1, 1, 3, 1))
+layout(matrix(1:2, nrow = 1), widths = c(0.85, 0.15))
+par(mar = c(4.5, 4.5, 3, 0.5))
 nc <- ncol(cor_matrix)
 nr <- nrow(cor_matrix)
 image(seq_len(nc), seq_len(nr), t(cor_matrix[nr:1, ]),
@@ -32,16 +39,16 @@ image(seq_len(nc), seq_len(nr), t(cor_matrix[nr:1, ]),
       xlab = "", ylab = "", axes = FALSE,
       main = "Bioclimatic Variable Correlations (p = 19)",
       zlim = c(-1, 1))
-axis(1, at = seq_len(nc), labels = colnames(cor_matrix), las = 2, cex.axis = 0.7)
-axis(2, at = nc:1, labels = colnames(cor_matrix), las = 2, cex.axis = 0.7)
+axis(1, at = seq_len(nc), labels = colnames(cor_matrix), las = 2)
+axis(2, at = nc:1, labels = colnames(cor_matrix), las = 2)
 
-for (i in seq_len(nc)) {
-  for (j in seq_len(nr)) {
-    text_col <- if (abs(cor_matrix[j, i]) > 0.6) "white" else "black"
-    text(i, nr - j + 1, sprintf("%.2f", cor_matrix[j, i]),
-         cex = 0.5, col = text_col)
-  }
-}
+# Scale bar
+par(mar = c(4.5, 0.5, 3, 3))
+breaks <- seq(-1, 1, length.out = length(col_pal) + 1)
+image(1, breaks[-1], matrix(breaks[-1], nrow = 1),
+      col = col_pal, axes = FALSE, xlab = "", ylab = "", zlim = c(-1, 1))
+axis(4, at = seq(-1, 1, by = 0.5), las = 1)
+mtext("correlation", side = 4, line = 2)
 
 ## -----------------------------------------------------------------------------
 if (requireNamespace("caret", quietly = TRUE)) {
@@ -64,7 +71,7 @@ cat("  Variables retained:", ncol(result_corrselect), "\n")
 cat("  Variables removed:", length(attr(result_corrselect, "removed_vars")), "\n")
 cat("  Removed:", paste(attr(result_corrselect, "removed_vars"), collapse = ", "), "\n")
 
-## ----fig.width=7, fig.height=5, fig.alt="Overlaid histogram comparing absolute correlation distributions across three methods: original data (gray bars), caret's findCorrelation (red bars), and corrselect (blue bars). Black vertical dashed line marks the 0.7 threshold. All methods successfully reduce correlations below the threshold, but corrselect retains more variables than caret while still satisfying the constraint, demonstrating the advantage of maximal clique enumeration over greedy removal."----
+## ----fig.alt="Overlaid histogram comparing absolute correlation distributions across three methods: original data (gray bars), caret's findCorrelation (red bars), and corrselect (blue bars). Black vertical dashed line marks the 0.7 threshold. All methods successfully reduce correlations below the threshold, but corrselect retains more variables than caret while still satisfying the constraint, demonstrating the advantage of maximal clique enumeration over greedy removal."----
 # Extract correlations
 cor_orig <- cor(predictors)
 cor_corrselect <- cor(result_corrselect)
@@ -92,6 +99,8 @@ if (requireNamespace("caret", quietly = TRUE)) {
 
   abline(v = 0.7, col = "black", lwd = 2, lty = 2)
 
+  # Squares rather than fill boxes, so the swatches and the threshold rule
+  # share one symbol column and line up
   legend("topright",
          legend = c(
            paste0("Original (", ncol(predictors), " vars)"),
@@ -99,45 +108,49 @@ if (requireNamespace("caret", quietly = TRUE)) {
            paste0("corrselect (", ncol(result_corrselect), " vars)"),
            "Threshold"
          ),
-         fill   = c(
+         pch    = c(22, 22, 22, NA),
+         pt.bg  = c(
            rgb(0.5, 0.5, 0.5, 0.4),
            rgb(0.8, 0.2, 0.2, 0.4),
            rgb(0.2, 0.5, 0.8, 0.4),
            NA
          ),
-         border = c("white", "white", "white", NA),
+         pt.cex = 2,
          lty    = c(NA, NA, NA, 2),
          lwd    = c(NA, NA, NA, 2),
-         col    = c(NA, NA, NA, "black"),
+         col    = c("white", "white", "white", "black"),
+         # The threshold rule runs the full height of the panel and would
+         # otherwise cross the labels
          bty    = "o",
-         bg = "white")
+         box.lty = 0,
+         bg     = "white")
 }
 
 ## ----eval=requireNamespace("Boruta", quietly=TRUE) && requireNamespace("ranger", quietly=TRUE)----
-# if (requireNamespace("Boruta", quietly = TRUE) &&
-#     requireNamespace("ranger", quietly = TRUE)) {
-#   # Boruta: "Which variables predict species_richness?"
-#   # getImp = getImpRfZ pins the ranger importance backend so the seeded run
-#   # is reproducible across Boruta versions (Boruta 10 defaults to the fru
-#   # backend, which is stochastic even at a fixed seed).
-#   set.seed(123)
-#   boruta_result <- Boruta::Boruta(
-#     species_richness ~ .,
-#     data    = bioclim_example,
-#     maxRuns = 100,
-#     getImp  = Boruta::getImpRfZ
-#   )
-# 
-#   cat("Boruta variable importance screening:\n")
-#   print(table(boruta_result$finalDecision))
-# 
-#   important_vars <- names(boruta_result$finalDecision[
-#     boruta_result$finalDecision == "Confirmed"
-#   ])
-# 
-#   cat("\n  Confirmed predictors:", length(important_vars), "\n")
-#   cat(" ", paste(important_vars, collapse = ", "), "\n")
-# }
+if (requireNamespace("Boruta", quietly = TRUE) &&
+    requireNamespace("ranger", quietly = TRUE)) {
+  # Boruta: "Which variables predict species_richness?"
+  # getImp = getImpRfZ pins the ranger importance backend so the seeded run
+  # is reproducible across Boruta versions (Boruta 10 defaults to the fru
+  # backend, which is stochastic even at a fixed seed).
+  set.seed(123)
+  boruta_result <- Boruta::Boruta(
+    species_richness ~ .,
+    data    = bioclim_example,
+    maxRuns = 100,
+    getImp  = Boruta::getImpRfZ
+  )
+
+  cat("Boruta variable importance screening:\n")
+  print(table(boruta_result$finalDecision))
+
+  important_vars <- names(boruta_result$finalDecision[
+    boruta_result$finalDecision == "Confirmed"
+  ])
+
+  cat("\n  Confirmed predictors:", length(important_vars), "\n")
+  cat(" ", paste(important_vars, collapse = ", "), "\n")
+}
 
 ## -----------------------------------------------------------------------------
 # corrselect: "Which variables are redundant?"
@@ -194,27 +207,25 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
       "with", ncol(result_corrselect), "predictors\n")
 }
 
-## ----eval=requireNamespace("glmnet", quietly=TRUE), fig.width=10, fig.height=5, fig.alt="Side-by-side barplots comparing coefficient magnitudes between glmnet (left panel, salmon bars) and corrselect (right panel, blue bars). Left panel shows glmnet's shrunk coefficients affected by L1 penalty, biased toward zero. Right panel shows corrselect's unbiased OLS coefficients on pruned variables with preserved effect sizes. The comparison illustrates the tradeoff between prediction-focused shrinkage and interpretation-focused hard selection."----
+## ----eval=requireNamespace("glmnet", quietly=TRUE), fig.width=9, fig.height=5, dev.args=list(pointsize=19), fig.alt="Side-by-side barplots comparing coefficient magnitudes between glmnet (left panel, salmon bars) and corrselect (right panel, blue bars). Left panel shows glmnet's shrunk coefficients affected by L1 penalty, biased toward zero. Right panel shows corrselect's unbiased OLS coefficients on pruned variables with preserved effect sizes. The comparison illustrates the tradeoff between prediction-focused shrinkage and interpretation-focused hard selection."----
 if (requireNamespace("glmnet", quietly = TRUE)) {
-  par(mfrow = c(1, 2), mar = c(8, 4, 3, 2))
+  par(mfrow = c(1, 2), mar = c(5.5, 4.5, 3, 1))
 
   # glmnet coefficients (shrinkage)
   coef_vals <- coef_lasso[coef_lasso[, 1] != 0, ][-1]
   barplot(sort(abs(coef_vals), decreasing = TRUE),
           las = 2,
-          main = "glmnet: Shrunk Coefficients",
-          ylab = "Absolute Coefficient Value",
-          col = "salmon",
-          cex.names = 0.7)
+          main = "glmnet: shrunk",
+          ylab = "|Coefficient|",
+          col = "salmon")
 
   # corrselect: unbiased OLS coefficients
   coef_corrselect <- coef(model_corrselect)[-1]  # Remove intercept
   barplot(sort(abs(coef_corrselect), decreasing = TRUE),
           las = 2,
-          main = "corrselect: Unbiased OLS Coefficients",
-          ylab = "Absolute Coefficient Value",
-          col = rgb(0.2, 0.5, 0.8, 0.7),
-          cex.names = 0.7)
+          main = "corrselect: OLS",
+          ylab = "|Coefficient|",
+          col = rgb(0.2, 0.5, 0.8, 0.7))
 }
 
 ## -----------------------------------------------------------------------------
@@ -275,7 +286,7 @@ if (requireNamespace("car", quietly = TRUE)) {
   print(round(car::vif(final_model), 2))
 }
 
-## ----fig.width=8, fig.height=5, fig.alt="Side-by-side barplot showing VIF values before (red bars) and after (blue bars) applying modelPrune() for the top 15 variables ordered by initial VIF. Black horizontal dashed line marks the VIF limit of 5. Before pruning, many variables show high VIF values indicating severe multicollinearity. After modelPrune(), all retained variables have VIF below the threshold, and high-VIF variables are completely removed (shown as red-only bars), demonstrating automated and effective multicollinearity reduction."----
+## ----fig.width=7.5, fig.height=5, dev.args=list(pointsize=16), fig.alt="Side-by-side barplot showing VIF values before (red bars) and after (blue bars) applying modelPrune() for the top 15 variables ordered by initial VIF. Black horizontal dashed line marks the VIF limit of 5. Before pruning, many variables show high VIF values indicating severe multicollinearity. After modelPrune(), all retained variables have VIF below the threshold, and high-VIF variables are completely removed (shown as red-only bars), demonstrating automated and effective multicollinearity reduction."----
 if (requireNamespace("car", quietly = TRUE)) {
   # Compute VIF for original model
   model_full <- lm(species_richness ~ ., data = bioclim_example)
@@ -302,7 +313,6 @@ if (requireNamespace("car", quietly = TRUE)) {
           main = "VIF Before and After modelPrune()",
           ylab = "VIF",
           col = c(rgb(0.8, 0.2, 0.2, 0.7), rgb(0.2, 0.5, 0.8, 0.7)),
-          cex.names = 0.6,
           names.arg = rownames(vif_combined)[1:n_show])
   abline(h = 5, col = "black", lwd = 2, lty = 2)
   legend("topright",

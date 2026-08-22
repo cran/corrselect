@@ -4,15 +4,15 @@
 #' ordered factors, or unordered) factors—whose *pair-wise association* does not
 #' exceed a user-supplied threshold.
 #' The routine wraps \code{\link{MatSelect}()} and handles all pre-processing
-#' (type conversion, missing-row removal, constant-column checks) for typical
+#' (type conversion, missing-row removal, constant-column removal) for typical
 #' data-frame/tibble/data-table inputs.
 #'
 #' A single call can therefore screen a data set that mixes continuous and
 #' categorical features and return every subset whose internal associations are
 #' “sufficiently low” under the metric(s) you choose.
 #'
-#' Rows containing \code{NA} are dropped with a warning; constant columns are
-#' treated as having zero association with every other variable.
+#' Rows containing \code{NA} are dropped with a warning; constant columns
+#' (a single distinct value) are excluded with a warning.
 #'
 #' @param df A data frame (or tibble / data.table). May contain any mix of:
 #'   \itemize{
@@ -64,13 +64,20 @@
 #' \describe{
 #'   \item{numeric – numeric}{\code{method_num_num} (default \code{"pearson"})}
 #'   \item{numeric – ordered}{\code{method_num_ord}}
-#'   \item{numeric – unordered}{\code{"eta"} (ANOVA \eqn{\eta^{2}})}
+#'   \item{numeric – unordered}{\code{"eta"} (the correlation ratio
+#'     \eqn{\eta = \sqrt{\eta^{2}}} of a one-way ANOVA)}
 #'   \item{ordered – ordered}{\code{method_ord_ord}}
 #'   \item{ordered – unordered}{\code{"cramersv"}}
 #'   \item{unordered – unordered}{\code{"cramersv"}}
 #' }
 #'
-#' All association measures are rescaled to \eqn{[0,1]} before thresholding.
+#' Every measure above is a correlation magnitude in \eqn{[0,1]}, so
+#' \code{threshold} means the same thing for every variable-type pair. \eqn{\eta}
+#' is the multiple correlation between the numeric variable and the factor and
+#' equals the absolute point-biserial correlation for a two-level factor;
+#' Cramer's V equals the absolute phi coefficient for a 2x2 table. A binary
+#' variable therefore gets the same association whether it is supplied as a
+#' 0/1 numeric column or as a two-level factor.
 #' External packages are required for
 #' \code{"bicor"} (\pkg{WGCNA}),
 #' \code{"distance"} (\pkg{energy}),
@@ -114,29 +121,18 @@ assocSelect <- function(df,
   ## ---------- preprocessing ----------
   df <- as.data.frame(df)
   # Auto-convert and drop unused levels
-  df[] <- lapply(df, function(col) {
-    if (is.character(col)) {
-      factor(col)
-    } else if (is.logical(col)) {
-      factor(col)
-    } else if (is.factor(col)) {
-      droplevels(col)
-    } else if (is.integer(col)) {
-      as.numeric(col)
-    } else {
-      col
-    }
-  })
+  df <- .auto_convert_types(df)
 
   if (ncol(df) < 2) stop("`df` needs at least two columns.")
 
   # Validate threshold
-  if (!is.numeric(threshold) || length(threshold) != 1 || is.na(threshold)) {
-    stop("`threshold` must be a single numeric value.")
-  }
-  if (threshold <= 0 || threshold > 1) {
-    stop("`threshold` must be in the range (0, 1].")
-  }
+  .validate_threshold(threshold)
+
+  # Resolve `force_in` (numeric indices or names) against the original,
+  # type-coerced data frame's columns, before any row/column filtering below
+  # removes candidates from consideration. Shared with corrSelect() so both
+  # data-frame entry points validate and report on `force_in` identically.
+  force_in <- .resolve_force_in(force_in, names(df))
 
   valid_types <- c("numeric", "ordered", "factor")
   types <- vapply(df, function(x) class(x)[1], character(1))
@@ -156,6 +152,11 @@ assocSelect <- function(df,
          "cannot compute associations.")
   }
 
+  # Drop constant variables
+  df <- .drop_constant_columns(df)
+  if (ncol(df) < 2) stop("Less than two columns remain after excluding constants.")
+  types <- types[names(df)]
+
   ## ---------- finalise methods ----------
   method_num_num <- match.arg(method_num_num)
   method_num_ord <- match.arg(method_num_ord)
@@ -168,13 +169,15 @@ assocSelect <- function(df,
   mat <- built$mat
   assoc_methods_used <- built$assoc_methods_used
 
-  ## ---------- resolve force_in ----------
+  ## ---------- force_in (already name/index-validated above) against the
+  ## final, filtered matrix, then convert to indices ----------
   if (!is.null(force_in)) {
-    if (is.character(force_in)) {
-      if (!all(force_in %in% names(df)))
-        stop("Some entries in `force_in` do not match column names.")
-      force_in <- match(force_in, names(df))
+    if (!all(force_in %in% colnames(mat))) {
+      missing <- setdiff(force_in, colnames(mat))
+      stop("The following `force_in` columns were excluded from the association analysis: ",
+           paste(missing, collapse = ", "))
     }
+    force_in <- match(force_in, colnames(mat))
   }
 
   ## ---------- subset selection ----------

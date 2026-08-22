@@ -36,6 +36,11 @@
 #' @param cor_method Character string. Correlation method or \code{"mixed"}. Defaults to \code{character()}.
 #' @param n_rows_used Integer. Number of rows used for computing the correlation matrix. \code{NA} for matrix input.
 #'
+#' @return \code{CorrCombo()} returns an S7 \code{CorrCombo} object holding the discovered subsets and their
+#'   correlation statistics, with properties \code{subset_list}, \code{avg_corr}, \code{min_corr}, \code{max_corr},
+#'   \code{var_names}, \code{threshold}, \code{forced_in}, \code{search_type}, \code{cor_method}, and
+#'   \code{n_rows_used} as described above.
+#'
 #' @seealso \code{\link{corrSelect}}, \code{\link{MatSelect}}, \code{\link{corrSubset}}
 #'
 #' @examples
@@ -77,6 +82,11 @@ CorrCombo <- new_class("CorrCombo",
     if (!check_lengths(self@avg_corr)) return("avg_corr must match subset_list length or be empty.")
     if (!check_lengths(self@min_corr)) return("min_corr must match subset_list length or be empty.")
     if (!check_lengths(self@max_corr)) return("max_corr must match subset_list length or be empty.")
+    if (length(self@threshold) != 1) return("threshold must be a single numeric value.")
+    if (length(self@search_type) != 1 || !self@search_type %in% c("els", "bron-kerbosch")) {
+      return("search_type must be a single string, one of \"els\" or \"bron-kerbosch\".")
+    }
+    if (length(self@cor_method) > 1) return("cor_method must be a single string or empty.")
     NULL
   }
 )
@@ -85,6 +95,8 @@ CorrCombo <- new_class("CorrCombo",
 #' @rdname CorrCombo
 #' @param x A \code{CorrCombo} object to be printed.
 #' @param ... Additional arguments (ignored).
+#' @return \code{print.CorrCombo()} returns \code{x}, invisibly. Called to print a formatted summary of a
+#'   \code{CorrCombo} object to the console.
 #' @export
 print.CorrCombo <- function(x, ...) {
   n <- length(x@subset_list)
@@ -166,6 +178,21 @@ print.CorrCombo <- function(x, ...) {
 
 #' @rdname CorrCombo
 #' @param object A \code{CorrCombo} object to summarize.
+#' @return \code{summary.CorrCombo()} returns a list of class \code{summary.CorrCombo} with 10 elements:
+#' \describe{
+#'   \item{n_subsets}{Integer. Number of maximal subsets found.}
+#'   \item{search_type}{Character string. One of \code{"els"} or \code{"bron-kerbosch"}.}
+#'   \item{cor_method}{Character string. Correlation method used, or \code{"mixed"} if multiple methods were used.}
+#'   \item{threshold}{Numeric scalar. The correlation threshold used during selection.}
+#'   \item{n_rows_used}{Integer. Number of rows used to compute the correlation matrix, or \code{NA} for matrix input.}
+#'   \item{forced_in}{Character vector. Variable names forced into every subset.}
+#'   \item{size_range}{Integer vector of length 2 giving the smallest and largest subset sizes found
+#'     (\code{c(NA, NA)} if no subsets were found).}
+#'   \item{size_median}{Numeric scalar. Median subset size across all discovered subsets (\code{NA} if none found).}
+#'   \item{avg_corr_range}{Numeric vector of length 2 giving the smallest and largest average absolute
+#'     correlation across subsets (\code{c(NA, NA)} if none found).}
+#'   \item{n_max_size}{Integer. Number of subsets that attain the largest size (\code{0} if none found).}
+#' }
 #' @export
 summary.CorrCombo <- function(object, ...) {
   x <- object
@@ -190,6 +217,8 @@ summary.CorrCombo <- function(object, ...) {
 
 #' @rdname CorrCombo
 #' @param x A \code{summary.CorrCombo} object to be printed.
+#' @return \code{print.summary.CorrCombo()} returns \code{x}, invisibly. Called to print a formatted
+#'   \code{summary.CorrCombo} object to the console.
 #' @export
 print.summary.CorrCombo <- function(x, ...) {
   cat("CorrCombo summary\n")

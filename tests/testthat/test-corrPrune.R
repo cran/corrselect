@@ -659,28 +659,31 @@ test_that("corrPrune handles all rows with NA (errors)", {
   )
 })
 
-test_that("corrPrune handles constant-factor pairs, matching assocSelect (#33)", {
+test_that("corrPrune drops a constant factor column, matching assocSelect (#33, #117)", {
   # Regression test for issue #33: corrPrune()'s mixed-type dispatch had no
   # constant-column gate for the Cramer's V (factor-factor) branch, so a
   # single-level factor produced an undefined (NA) association via
-  # table()/chisq.test() and tripped the "surface NA explicitly" stop, even
-  # though assocSelect() -- which corrPrune()'s own docs claim to mirror --
-  # already treats a constant categorical variable as association = 0.
+  # table()/chisq.test() and tripped the "surface NA explicitly" stop. Per
+  # #117, corrPrune() and assocSelect() now agree on constant columns: both
+  # exclude them with a warning rather than keeping them at association 0.
   set.seed(9330)
   df <- data.frame(
     const_fac = factor(rep("A", 20)),
-    other_fac = factor(sample(c("X", "Y", "Z"), 20, TRUE))
+    other_fac = factor(sample(c("X", "Y", "Z"), 20, TRUE)),
+    num       = rnorm(20)
   )
 
-  expect_no_error(res <- corrPrune(df, threshold = 0.9))
+  res <- expect_warning(corrPrune(df, threshold = 0.9), "constant.*excluded")
   expect_s3_class(res, "data.frame")
-  expect_true(all(c("const_fac", "other_fac") %in% names(res)))
+  expect_false("const_fac" %in% names(res))
+  expect_true("other_fac" %in% names(res))
 
-  # assocSelect() already handled this case; corrPrune() should now agree.
-  expect_no_error(assocSelect(df, threshold = 0.9))
+  # assocSelect() should agree.
+  res_assoc <- expect_warning(assocSelect(df, threshold = 0.9), "constant.*excluded")
+  expect_false("const_fac" %in% res_assoc@var_names)
 })
 
-test_that("corrPrune handles a constant numeric column in a mixed-type data frame (#33)", {
+test_that("corrPrune drops a constant numeric column in a mixed-type data frame (#33)", {
   set.seed(9331)
   n <- 20
   df <- data.frame(
@@ -689,8 +692,9 @@ test_that("corrPrune handles a constant numeric column in a mixed-type data fram
     fac = factor(sample(c("X", "Y", "Z"), n, replace = TRUE))
   )
 
-  expect_no_error(res <- corrPrune(df, threshold = 0.9))
+  res <- expect_warning(corrPrune(df, threshold = 0.9), "constant.*excluded")
   expect_s3_class(res, "data.frame")
+  expect_false("const_num" %in% names(res))
 })
 
 test_that("corrPrune still errors on genuinely all-missing columns after the #33 fix", {
@@ -709,6 +713,37 @@ test_that("corrPrune still errors on genuinely all-missing columns after the #33
     corrPrune(df2, threshold = 0.7),
     "no complete element pairs|All rows contain missing values|undefined \\(NA\\) values"
   )
+})
+
+test_that("corrPrune errors clearly when force_in names a constant column (#117)", {
+  set.seed(9332)
+  n <- 20
+  df <- data.frame(
+    const_num = rep(5, n),
+    other_num = rnorm(n),
+    fac = factor(sample(c("X", "Y", "Z"), n, replace = TRUE))
+  )
+
+  expect_error(
+    suppressWarnings(corrPrune(df, threshold = 0.9, force_in = "const_num")),
+    "'force_in'.*excluded for being constant"
+  )
+})
+
+test_that("corrPrune keeps a column constant only within one group (#117)", {
+  # A column constant only *within one group* is not globally constant, so
+  # it must not be dropped up front -- it's still a legitimate case for
+  # .numeric_assoc_matrix()'s own within-group zero-out logic.
+  set.seed(9333)
+  n <- 40
+  grp <- rep(c("A", "B"), each = n / 2)
+  x <- rnorm(n)
+  y <- ifelse(grp == "A", 5, rnorm(n))  # constant within group A only
+
+  df <- data.frame(x = x, y = y, grp = grp)
+
+  result <- corrPrune(df, threshold = 0.9, by = "grp")
+  expect_true("y" %in% attr(result, "selected_vars"))
 })
 
 test_that("corrPrune mixed-type branch warns and reports n_rows_used on missing data, matching assocSelect (#35)", {
@@ -867,28 +902,38 @@ test_that("corrPrune greedy mode with single force_in", {
   expect_true("x2" %in% attr(result, "selected_vars"))
 })
 
-test_that("corrPrune handles eta with constant categorical variable", {
+test_that("corrPrune drops a constant categorical variable and still runs exact mode on the rest", {
   set.seed(1110)
   n <- 30
   df <- data.frame(
     num1 = rnorm(n),
-    cat_const = factor(rep("A", n))  # Constant factor
+    num2 = rnorm(n),
+    cat_const = factor(rep("A", n))  # Constant factor -- excluded before search
   )
 
-  result <- corrPrune(df, threshold = 0.99, mode = "exact")
+  result <- expect_warning(
+    corrPrune(df, threshold = 0.99, mode = "exact"),
+    "constant.*excluded"
+  )
   expect_s3_class(result, "data.frame")
+  expect_false("cat_const" %in% names(result))
 })
 
-test_that("corrPrune handles eta with constant numeric variable", {
+test_that("corrPrune drops a constant numeric variable and still runs exact mode on the rest", {
   set.seed(1111)
   n <- 30
   df <- data.frame(
-    num_const = rep(5, n),  # Constant numeric (ss_tot = 0)
-    cat1 = factor(sample(c("A", "B"), n, replace = TRUE))
+    num_const = rep(5, n),  # Constant numeric -- excluded before search
+    cat1 = factor(sample(c("A", "B"), n, replace = TRUE)),
+    cat2 = factor(sample(c("X", "Y"), n, replace = TRUE))
   )
 
-  result <- corrPrune(df, threshold = 0.99, mode = "exact")
+  result <- expect_warning(
+    corrPrune(df, threshold = 0.99, mode = "exact"),
+    "constant.*excluded"
+  )
   expect_s3_class(result, "data.frame")
+  expect_false("num_const" %in% names(result))
 })
 
 test_that("corrPrune grouped pruning works with by parameter", {
@@ -1847,24 +1892,47 @@ test_that("corrPrune grouped group_q aggregation matches hand-computed quantiles
   expect_setequal(attr(res_min, "selected_vars"), c("x", "y"))
 })
 
-test_that("corrPrune grouped mode errors when a factor level is unused within one group (#55)", {
-  # region has an "East" level, but group A only ever has North/South -- the
-  # eta/Cramer's V computation for group A therefore returns NA for any pair
-  # involving region, even though group A had plenty of complete rows. This
-  # must not be silently dropped from the group_q aggregation (which would
-  # let group_q = 1's "holds in all groups" guarantee pass unverified).
-  set.seed(1)
-  n <- 30
-  site <- rep(c("A", "B"), each = 15)
-  region <- factor(rep(NA_character_, n), levels = c("North", "South", "East"))
-  region[site == "A"] <- sample(c("North", "South"), 15, replace = TRUE)
-  region[site == "B"] <- sample(c("North", "South", "East"), 15, replace = TRUE)
-  df <- data.frame(x1 = rnorm(n), x2 = rnorm(n), region = region, site = site)
+test_that("corrPrune grouped mode errors on a degenerate contingency table within one group (#55)", {
+  # region has an "East" level that group A never takes, so group A's
+  # region-by-soil table carries an all-zero row and Cramer's V is undefined
+  # there, even though group A had plenty of complete rows. This must not be
+  # silently dropped from the group_q aggregation (which would let
+  # group_q = 1's "holds in all groups" guarantee pass unverified).
+  site   <- rep(c("A", "B"), each = 6)
+  region <- factor(c("North", "North", "South", "South", "North", "South",
+                     "North", "South", "East",  "East",  "North", "South"),
+                   levels = c("North", "South", "East"))
+  soil   <- factor(c("clay", "sand", "clay", "sand", "sand", "clay",
+                     "clay", "sand", "clay", "sand", "sand", "clay"))
+  df <- data.frame(soil = soil, region = region, site = site)
 
-  expect_error(
+  err <- expect_error(
     corrPrune(df, threshold = 0.9, by = "site", group_q = 1),
     "undefined"
   )
+  # The message has to name both the pair and the group that is degenerate,
+  # since which group to drop or coarsen is what the user acts on.
+  expect_match(conditionMessage(err), "'soil' and 'region'", fixed = TRUE)
+  expect_match(conditionMessage(err), "'A'", fixed = TRUE)
+})
+
+test_that("corrPrune grouped mode handles a factor level unused within one group for numeric-factor pairs (#127)", {
+  # Same shape as the Cramer's V case above, but the pair is numeric-factor,
+  # where the association is defined over the levels that were observed: an
+  # unused level contributes n_g * (xbar_g - xbar)^2 = 0 to the between-group
+  # sum of squares. A group missing one level of a factor is the ordinary
+  # case for small groups, so this must return rather than error.
+  set.seed(127)
+  n <- 40
+  site   <- rep(c("A", "B"), each = 20)
+  region <- factor(rep(NA_character_, n), levels = c("North", "South", "East"))
+  region[site == "A"] <- rep(c("North", "South"), 10)
+  region[site == "B"] <- rep(c("North", "South", "East"), length.out = 20)
+  df <- data.frame(x1 = rnorm(n), region = region, site = site)
+
+  res <- corrPrune(df, threshold = 0.9, by = "site", group_q = 1)
+  expect_s3_class(res, "data.frame")
+  expect_setequal(attr(res, "selected_vars"), c("x1", "region"))
 })
 
 test_that("corrPrune grouped mode warns about NA rows confined to a single group (#55)", {
@@ -1916,6 +1984,45 @@ test_that("corrPrune exact mode resolves an exact avg-correlation tie lexicograp
 
   result <- corrPrune(df, threshold = 0.5, mode = "exact")
   expect_equal(sort(attr(result, "selected_vars")), c("a", "c"))
+})
+
+test_that("corrPrune exact mode's tie-break does not depend on the collation locale (#128)", {
+  # Same tie construction as above, but with names that mix case. C collation
+  # puts every uppercase name before every lowercase one, while en_US
+  # collation interleaves them, so the two disagree on which of the four tied
+  # pairs is "alphabetically first" -- the same data at the same threshold
+  # would select a different subset in two sessions on the same machine.
+  # Single lowercase letters collate identically everywhere and cannot
+  # exercise this.
+  set.seed(42)
+  n <- 20
+  Q <- qr.Q(qr(matrix(rnorm(n * 2), n, 2)))
+  z1 <- Q[, 1]; z2 <- Q[, 2]
+  df <- data.frame(BIO1 = z1, bio2 = -z1, BIO3 = z2, bio4 = -z2)
+
+  pick <- function() {
+    sort(attr(corrPrune(df, threshold = 0.5, mode = "exact"), "selected_vars"),
+         method = "radix")
+  }
+
+  old_collate <- Sys.getlocale("LC_COLLATE")
+  on.exit(suppressWarnings(Sys.setlocale("LC_COLLATE", old_collate)), add = TRUE)
+
+  # Session default.
+  expect_equal(pick(), c("BIO1", "BIO3"))
+
+  # Fixed C collation, available everywhere.
+  suppressWarnings(Sys.setlocale("LC_COLLATE", "C"))
+  expect_equal(pick(), c("BIO1", "BIO3"))
+
+  # A collation that orders case differently from C, if this machine has one.
+  case_insensitive <- c("en_US.UTF-8", "English_United States.1252", "en_US")
+  for (loc in case_insensitive) {
+    if (suppressWarnings(Sys.setlocale("LC_COLLATE", loc)) != "") {
+      expect_equal(pick(), c("BIO1", "BIO3"))
+      break
+    }
+  }
 })
 
 test_that("corrPrune greedy mode removes the variable with the most violations first", {

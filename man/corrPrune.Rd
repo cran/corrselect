@@ -21,19 +21,28 @@ corrPrune(
 
 \item{threshold}{Numeric scalar. Maximum allowed pairwise association
 (default: 0.7). Must be in \verb{[0, 1]} -- every supported association
-measure is bounded in \verb{[0, 1]} (in absolute value), so this range is
-enforced the same way regardless of \code{mode} (\code{threshold = 0} is valid
-only in \code{mode = "greedy"}; see Mode Selection below).}
+measure is a correlation magnitude in \verb{[0, 1]} (see \code{measure}), so this
+range is enforced the same way regardless of \code{mode} (\code{threshold = 0} is
+valid only in \code{mode = "greedy"}; see Mode Selection below).}
 
 \item{measure}{Character string specifying the numeric-numeric association
 measure to use. One of \code{"auto"} (default, Pearson), \code{"pearson"},
 \code{"spearman"}, \code{"kendall"}, \code{"bicor"}, \code{"distance"}, or \code{"maximal"}. This
 only customizes numeric-numeric pairs; every other pair-type combination
-is fixed and not affected by \code{measure}: eta-squared for
-numeric-categorical pairs, Cramer's V for categorical-categorical pairs,
-and Spearman for numeric-ordered and ordered-ordered pairs. The measure
-actually used for each pair-type combination is reported in the
-\code{assoc_methods_used} attribute of the result.}
+is fixed and not affected by \code{measure}: eta (the correlation ratio,
+\eqn{\sqrt{\eta^{2}}}) for numeric-categorical pairs, Cramer's V for
+categorical-categorical pairs, and Spearman for numeric-ordered and
+ordered-ordered pairs. The measure actually used for each pair-type
+combination is reported in the \code{assoc_methods_used} attribute of the
+result.
+
+All of these are correlation magnitudes on a common scale, so \code{threshold}
+means the same thing for every pair type: eta is the multiple correlation
+between the numeric variable and the factor, equal to the absolute
+point-biserial correlation for a two-level factor, and Cramer's V equals
+the absolute phi coefficient for a 2x2 table. Encoding a binary variable
+as 0/1 numeric or as a two-level factor therefore gives the same
+association, and the same pruning result.}
 
 \item{mode}{Character string specifying the search algorithm. Options:
 \itemize{
@@ -90,11 +99,16 @@ the association constraint.
 are all below \code{threshold}. The function works in several stages:
 \enumerate{
 \item \strong{Variable type detection}: Identifies numeric vs. categorical predictors
+\item \strong{Constant-column removal}: Predictors that are constant across every
+complete-case row are excluded with a warning, since their association
+with anything is undefined and they would otherwise ride into the
+result without contributing any information
 \item \strong{Association measurement}: Computes appropriate pairwise associations
 \item \strong{Grouping (optional)}: If \code{by} is specified, computes associations within
 each group and aggregates using the specified quantile
 \item \strong{Feasibility check}: Verifies that \code{force_in} variables satisfy the
-threshold constraint
+threshold constraint (a \code{force_in} variable excluded for being constant
+also errors here)
 \item \strong{Subset selection}: Uses either exact or greedy search to find a valid subset
 }
 
@@ -112,8 +126,10 @@ iterative removal strategy based on association scores.
 deterministic tie-breaking is applied:
 \itemize{
 \item \strong{Exact mode}: Selects by (1) largest subset size, (2) lowest
-average correlation, (3) alphabetically first variable names. Column
-order does not affect the result.
+average correlation, (3) lexicographically first variable names,
+compared in C order (\code{method = "radix"}) so the result does not depend
+on the session's collation locale. Column order does not affect the
+result.
 \item \strong{Greedy mode}: Removes the variable with (1) most constraint
 violations, (2) highest max association, (3) highest average association,
 (4) lowest column index. Column order can influence the result when

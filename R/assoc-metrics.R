@@ -2,6 +2,104 @@
 ## and corrPrune(). Kept in one place so a fix to NA/constant-column handling
 ## or a metric's definition applies to every caller at once.
 
+# Auto-converts a data frame's columns to the canonical types the shared
+# association machinery expects: character/logical columns become factors,
+# existing factors get droplevels() applied (dropping unused levels), integer
+# columns become numeric, and everything else is left unchanged. Shared by
+# assocSelect() and corrPrune() so a future change to these conversion rules
+# (e.g. adding Date support) only needs to be made once.
+.auto_convert_types <- function(df) {
+  df[] <- lapply(df, function(col) {
+    if (is.character(col)) {
+      factor(col)
+    } else if (is.logical(col)) {
+      factor(col)
+    } else if (is.factor(col)) {
+      droplevels(col)
+    } else if (is.integer(col)) {
+      as.numeric(col)
+    } else {
+      col
+    }
+  })
+  df
+}
+
+# Validates a `threshold` argument: must be a single, non-NA numeric value in
+# (0, 1]. Shared by corrSelect(), assocSelect(), and MatSelect() so the
+# contract and its error messages live in one place; corrPrune()/greedy's
+# threshold == 0 special case is handled by those callers themselves, not
+# here.
+.validate_threshold <- function(threshold) {
+  if (!is.numeric(threshold) || length(threshold) != 1 || is.na(threshold)) {
+    stop("`threshold` must be a single numeric value.")
+  }
+  if (threshold <= 0 || threshold > 1) {
+    stop("`threshold` must be in the range (0, 1].")
+  }
+  invisible(threshold)
+}
+
+# Drops columns whose values are all identical (a single distinct value --
+# works for any column type, unlike sd() == 0 which is numeric-only), with a
+# warning naming them. A constant column's association with anything is
+# mathematically undefined, not usefully "zero"; excluding it up front keeps
+# it from riding into every returned subset just because it can never cause a
+# threshold violation. Shared by corrSelect(), assocSelect(), and
+# corrPrune()'s upfront (whole-data) preprocessing -- not by the per-group
+# matrix builders in corrPrune()'s `by` path, where a column constant only
+# *within one group* is a different, legitimate case still handled by
+# .numeric_assoc_matrix()/.mixed_type_assoc_matrix()'s own within-group
+# zero-out logic below.
+.drop_constant_columns <- function(df) {
+  is_const <- vapply(df, function(x) length(unique(x)) <= 1, logical(1))
+  if (any(is_const)) {
+    warning("The following columns were constant and excluded: ",
+            paste(names(df)[is_const], collapse = ", "))
+    df <- df[, !is_const, drop = FALSE]
+  }
+  df
+}
+
+# Resolves a user-supplied `force_in` argument -- a character vector of
+# column names or a numeric vector of 1-based column indices -- against
+# `names_pool` (typically the input data frame's columns, before any
+# row/column filtering removes candidates from consideration), returning a
+# character vector of names, or NULL if `force_in` is NULL. Shared by
+# corrSelect() and assocSelect() so both data-frame entry points apply the
+# same whole-number range check to a numeric `force_in` and the same error
+# (naming the offending value(s)) to a `force_in` name absent from
+# `names_pool`, rather than each re-deriving its own check.
+#
+# `what` names, for the error message only, what `names_pool` represents;
+# a caller re-checking `force_in` against a later, filtered set of names
+# passes a different value so the message still makes sense in context.
+.resolve_force_in <- function(force_in, names_pool, what = "the data frame") {
+  if (is.null(force_in)) return(NULL)
+
+  if (is.numeric(force_in)) {
+    bad <- is.na(force_in) | force_in != as.integer(force_in) |
+      force_in < 1 | force_in > length(names_pool)
+    if (any(bad)) {
+      stop("`force_in` numeric indices must be whole numbers between 1 and ncol(df) = ",
+           length(names_pool), "; invalid: ",
+           paste(force_in[bad], collapse = ", "), ".")
+    }
+    return(names_pool[as.integer(force_in)])
+  }
+
+  if (is.character(force_in)) {
+    missing <- setdiff(force_in, names_pool)
+    if (length(missing) > 0) {
+      stop("The following `force_in` names are not in ", what, ": ",
+           paste(missing, collapse = ", "))
+    }
+    return(force_in)
+  }
+
+  stop("`force_in` must be a character vector of column names or a numeric vector of 1-based indices.")
+}
+
 # Association value for a single pair of variables, used by assocSelect()
 # and corrPrune()'s mixed-type branch. `type_x`/`type_y` (one of "numeric",
 # "ordered", "factor") are only consulted by the "eta" method, to identify
@@ -53,9 +151,28 @@
     eta = {
       cat_var <- if (type_x == "factor") x else y
       num_var <- if (type_x == "numeric") x else y
+
+      # droplevels(): a level with no observations contributes
+      # n_g * (xbar_g - xbar)^2 = 0 to the between-group sum of squares, but
+      # tapply() fills such a level with NA, which the enclosing sum() would
+      # propagate, reporting a well-defined association as undefined. The
+      # rows seen here are frequently a subset of the rows the factor's
+      # levels were built from -- one group of corrPrune(by = ) is exactly
+      # that -- so an unused level is the common case, not an edge case.
+      cat_var <- droplevels(as.factor(cat_var))
+
       ss_tot <- sum((num_var - mean(num_var))^2)
-      sum(tapply(num_var, cat_var,
-                 function(z) length(z) * (mean(z) - mean(num_var))^2)) / ss_tot
+      ss_between <- sum(tapply(num_var, cat_var,
+                               function(z) length(z) * (mean(z) - mean(num_var))^2))
+
+      # eta, the correlation ratio, rather than eta-squared: the square root
+      # puts numeric-categorical pairs on the same correlation-magnitude
+      # scale as |r| for numeric pairs and Cramer's V for categorical pairs,
+      # so one threshold means the same thing for every pair type. For a
+      # two-level factor eta equals the absolute point-biserial correlation,
+      # so a binary variable encoded as 0/1 numeric and the same variable
+      # encoded as a two-level factor get the same association value.
+      sqrt(ss_between / ss_tot)
     },
     stop("Unsupported association method: ", method)
   )
@@ -122,15 +239,19 @@
 
 # Vectorized numeric-only association matrix, shared by corrSelect() and
 # corrPrune()'s all-numeric branch. `df_num` must already be complete-case
-# (NA-free). Constant columns get association 0 with every other variable
+# (NA-free). A constant column gets association 0 with every other variable
 # rather than the NA/NaN that the underlying correlation functions would
 # otherwise produce, matching the constant-column contract in
-# .pairwise_assoc_value() above. Returned values are abs()-clamped, matching
-# .pairwise_assoc_value()/.mixed_type_assoc_matrix()'s contract -- callers
+# .pairwise_assoc_value() above -- in practice this only fires for a column
+# constant only *within one call*, since both callers already exclude a
+# globally-constant column via .drop_constant_columns() before reaching here
+# (corrSelect() up front, corrPrune() up front except for its grouped `by`
+# path, which calls this once per group). Returned values are abs()-clamped,
+# matching .pairwise_assoc_value()/.mixed_type_assoc_matrix()'s contract -- callers
 # that aggregate across multiple matrices (corrPrune()'s grouped `by` path)
 # rely on every association being a non-negative magnitude, since a signed
 # value would let a strong negative association in one group be averaged
-# away by a weak positive one in another (see #97).
+# away by a weak positive one in another.
 .numeric_assoc_matrix <- function(df_num, method) {
   p <- ncol(df_num)
   is_const <- vapply(df_num, function(x) stats::sd(x) == 0, logical(1))
@@ -179,4 +300,66 @@
   }
 
   mat
+}
+
+# Association matrix for a single data frame, used by corrPrune() both for
+# its ungrouped path and once per group in its grouped `by` path. Handles
+# listwise deletion of missing values up front so every pair-type computation
+# in this call sees the same complete-case data, rather than each pair
+# applying its own ad hoc NA policy, then dispatches to the shared
+# all-numeric or mixed-type builders above. Returns a list with the
+# association matrix ($mat) and the per-pair-type methods actually used
+# ($assoc_methods_used).
+.compute_single_assoc_matrix <- function(df_input, meas, var_types) {
+  dropped <- sum(!complete.cases(df_input))
+  if (dropped > 0) {
+    df_clean <- df_input[complete.cases(df_input), ]
+    if (dropped == nrow(df_input)) {
+      stop("All rows contain missing values")
+    }
+    warning(sprintf(
+      "Removed %d row%s with missing values when computing associations (rows are not removed from the returned data).",
+      dropped, if (dropped == 1) "" else "s"
+    ))
+  } else {
+    df_clean <- df_input
+  }
+
+  # A single remaining row makes sd()/cor() degenerate (NA, not 0/FALSE),
+  # which would otherwise surface here as an opaque "missing value where
+  # TRUE/FALSE needed" from .numeric_assoc_matrix()'s constant-column check
+  # rather than a clear, corrPrune-specific message (matching
+  # corrSelect()/assocSelect()'s equivalent guard).
+  if (nrow(df_clean) < 2) {
+    stop("Fewer than two complete-case rows remain after removing missing values: ",
+         "cannot compute associations.")
+  }
+
+  # If all numeric, use the shared vectorized correlation-based builder.
+  # Globally-constant columns are already excluded by the caller before this
+  # is invoked (corrPrune()'s .drop_constant_corrPrune_columns()); a column
+  # constant only within this call's rows (corrPrune()'s grouped `by` path,
+  # called once per group) still gets association 0 here, not NA -- see
+  # .numeric_assoc_matrix(). No pair-type method was actually dispatched
+  # when there is only one variable (no pair exists), so assoc_methods_used
+  # stays empty in that case, matching .mixed_type_assoc_matrix()'s own
+  # behaviour when its inner loop has nothing to iterate over.
+  if (all(var_types == "numeric")) {
+    if (!meas %in% c("pearson", "spearman", "kendall", "bicor", "distance", "maximal")) {
+      stop(sprintf("Measure '%s' is not supported. Use one of: pearson, spearman, kendall, bicor, distance, maximal", meas))
+    }
+    list(
+      mat = .numeric_assoc_matrix(df_clean, meas),
+      assoc_methods_used = if (length(var_types) >= 2) list(numeric_numeric = meas) else list()
+    )
+  } else {
+    # Mixed-type: shared pairwise builder (also used by assocSelect()),
+    # whose returned $assoc_methods_used is passed straight through so
+    # corrPrune() never re-derives it independently. corrPrune() only
+    # exposes a configurable measure for numeric-numeric pairs; every other
+    # pair-type combination uses the fixed dispatch documented in
+    # ?corrPrune (spearman / eta / cramersv).
+    full_assoc_methods <- .full_assoc_method_map(meas)
+    .mixed_type_assoc_matrix(df_clean, var_types, full_assoc_methods)
+  }
 }

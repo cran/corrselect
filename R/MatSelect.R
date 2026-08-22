@@ -1,6 +1,16 @@
 #' @useDynLib corrselect, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 NULL
+
+# Numeric tolerance for the diagonal-is-1 and symmetry checks on `mat` below.
+.MATSELECT_TOL <- 1e-8
+
+# Thresholds for the combinatorial-blowup heuristic warning below: only warn
+# when there are more than this many variables *and* more than this share of
+# pairs are compatibility-graph edges (i.e. at or below `threshold`).
+.MATSELECT_BLOWUP_MIN_VARS <- 100L
+.MATSELECT_BLOWUP_MAX_DENSITY <- 0.3
+
 #' Select Variable Subsets with Low Correlation or Association (Matrix Interface)
 #'
 #' Identifies all maximal subsets of variables from a symmetric matrix (typically a correlation matrix)
@@ -19,13 +29,20 @@ NULL
 #'        \code{MatSelect()} warns (naming the offending pair) but still forces them into every
 #'        returned subset -- unlike \code{\link{corrPrune}()}, which treats this condition as
 #'        infeasible and errors instead.
-#' @param ... Additional arguments passed to the backend, e.g., \code{use_pivot} (logical)
-#'        for enabling pivoting in Bron–Kerbosch (ignored by ELS).
+#' @param ... Additional arguments passed to the backend. The only supported
+#'        argument is \code{use_pivot} (logical), for enabling pivoting in
+#'        Bron–Kerbosch (ignored by ELS); any other named argument is an error.
 #'
 #' @return An object of class \code{\link{CorrCombo}}, containing all valid subsets and their
 #' correlation statistics. If every variable is pairwise correlated above \code{threshold},
 #' the only valid maximal subsets are single variables; these are returned with
 #' \code{min_corr}/\code{max_corr} set to \code{NA} (there is no pair to summarize).
+#'
+#' Subsets are ordered by decreasing size, then increasing average absolute
+#' correlation. Subsets tying on both keep the order the search enumerated
+#' them in, which is itself determined by \code{mat} and \code{threshold}, so
+#' the ordering is reproducible across platforms. It is this ordering that
+#' \code{\link{corrSubset}(which = "best")} and \code{print()} read.
 #'
 #' @examples
 #' set.seed(42)
@@ -53,44 +70,11 @@ MatSelect <- function(mat,
                       force_in = NULL,
                       ...) {
 
-  # Force-in conversion (names or indices)
-  if (!is.null(force_in)) {
-    if (is.character(force_in)) {
-      if (is.null(colnames(mat))) {
-        stop("`mat` has no column names: cannot use character `force_in`.")
-      }
-      missing_names <- setdiff(force_in, colnames(mat))
-      if (length(missing_names)) {
-        stop("`force_in` names not found in matrix: ",
-             paste(missing_names, collapse = ", "))
-      }
-      force_in <- match(force_in, colnames(mat))
-    }
-    
-    # Now: must be valid 1-based indices. Whole-number-ness is checked
-    # explicitly -- as.integer() truncates rather than rounds, so a
-    # non-integer index (e.g. from floating-point drift) would otherwise
-    # silently resolve to a different, valid column instead of erroring.
-    if (!is.numeric(force_in) || anyNA(force_in) ||
-        any(force_in != as.integer(force_in)) ||
-        any(force_in < 1) || any(force_in > ncol(mat))) {
-      stop("`force_in` must be valid 1-based column indices or names.")
-    }
-
-    force_in <- unique(force_in)
-  } else {
-    force_in <- integer(0)
-  }
-  
-
-  # Conditionally select default method
-  if (is.null(method)) {
-    method <- if (length(force_in) > 0) "els" else "bron-kerbosch"
-  } else {
-    method <- match.arg(method, choices = c("bron-kerbosch", "els"))
-  }
-
   ## ---- Input validation ----
+  # Runs before force_in resolution below: force_in's own checks assume `mat`
+  # is already a valid matrix (colnames()/ncol() on a malformed `mat` would
+  # otherwise surface as a misleading force_in-flavored error instead of the
+  # real problem with `mat` itself).
   if (!is.matrix(mat) || !is.numeric(mat)) {
     stop("`mat` must be a numeric matrix.")
   }
@@ -107,47 +91,67 @@ MatSelect <- function(mat,
   if (anyNA(mat)) {
     stop("`mat` must not contain NA.")
   }
-  if (!all(abs(diag(mat) - 1) < 1e-8)) {
+  if (!all(abs(diag(mat) - 1) < .MATSELECT_TOL)) {
     stop("Diagonal entries of `mat` must be 1.")
   }
-  if (!all(abs(mat - t(mat)) < 1e-8)) {
+  if (!all(abs(mat - t(mat)) < .MATSELECT_TOL)) {
     stop("`mat` must be symmetric.")
   }
-  if (!is.numeric(threshold) || length(threshold) != 1 || is.na(threshold)) {
-    stop("`threshold` must be a single numeric value.")
-  }
-  if (threshold <= 0 || threshold > 1) {
-    stop("`threshold` must be in the range (0, 1].")
-  }
+  .validate_threshold(threshold)
   n <- ncol(mat)
+
+  # Force-in conversion (names or indices)
+  if (!is.null(force_in)) {
+    if (is.character(force_in)) {
+      if (is.null(colnames(mat))) {
+        stop("`mat` has no column names: cannot use character `force_in`.")
+      }
+      missing_names <- setdiff(force_in, colnames(mat))
+      if (length(missing_names)) {
+        stop("`force_in` names not found in matrix: ",
+             paste(missing_names, collapse = ", "))
+      }
+      force_in <- match(force_in, colnames(mat))
+    }
+
+    # Now: must be valid 1-based indices. Whole-number-ness is checked
+    # explicitly -- as.integer() truncates rather than rounds, so a
+    # non-integer index (e.g. from floating-point drift) would otherwise
+    # silently resolve to a different, valid column instead of erroring.
+    if (!is.numeric(force_in) || anyNA(force_in) ||
+        any(force_in != as.integer(force_in)) ||
+        any(force_in < 1) || any(force_in > ncol(mat))) {
+      stop("`force_in` must be valid 1-based column indices or names.")
+    }
+
+    force_in <- unique(force_in)
+  } else {
+    force_in <- integer(0)
+  }
+
+  # Conditionally select default method
+  if (is.null(method)) {
+    method <- if (length(force_in) > 0) "els" else "bron-kerbosch"
+  } else {
+    method <- match.arg(method, choices = c("bron-kerbosch", "els"))
+  }
 
   ## ---- prepare names ----
   varnames   <- colnames(mat)
   if (is.null(varnames)) varnames <- paste0("V", seq_len(n))
   force_names <- if (!is.null(force_in)) varnames[force_in] else character()
 
-  ## ---- warn if forced_in vars are too correlated internally ----
+  ## ---- forced_in vars that are too correlated internally ----
   # MatSelect() honors an explicit force_in request even when it is
   # internally incompatible with `threshold` -- unlike corrPrune(), which
-  # treats the same condition as infeasible and stop()s (see #98). This
+  # treats the same condition as infeasible and stop()s. This
   # divergence is intentional: MatSelect() is the low-level enumeration
   # primitive and force_in is a direct instruction, while corrPrune()
-  # promises a single subset that satisfies threshold. Naming the specific
-  # offending pair (rather than a generic message) still lets a caller who
-  # didn't intend this find out which variables and by how much.
-  if (length(force_names) > 1) {
-    submat <- abs(mat[force_in, force_in, drop = FALSE])
-    bad <- which(upper.tri(submat) & submat > threshold, arr.ind = TRUE)
-    if (nrow(bad) > 0) {
-      var1 <- force_names[bad[1, 1]]
-      var2 <- force_names[bad[1, 2]]
-      bad_val <- submat[bad[1, 1], bad[1, 2]]
-      warning(sprintf(
-        "Variables in `force_in` are mutually correlated beyond the threshold. Example: '%s' and '%s' have association %.3f > %.3f. They will still be forced into all subsets.",
-        var1, var2, bad_val, threshold
-      ))
-    }
-  }
+  # promises a single subset that satisfies threshold. The warning naming
+  # the specific offending pair is issued by the shared C++ validation path
+  # (warnIfForcedMutuallyIncompatible() in src/utils.cpp, called from
+  # runELS()/runBronKerbosch() below), so a caller who bypasses MatSelect()
+  # and calls those Rcpp exports directly still gets it.
 
   ## ---- warn about possible combinatorial blowup ----
   # Exhaustive maximal-subset enumeration is worst-case exponential in the
@@ -155,9 +159,9 @@ MatSelect <- function(mat,
   # variable count *and* a permissive-enough threshold that a large share of
   # pairs are compatible (a strict threshold keeps the compatibility graph
   # sparse, where blowup isn't a practical risk).
-  if (n > 100) {
+  if (n > .MATSELECT_BLOWUP_MIN_VARS) {
     compat_density <- mean(abs(mat[upper.tri(mat)]) <= threshold)
-    if (compat_density > 0.3) {
+    if (compat_density > .MATSELECT_BLOWUP_MAX_DENSITY) {
       warning(sprintf(
         "%d variables with %.0f%% of pairs at or below the threshold: exhaustive maximal-subset enumeration can be exponential in the worst case. Consider corrPrune(mode = \"greedy\") for large variable counts.",
         n, 100 * compat_density
@@ -167,6 +171,15 @@ MatSelect <- function(mat,
 
   ## ---- backend options ----
   dots      <- list(...)
+  dot_names <- names(dots)
+  if (is.null(dot_names)) dot_names <- rep.int("", length(dots))
+  unrecognized_dots <- setdiff(dot_names, "use_pivot")
+  if (length(unrecognized_dots) > 0) {
+    stop(sprintf(
+      "Unrecognized argument(s) in `...`: %s. The only supported `...` argument is `use_pivot`.",
+      paste(unrecognized_dots, collapse = ", ")
+    ))
+  }
   use_pivot <- TRUE
   if ("use_pivot" %in% names(dots)) {
     tmp <- suppressWarnings(as.logical(dots$use_pivot))

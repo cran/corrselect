@@ -6,12 +6,6 @@
 
 using namespace Rcpp;
 
-// Mirrors buildCompatibilityMatrix()'s convention (clique_core.cpp): corMatrix
-// may be stored upper-triangular-only, so a pair is always read as (min, max).
-static inline bool isCompatible(const NumericMatrix& corMatrix, double threshold, int a, int b) {
-  return std::abs(corMatrix(std::min(a, b), std::max(a, b))) <= threshold;
-}
-
 // Eppstein-Loffler-Strash (2010): for each vertex v of a graph, ordered by a
 // degeneracy ordering, expand a single Bron-Kerbosch-with-pivot call seeded
 // with R={v}, P=neighbors of v later in the order, X=neighbors earlier in
@@ -96,6 +90,7 @@ ComboList runELS(const NumericMatrix& corMatrix,
   int n = corMatrix.nrow();
   validateCorMatrix(corMatrix);
   validateForcedIndices(forcedVec, n);
+  warnIfForcedMutuallyIncompatible(corMatrix, threshold, forcedVec);
 
   std::unordered_set<int> forcedSet(forcedVec.begin(), forcedVec.end());
 

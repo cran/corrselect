@@ -13,12 +13,18 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7,
-  fig.height = 5,
+  fig.width = 6.5,
+  fig.height = 4.5,
   dev = "svglite",
-  fig.ext = "svg"
+  fig.ext = "svg",
+  dev.args = list(pointsize = 14)
 )
 library(corrselect)
+
+# Figure palette, light mode hex; the pkgdown CSS swaps in dark counterparts
+PAL <- c(blue = "#2E6F9E", red = "#B5342B", green = "#3F7A3D",
+         orange = "#9E5E0F", purple = "#7A4F9E", teal = "#2A7A7A",
+         grey = "#5C6166")
 ```
 
 ## Installation
@@ -260,6 +266,10 @@ modelPrune(formula, data, engine = "lm", criterion = "vif",
 | `criterion` | `"vif"` or `"condition_number"` | `"vif"` |
 | `limit` | Maximum allowed diagnostic value | `5` |
 | `force_in` | Variables that must be retained | `NULL` |
+
+`"vif"` is a variance ratio and `"condition_number"` is a condition index
+running from 1 to the design matrix's overall condition number, so `limit` is
+read on a different scale for each. See `vignette("advanced")`.
 
 **Returns**: Pruned data frame. Attributes: `selected_vars`, `removed_vars`, `final_model`.
 
